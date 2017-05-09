@@ -56,7 +56,12 @@ async def on_message(message):
     if message.content.startswith("!scout"):
         try:
             card = await scout_card()
-            reply = "<@" + message.author.id + "> http:" + card["card_image"]
+            reply = "<@" + message.author.id + "> "
+
+            if card["card_image"] == None:
+                reply += "http:" + card["card_idolized_image"]
+            else:
+                reply += "http:" + card["card_image"]
 
         except Exception as e:
             reply = "<@" + message.author.id + "> A transmission error occured."
