@@ -14,7 +14,12 @@ UR_RATE = 0.01
 
 client = discord.Client()
 
-async def roll_rarity():
+'''
+Generates a random rarity based on the defined scouting rates
+
+return: String - rarity represented as a string ("UR", "SSR", "SR", "R")
+'''
+def roll_rarity():
     roll = random.uniform(0, 1)
 
     if roll < UR_RATE:
@@ -26,33 +31,44 @@ async def roll_rarity():
     else:
         return "R"
 
+'''
+Scouts a single card
+
+return: Dictionary - card scouted
+'''
+def scout_card():
+        # Build request url
+        request_url = API_URL + "cards/?rarity=" + roll_rarity()
+        request_url += "&ordering=random"
+        request_url += "&is_promo=off"
+        request_url += "&is_special=off"
+        request_url += "&page_size=1"
+
+        response = requests.get(request_url)
+        response_obj = json.loads(response.text)
+
+        return response_obj["results"][0]
+
 @client.event
 async def on_message(message):
     reply = ""
 
-    if message.content == "!scout":
-        rarity = await roll_rarity()
+    if message.content.startswith("!scout"):
+        try:
+            card = scout_card()
+            reply = "<@" + message.author.id + "> http:" + card["card_image"]
 
-        request_url = API_URL + "cards/?ordering=random&rarity=" + rarity + "&page_size=1"
-        response = requests.get(request_url)
-        response_obj = json.loads(response.text)
-        card = response_obj["results"][0]
+        except Exception as e:
+            reply = "A transmission error occured."
+            print(str(e))
 
-        # Post idolized card if promo
-        if card["card_image"] == None:
-            reply = card["card_idolized_image"]
-        else:
-            reply = card["card_image"]
-            
-        await client.send_message(message.channel, "http:" + reply)
+        await client.send_message(message.channel, reply)
 
 @client.event
 async def on_ready():
     print("Logged in")
 
-# Get login token from text file
+# Get login token from text file and run client
 fp_token = open("token.txt", "r")
 token = fp_token.read().strip("\n")
-
-# Create and run client
 client.run(token)
