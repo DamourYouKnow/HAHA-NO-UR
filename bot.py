@@ -59,7 +59,7 @@ async def on_message(message):
             reply = "<@" + message.author.id + "> http:" + card["card_image"]
 
         except Exception as e:
-            reply = "A transmission error occured."
+            reply = "<@" + message.author.id + "> A transmission error occured."
             print(str(e))
 
         await client.send_message(message.channel, reply)
