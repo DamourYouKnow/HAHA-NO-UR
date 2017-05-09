@@ -36,7 +36,7 @@ Scouts a single card
 
 return: Dictionary - card scouted
 '''
-def scout_card():
+async def scout_card():
         # Build request url
         request_url = API_URL + "cards/?rarity=" + roll_rarity()
         request_url += "&ordering=random"
@@ -55,7 +55,7 @@ async def on_message(message):
 
     if message.content.startswith("!scout"):
         try:
-            card = scout_card()
+            card = await scout_card()
             reply = "<@" + message.author.id + "> http:" + card["card_image"]
 
         except Exception as e:
