@@ -52,8 +52,7 @@ async def on_ready():
 
 # Get login token from text file
 fp_token = open("token.txt", "r")
-token = fp_token.read()
-print(token)
+token = fp_token.read().strip("\n")
 
 # Create and run client
 client.run(token)
