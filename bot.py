@@ -55,7 +55,7 @@ async def on_message(message):
 
     if message.content.startswith("!scout"):
         try:
-            card = await scout_card()["idol"]["main_unit"] == "A-RISE"
+            card = await scout_card()
 
             # Draw new card if A-RISE member
             while card["idol"]["main_unit"] == "A-RISE":
