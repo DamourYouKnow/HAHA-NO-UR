@@ -40,8 +40,8 @@ async def scout_card():
         # Build request url
         request_url = API_URL + "cards/?rarity=" + roll_rarity()
         request_url += "&ordering=random"
-        request_url += "&is_promo=off"
-        request_url += "&is_special=off"
+        request_url += "&is_promo=False"
+        request_url += "&is_special=False"
         request_url += "&page_size=1"
 
         response = requests.get(request_url)
