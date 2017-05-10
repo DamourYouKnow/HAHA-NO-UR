@@ -49,6 +49,17 @@ async def scout_card():
 
         return response_obj["results"][0]
 
+'''
+Checks if a card belongs to a minor idol unit (Saint Snow, A-RISE)
+
+card: Dictionary - card being checked
+
+return: Boolean - True if minor unit, otherwise False
+'''
+def is_minor_unit(card):
+    unit = card["idol"]["main_unit"]
+    return (unit == "A-RISE") or (unit == "Saint Snow")
+
 @client.event
 async def on_message(message):
     reply = ""
@@ -58,8 +69,8 @@ async def on_message(message):
             card = await scout_card()
 
             # Draw new card if A-RISE member
-            while card["idol"]["main_unit"] == "A-RISE":
-                card = await scout_card()["idol"]["main_unit"] == "A-RISE"
+            while is_minor_unit(card):
+                card = await scout_card()
 
             reply = "<@" + message.author.id + "> "
 
