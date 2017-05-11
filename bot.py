@@ -50,6 +50,14 @@ async def scout_card():
         return response_obj["results"][0]
 
 '''
+Scouts a specified number of cards
+
+return: List - cards scouted
+'''
+def scout_cards(count):
+    rarities = []
+
+'''
 Checks if a card belongs to a minor idol unit (Saint Snow, A-RISE)
 
 card: Dictionary - card being checked
