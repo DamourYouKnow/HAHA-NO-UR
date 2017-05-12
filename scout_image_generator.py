@@ -111,19 +111,3 @@ def ensure_path_exists(path):
         os.mkdir(path)
     except OSError as Exception:
         return
-
-test_idols = [
-    "http://i.schoolido.lu/c/1RoundShizuku.png",
-    "http://i.schoolido.lu/c/4RoundMarika.png",
-    "http://i.schoolido.lu/c/2RoundCoco.png",
-    "http://i.schoolido.lu/c/3RoundYuu.png",
-    "http://i.schoolido.lu/c/5RoundSana.png",
-    "http://i.schoolido.lu/c/6RoundFumie.png",
-    "http://i.schoolido.lu/c/7RoundMinami.png",
-    "http://i.schoolido.lu/c/8RoundChristina.png",
-    "http://i.schoolido.lu/c/9RoundAkemi.png",
-    "http://i.schoolido.lu/c/10RoundIruka.png",
-    "http://i.schoolido.lu/c/11RoundAya.png"
-]
-
-create_image(test_idols, 2, "test.png")
