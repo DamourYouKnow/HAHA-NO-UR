@@ -6,6 +6,7 @@ import asyncio
 import os
 import time
 import traceback
+import threading
 import scout_image_generator
 
 API_URL = "http://schoolido.lu/api/"
@@ -130,71 +131,72 @@ Runs thread that will handle a message
 
 message: message object
 '''
-def handle_message_thread(message):
+async def handle_message_task(message):
+    reply = ""
+
+    if message.content.startswith("!scout11"):
+        cards = scout_cards(11, True)
+        circle_image_urls = []
+
+        for card in cards:
+            if card["round_card_image"] == None:
+                circle_image_urls.append(
+                    "http:" + card["round_card_idolized_image"]
+                )
+            else:
+                circle_image_urls.append(
+                    "http:" + card["round_card_image"]
+                )
+
+        image_path = scout_image_generator.create_image(
+            circle_image_urls,
+            2,
+            str(time.clock()) + message.author.id + ".png"
+        )
+
+        await client.send_file(
+            message.channel,
+            image_path,
+            content="<@" + message.author.id + ">",
+            tts=False
+        )
+
+        os.remove(image_path)
+
+    elif message.content.startswith("!scout"):
+        card = scout_card()
+        reply = "<@" + message.author.id + "> "
+
+        if card["card_image"] == None:
+            reply += "http:" + card["card_idolized_image"]
+        else:
+            reply += "http:" + card["card_image"]
+
+        await client.send_message(message.channel, reply)
+
+
 
 @client.event
 async def on_message(message):
-    t = threading.Thread(target=handle_message_thread, args=(message))
-    t.daemon = True
-    t.start()
-    reply = ""
-
     try:
-        if message.content.startswith("!scout11"):
-            cards = scout_cards(11, True)
-            circle_image_urls = []
-
-            for card in cards:
-                if card["round_card_image"] == None:
-                    circle_image_urls.append(
-                        "http:" + card["round_card_idolized_image"]
-                    )
-                else:
-                    circle_image_urls.append(
-                        "http:" + card["round_card_image"]
-                    )
-
-            image_path = scout_image_generator.create_image(
-                circle_image_urls, 2, str(time.clock()) + ".png"
-            )
-
-            await client.send_file(
-                message.channel,
-                image_path,
-                content="<@" + message.author.id + ">",
-                tts=False
-            )
-
-            os.remove(image_path)
-
-        elif message.content.startswith("!scout"):
-            card = scout_card()
-            reply = "<@" + message.author.id + "> "
-
-            if card["card_image"] == None:
-                reply += "http:" + card["card_idolized_image"]
-            else:
-                reply += "http:" + card["card_image"]
-
-            await client.send_message(message.channel, reply)
-
+        client.loop.create_task(handle_message_task(message))
 
     except Exception as e:
-        reply = "<@" + message.author.id + "> A transmission error occured.\n\n"
-        reply += "`" + str(e) + "`"
+        err = "<@" + message.author.id + "> A transmission error occured.\n\n"
+        err += "`" + str(e) + "`"
         traceback.print_exc()
-        await client.send_message(message.channel, reply)
+        client.send_message(message.channel, err)
 
-@Client.event
-async def on_error():
+@client.event
+async def on_error(event, *args, **kwargs):
     # Test by rasing exception when request is received
     time.sleep(5)
-    
+
     # Get login token from text file and attempt to reconnect
     fp_token = open("token.txt", "r")
     token = fp_token.read().strip("\n")
     client.run(token)
-        
+
 @client.event
 async def on_ready():
     print("Logged in")
