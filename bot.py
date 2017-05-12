@@ -21,21 +21,21 @@ client = discord.Client()
 '''
 Generates a random rarity based on the defined scouting rates
 
-guarenteed_sr: Boolean -
+guaranteed_sr: Boolean - Whether an R will flip to an SR
 
 return: String - rarity represented as a string ("UR", "SSR", "SR", "R")
 '''
-def roll_rarity(guarenteed_sr = False):
+def roll_rarity(guaranteed_sr = False):
     roll = random.uniform(0, 1)
 
     if roll < UR_RATE:
         return "UR"
-    elif roll < SSR_RATE:
+    elif roll < SSR_RATE + UR_RATE:
         return "SSR"
-    elif roll < SR_RATE:
+    elif roll < SR_RATE + UR_RATE + SSR_RATE:
         return "SR"
     else:
-        if guarenteed_sr:
+        if guaranteed_sr:
             return "SR"
         else:
             return "R"
@@ -86,14 +86,14 @@ def scout_by_rarity(count, rarity):
 Scouts a specified number of cards
 
 count: Integer - number of cards to scouted
-guarenteed_sr: Boolean - whether at least one card in the scout will be an SR
+guaranteed_sr: Boolean - whether at least one card in the scout will be an SR
 
 return: List - cards scouted
 '''
-def scout_cards(count, guarenteed_sr = False):
+def scout_cards(count, guaranteed_sr = False):
     rarities = []
 
-    if guarenteed_sr:
+    if guaranteed_sr:
         for r in range(0, count - 1):
             rarities.append(roll_rarity())
 
