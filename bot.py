@@ -97,7 +97,7 @@ def scout_cards(count, guarenteed_sr = False):
         for r in range(0, count - 1):
             rarities.append(roll_rarity())
 
-        if rarities.count("R") == count:
+        if rarities.count("R") == count - 1:
             rarities.append(roll_rarity(True))
         else:
             rarities.append(roll_rarity())
