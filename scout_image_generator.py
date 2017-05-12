@@ -77,7 +77,7 @@ def build_image(circle_images, num_rows, x_distance, y_distance):
         x = 0
 
         # Offset row
-        if row_index % 2 != 0:
+        if (row_index + 1) % 2 == 0:
             x += circle_width // 2
 
         for col_index in range(0, len(circle_rows[row_index])):
