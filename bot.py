@@ -110,6 +110,7 @@ def scout_cards(count, guarenteed_sr = False):
     results += scout_by_rarity(rarities.count("SR"), "SR")
     results += scout_by_rarity(rarities.count("SSR"), "SSR")
     results += scout_by_rarity(rarities.count("UR"), "UR")
+    random.shuffle(results)
 
     return results
 
