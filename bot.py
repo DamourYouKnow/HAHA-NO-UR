@@ -125,8 +125,18 @@ def is_minor_unit(card):
     unit = card["idol"]["main_unit"]
     return (unit == "A-RISE") or (unit == "Saint Snow")
 
+'''
+Runs thread that will handle a message
+
+message: message object
+'''
+def handle_message_thread(message):
+
 @client.event
 async def on_message(message):
+    t = threading.Thread(target=handle_message_thread, args=(message))
+    t.daemon = True
+    t.start()
     reply = ""
 
     try:
@@ -175,6 +185,16 @@ async def on_message(message):
         traceback.print_exc()
         await client.send_message(message.channel, reply)
 
+@Client.event
+async def on_error():
+    # Test by rasing exception when request is received
+    time.sleep(5)
+    
+    # Get login token from text file and attempt to reconnect
+    fp_token = open("token.txt", "r")
+    token = fp_token.read().strip("\n")
+    client.run(token)
+        
 @client.event
 async def on_ready():
     print("Logged in")
