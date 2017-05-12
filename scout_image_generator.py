@@ -12,12 +12,13 @@ CIRCLE_DISTANCE = 10
 '''
 Creates a stitched together image of idol circles.
 
-idol_circles: List - urls of idol circle images to be stitched together.
+idol_circles: List - urls of idol circle images to be stitched together
+num_rows: Integer - Number of rows to use in the image
 output_filename: String - name of output image file
 
 return: String - path pointing to created image.
 '''
-def create_image(idol_circle_urls, output_filename):
+def create_image(idol_circle_urls, num_rows, output_filename):
     # Create directories for stroing images if they do not exist
     ensure_path_exists(IDOL_CIRCLES_PATH)
     ensure_path_exists(OUTPUT_PATH)
@@ -38,26 +39,52 @@ def create_image(idol_circle_urls, output_filename):
     for image_filepath in image_filepaths:
         circle_images.append(Image.open(image_filepath))
 
-    # Create transparent background
+    image = build_image(circle_images, num_rows, 10, 10)
+    image.save(OUTPUT_PATH + output_filename, "PNG")
+
+'''
+Stitches together a list of images to an output image.
+
+circle_images: Object - list of image object being stitched together
+num_rows: Integer - number of rows to lay the image out in
+x_distance: Integer - x spacing between each image
+y_distane: Integer - y spacing between each image
+
+return: Object - ouput image object
+'''
+def build_image(circle_images, num_rows, x_distance, y_distance):
+    # Compute required height and width
     circle_width, circle_height = circle_images[0].size
+    out_height = num_rows * (circle_height + y_distance)
+    out_width = ((len(circle_images) + 1) * (circle_width + x_distance)) // 2
 
-    stitch_height = circle_height
-    stitch_width = (
-        circle_width +
-        (len(circle_images) * (circle_width))
-    )
+    image = Image.new("RGBA", (out_width, out_height))
 
-    print(str(stitch_height))
-    print(str(stitch_width))
+    circle_rows = []
+    for row_index in range(0, num_rows):
+        circle_rows.append([])
 
-    image = Image.new("RGBA", (stitch_width, stitch_height))
+    i = 0
+    for circle_image in circle_images:
+        i += 1
+        circle_rows[i % len(circle_rows)].append(circle_image)
 
     x = 0
-    for circle_image in circle_images:
-        image.paste(circle_image, (x, 0))
-        x += circle_width
+    y = 0
+    for row_index in range(0, len(circle_rows)):
+        x = 0
 
-    image.save(OUTPUT_PATH + output_filename, "PNG")
+        # Offset row
+        if row_index % 2 == 0:
+            x += circle_width // 2
+
+        for col_index in range(0, len(circle_rows[row_index])):
+            image.paste(circle_rows[row_index][col_index], (x, y))
+            x += circle_width + x_distance
+
+        y += circle_height + y_distance
+
+    return image
 
 '''
 Downloads an image from a url and saves it to a specified location
@@ -83,7 +110,6 @@ def ensure_path_exists(path):
     except OSError as Exception:
         return
 
-
 test_idols = [
     "http://i.schoolido.lu/c/1RoundShizuku.png",
     "http://i.schoolido.lu/c/4RoundMarika.png",
@@ -98,4 +124,4 @@ test_idols = [
     "http://i.schoolido.lu/c/11RoundAya.png"
 ]
 
-create_image(test_idols, "test.png")
+create_image(test_idols, 2, "test.png")
