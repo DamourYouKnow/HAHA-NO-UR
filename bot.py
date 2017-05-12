@@ -3,6 +3,9 @@ import random
 import json
 import requests
 import asyncio
+import os
+import time
+import traceback
 import scout_image_generator
 
 API_URL = "http://schoolido.lu/api/"
@@ -42,18 +45,18 @@ Scouts a single card
 
 return: Dictionary - card scouted
 '''
-async def scout_card():
-        # Build request url
-        request_url = API_URL + "cards/?rarity=" + roll_rarity()
-        request_url += "&ordering=random"
-        request_url += "&is_promo=False"
-        request_url += "&is_special=False"
-        request_url += "&page_size=1"
+def scout_card():
+    # Build request url
+    request_url = API_URL + "cards/?rarity=" + roll_rarity()
+    request_url += "&ordering=random"
+    request_url += "&is_promo=False"
+    request_url += "&is_special=False"
+    request_url += "&page_size=1"
 
-        response = requests.get(request_url)
-        response_obj = json.loads(response.text)
+    response = requests.get(request_url)
+    response_obj = json.loads(response.text)
 
-        return response_obj["results"][0]
+    return response_obj["results"][0]
 
 '''
 Scouts a specified number of cards of a given rarity
@@ -64,6 +67,9 @@ rarity: String - rarity of all cards in scout
 return: List - cards scouted
 '''
 def scout_by_rarity(count, rarity):
+    if count == 0:
+        return []
+
     # Build request url
     request_url = API_URL + "cards/?rarity=" + rarity
     request_url += "&ordering=random"
@@ -93,15 +99,17 @@ def scout_cards(count, guarenteed_sr = False):
 
         if rarities.count("R") == count:
             rarities.append(roll_rarity(True))
+        else:
+            rarities.append(roll_rarity())
     else:
         for r in range(0, count):
             rarities.append(roll_rarity())
 
     results = []
-    results.append(scout_by_rarity(rarities.count("R"), "R"))
-    results.append(scout_by_rarity(rarities.count("SR"), "SR"))
-    results.append(scout_by_rarity(rarities.count("SSR"), "SSR"))
-    results.append(scout_by_rarity(rarities.count("UR"), "UR"))
+    results += scout_by_rarity(rarities.count("R"), "R")
+    results += scout_by_rarity(rarities.count("SR"), "SR")
+    results += scout_by_rarity(rarities.count("SSR"), "SSR")
+    results += scout_by_rarity(rarities.count("UR"), "UR")
 
     return results
 
@@ -121,7 +129,35 @@ async def on_message(message):
     reply = ""
 
     try:
-        if message.content.startswith("!scout"):
+        if message.content.startswith("!scout11"):
+            cards = scout_cards(11, True)
+            circle_image_urls = []
+
+            for card in cards:
+                if card["round_card_image"] == None:
+                    circle_image_urls.append(
+                        "http:" + card["round_card_idolized_image"]
+                    )
+                else:
+                    circle_image_urls.append(
+                        "http:" + card["round_card_image"]
+                    )
+
+            image_path = scout_image_generator.create_image(
+                circle_image_urls, 2, str(time.clock()) + ".png"
+            )
+
+            await client.send_file(
+                message.channel,
+                image_path,
+                None,
+                "<@" + message.author.id + ">",
+                False
+            )
+
+            os.remove(image_path)
+
+        elif message.content.startswith("!scout"):
             card = scout_card()
             reply = "<@" + message.author.id + "> "
 
@@ -130,30 +166,14 @@ async def on_message(message):
             else:
                 reply += "http:" + card["card_image"]
 
-        if message.content.startswith("!scout11"):
-            cards = scout_cards(11, True)
-            circle_image_urls = []
-
-            for each card in cards:
-                if card["round_card_image"] == None:
-                    circle_image_urls.append(
-                        "http:" + card["round_card_image"]
-                    )
-                else:
-                    circle_image_urls.append(
-                        "http:" + card["round_card_idolized_image"]
-                    )
-
-            scout_image_generator(
-                create_image(circle_image_urls, 2, message.author.id + ".png")
-            )
+            await client.send_message(message.channel, reply)
 
 
     except Exception as e:
-        reply = "<@" + message.author.id + "> A transmission error occured."
-        print(str(e))
-
-    await client.send_message(message.channel, reply)
+        reply = "<@" + message.author.id + "> A transmission error occured.\n\n"
+        reply += "`" + str(e) + "`"
+        traceback.print_exc()
+        await client.send_message(message.channel, reply)
 
 @client.event
 async def on_ready():

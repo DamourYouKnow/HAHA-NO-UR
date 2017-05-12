@@ -42,6 +42,8 @@ def create_image(idol_circle_urls, num_rows, output_filename):
     image = build_image(circle_images, num_rows, 10, 10)
     image.save(OUTPUT_PATH + output_filename, "PNG")
 
+    return OUTPUT_PATH + output_filename
+
 '''
 Stitches together a list of images to an output image.
 
