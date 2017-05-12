@@ -150,9 +150,8 @@ async def on_message(message):
             await client.send_file(
                 message.channel,
                 image_path,
-                None,
-                "<@" + message.author.id + ">",
-                False
+                content="<@" + message.author.id + ">",
+                tts=False
             )
 
             os.remove(image_path)
