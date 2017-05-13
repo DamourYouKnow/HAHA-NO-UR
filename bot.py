@@ -290,7 +290,7 @@ async def on_error(event, *args, **kwargs):
 async def on_ready():
     print("Logged in")
 
-# wrape run_bot in loop that handle exceptions
+# wrap run_bot in loop that handle exceptions
 while True:
     try:
         run_bot()
