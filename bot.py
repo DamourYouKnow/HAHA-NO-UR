@@ -7,6 +7,8 @@ import os
 import time
 import traceback
 import threading
+import posixpath
+import urllib
 import scout_image_generator
 
 API_URL = "http://schoolido.lu/api/"
@@ -215,7 +217,7 @@ async def handle_message_task(message):
             url = "http:" + card["card_image"]
 
         image_path = scout_image_generator.IDOL_IMAGES_PATH
-        image_path += str(time.clock()) + message.author.id + ".png"
+        image_path += posixpath.basename(urllib.parse.urlsplit(url).path)
 
         scout_image_generator.download_image_from_url(url, image_path)
 
@@ -237,7 +239,7 @@ async def handle_message_task(message):
             url = "http:" + card["card_image"]
 
         image_path = scout_image_generator.IDOL_IMAGES_PATH
-        image_path += str(time.clock()) + message.author.id + ".png"
+        image_path += posixpath.basename(urllib.parse.urlsplit(url).path)
 
         scout_image_generator.download_image_from_url(url, image_path)
 
@@ -259,7 +261,7 @@ async def handle_message_task(message):
             url = "http:" + card["card_image"]
 
         image_path = scout_image_generator.IDOL_IMAGES_PATH
-        image_path += str(time.clock()) + message.author.id + ".png"
+        image_path += posixpath.basename(urllib.parse.urlsplit(url).path)
 
         scout_image_generator.download_image_from_url(url, image_path)
 
