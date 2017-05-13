@@ -5,7 +5,7 @@ import requests
 import posixpath
 from PIL import Image
 
-IDOL_CIRCLES_PATH = "idol_circles/"
+IDOL_IMAGES_PATH = "idol_images/"
 OUTPUT_PATH = "scout_output/"
 CIRCLE_DISTANCE = 10
 
@@ -20,7 +20,7 @@ return: String - path pointing to created image.
 '''
 def create_image(idol_circle_urls, num_rows, output_filename):
     # Create directories for stroing images if they do not exist
-    ensure_path_exists(IDOL_CIRCLES_PATH)
+    ensure_path_exists(IDOL_IMAGES_PATH)
     ensure_path_exists(OUTPUT_PATH)
 
     image_filepaths = [] # list of image filepaths
@@ -29,9 +29,9 @@ def create_image(idol_circle_urls, num_rows, output_filename):
     for image_url in idol_circle_urls:
         url_path = urllib.parse.urlsplit(image_url).path
         filename = posixpath.basename(url_path)
-        image_filepaths.append(IDOL_CIRCLES_PATH + filename)
+        image_filepaths.append(IDOL_IMAGES_PATH + filename)
 
-        download_image_from_url(image_url, IDOL_CIRCLES_PATH + filename)
+        download_image_from_url(image_url, IDOL_IMAGES_PATH + filename)
 
     # Load images
     circle_images = []

@@ -214,7 +214,7 @@ async def handle_message_task(message):
         else:
             url = "http:" + card["card_image"]
 
-        image_path = scout_image_generator.OUTPUT_PATH
+        image_path = scout_image_generator.IDOL_IMAGES_PATH
         image_path += str(time.clock()) + message.author.id + ".png"
 
         scout_image_generator.download_image_from_url(url, image_path)
@@ -225,8 +225,6 @@ async def handle_message_task(message):
             content="<@" + message.author.id + ">",
             tts=False
         )
-
-        os.remove(image_path)
 
     elif message.content.startswith("!scout muse"):
         card = scout_cards(1, False, "µ's")[0]
@@ -238,7 +236,7 @@ async def handle_message_task(message):
         else:
             url = "http:" + card["card_image"]
 
-        image_path = scout_image_generator.OUTPUT_PATH
+        image_path = scout_image_generator.IDOL_IMAGES_PATH
         image_path += str(time.clock()) + message.author.id + ".png"
 
         scout_image_generator.download_image_from_url(url, image_path)
@@ -249,8 +247,6 @@ async def handle_message_task(message):
             content="<@" + message.author.id + ">",
             tts=False
         )
-
-        os.remove(image_path)
 
     elif message.content.startswith("!scout"):
         card = scout_cards(1)[0]
@@ -262,7 +258,7 @@ async def handle_message_task(message):
         else:
             url = "http:" + card["card_image"]
 
-        image_path = scout_image_generator.OUTPUT_PATH
+        image_path = scout_image_generator.IDOL_IMAGES_PATH
         image_path += str(time.clock()) + message.author.id + ".png"
 
         scout_image_generator.download_image_from_url(url, image_path)
@@ -273,8 +269,6 @@ async def handle_message_task(message):
             content="<@" + message.author.id + ">",
             tts=False
         )
-
-        os.remove(image_path)
 
 @client.event
 async def on_message(message):
@@ -300,7 +294,7 @@ async def on_ready():
 while True:
     try:
         run_bot()
-    except BaseException as e:
+    except:
         print("critical error")
         time.sleep(5)
 
