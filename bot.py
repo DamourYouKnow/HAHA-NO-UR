@@ -299,6 +299,7 @@ while True:
         run_bot()
     except:
         print("critical error")
+        client.close()
         time.sleep(5)
 
     print("relaunching")
