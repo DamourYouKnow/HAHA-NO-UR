@@ -31,8 +31,7 @@ def create_image(idol_circle_urls, num_rows, output_filename):
         filename = posixpath.basename(url_path)
         image_filepaths.append(IDOL_CIRCLES_PATH + filename)
 
-        if not os.path.exists(IDOL_CIRCLES_PATH + filename):
-            download_image_from_url(image_url, IDOL_CIRCLES_PATH + filename)
+        download_image_from_url(image_url, IDOL_CIRCLES_PATH + filename)
 
     # Load images
     circle_images = []
@@ -97,11 +96,13 @@ url: String - url of image
 path: String - path where the image will be saved to
 '''
 def download_image_from_url(url, path):
+    if not os.path.exists(path):
+        print("Saving " + url + " to " + path)
+        fp = open(path, "wb")
+        fp.write(requests.get(url).content)
+        fp.close()
 
-    print("Saving " + url + " to " + path)
-    fp = open(path, "wb")
-    fp.write(requests.get(url).content)
-    fp.close()
+    return path
 
 '''
 Makes sure a path exists. Creates new directory if it does not.
