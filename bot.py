@@ -23,7 +23,6 @@ client = discord.Client()
 
 def run_bot():
     # Get login token from text file and run client
-    client = discord.Client()
     fp_token = open("token.txt", "r")
     token = fp_token.read().strip("\n")
     client.run(token)
@@ -301,5 +300,6 @@ while True:
         print("critical error")
         client.close()
         time.sleep(5)
+        client = discord.Client()
 
     print("relaunching")
