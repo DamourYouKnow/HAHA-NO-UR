@@ -283,10 +283,13 @@ async def on_message(message):
         traceback.print_exc()
         client.send_message(message.channel, err)
 
+'''
 @client.event
 async def on_error(event, *args, **kwargs):
+    traceback.print_exc()
     time.sleep(5)
     run_bot()
+'''
 
 @client.event
 async def on_ready():
@@ -298,8 +301,9 @@ while True:
         run_bot()
     except:
         print("critical error")
+        traceback.print_exc()
         client.close()
-        time.sleep(5)
-        client = discord.Client()
+        #time.sleep(5)
+        #client = discord.Client()
 
     print("relaunching")
