@@ -127,7 +127,7 @@ def is_minor_unit(card):
     return (unit == "A-RISE") or (unit == "Saint Snow")
 
 '''
-Runs thread that will handle a message
+Runs task that will handle a message
 
 message: message object
 '''
@@ -165,16 +165,27 @@ async def handle_message_task(message):
 
     elif message.content.startswith("!scout"):
         card = scout_card()
+        url = ""
         reply = "<@" + message.author.id + "> "
 
         if card["card_image"] == None:
-            reply += "http:" + card["card_idolized_image"]
+            url = "http:" + card["card_idolized_image"]
         else:
-            reply += "http:" + card["card_image"]
+            url = "http:" + card["card_image"]
 
-        await client.send_message(message.channel, reply)
+        image_path = scout_image_generator.OUTPUT_PATH
+        image_path += str(time.clock()) + message.author.id + ".png"
 
+        scout_image_generator.download_image_from_url(url, image_path)
 
+        await client.send_file(
+            message.channel,
+            image_path,
+            content="<@" + message.author.id + ">",
+            tts=False
+        )
+
+        os.remove(image_path)
 
 @client.event
 async def on_message(message):
@@ -189,7 +200,6 @@ async def on_message(message):
 
 @client.event
 async def on_error(event, *args, **kwargs):
-    # Test by rasing exception when request is received
     time.sleep(5)
 
     # Get login token from text file and attempt to reconnect
