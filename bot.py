@@ -19,6 +19,12 @@ UR_RATE = 0.01
 
 client = discord.Client()
 
+def run_bot():
+    # Get login token from text file and run client
+    fp_token = open("token.txt", "r")
+    token = fp_token.read().strip("\n")
+    client.run(token)
+
 '''
 Generates a random rarity based on the defined scouting rates
 
@@ -42,32 +48,15 @@ def roll_rarity(guaranteed_sr = False):
             return "R"
 
 '''
-Scouts a single card
-
-return: Dictionary - card scouted
-'''
-def scout_card():
-    # Build request url
-    request_url = API_URL + "cards/?rarity=" + roll_rarity()
-    request_url += "&ordering=random"
-    request_url += "&is_promo=False"
-    request_url += "&is_special=False"
-    request_url += "&page_size=1"
-
-    response = requests.get(request_url)
-    response_obj = json.loads(response.text)
-
-    return response_obj["results"][0]
-
-'''
 Scouts a specified number of cards of a given rarity
 
 count: Integer - number of cards to scouted
 rarity: String - rarity of all cards in scout
+unit: unit of card to scout
 
 return: List - cards scouted
 '''
-def scout_by_rarity(count, rarity):
+def scout_by_rarity(count, rarity, unit = None):
     if count == 0:
         return []
 
@@ -76,6 +65,10 @@ def scout_by_rarity(count, rarity):
     request_url += "&ordering=random"
     request_url += "&is_promo=False"
     request_url += "&is_special=False"
+
+    if unit != None:
+        request_url += "&idol_main_unit=" + unit
+
     request_url += "&page_size=" + str(count)
 
     response = requests.get(request_url)
@@ -88,10 +81,11 @@ Scouts a specified number of cards
 
 count: Integer - number of cards to scouted
 guaranteed_sr: Boolean - whether at least one card in the scout will be an SR
+unit: String - unit of cards to scout
 
 return: List - cards scouted
 '''
-def scout_cards(count, guaranteed_sr = False):
+def scout_cards(count, guaranteed_sr = False, unit = None):
     rarities = []
 
     if guaranteed_sr:
@@ -107,24 +101,13 @@ def scout_cards(count, guaranteed_sr = False):
             rarities.append(roll_rarity())
 
     results = []
-    results += scout_by_rarity(rarities.count("R"), "R")
-    results += scout_by_rarity(rarities.count("SR"), "SR")
-    results += scout_by_rarity(rarities.count("SSR"), "SSR")
-    results += scout_by_rarity(rarities.count("UR"), "UR")
+    results += scout_by_rarity(rarities.count("R"), "R", unit)
+    results += scout_by_rarity(rarities.count("SR"), "SR", unit)
+    results += scout_by_rarity(rarities.count("SSR"), "SSR", unit)
+    results += scout_by_rarity(rarities.count("UR"), "UR", unit)
     random.shuffle(results)
 
     return results
-
-'''
-Checks if a card belongs to a minor idol unit (Saint Snow, A-RISE)
-
-card: Dictionary - card being checked
-
-return: Boolean - True if minor unit, otherwise False
-'''
-def is_minor_unit(card):
-    unit = card["idol"]["main_unit"]
-    return (unit == "A-RISE") or (unit == "Saint Snow")
 
 '''
 Runs task that will handle a message
@@ -133,8 +116,66 @@ message: message object
 '''
 async def handle_message_task(message):
     reply = ""
+    # TODO: delegate some of this stuff to functions
+    if message.content.startswith("!scout11 aqours"):
+        cards = scout_cards(11, True, "aqours")
+        circle_image_urls = []
 
-    if message.content.startswith("!scout11"):
+        for card in cards:
+            if card["round_card_image"] == None:
+                circle_image_urls.append(
+                    "http:" + card["round_card_idolized_image"]
+                )
+            else:
+                circle_image_urls.append(
+                    "http:" + card["round_card_image"]
+                )
+
+        image_path = scout_image_generator.create_image(
+            circle_image_urls,
+            2,
+            str(time.clock()) + message.author.id + ".png"
+        )
+
+        await client.send_file(
+            message.channel,
+            image_path,
+            content="<@" + message.author.id + ">",
+            tts=False
+        )
+
+        os.remove(image_path)
+
+    elif message.content.startswith("!scout11 muse"):
+        cards = scout_cards(11, True, "µ's")
+        circle_image_urls = []
+
+        for card in cards:
+            if card["round_card_image"] == None:
+                circle_image_urls.append(
+                    "http:" + card["round_card_idolized_image"]
+                )
+            else:
+                circle_image_urls.append(
+                    "http:" + card["round_card_image"]
+                )
+
+        image_path = scout_image_generator.create_image(
+            circle_image_urls,
+            2,
+            str(time.clock()) + message.author.id + ".png"
+        )
+
+        await client.send_file(
+            message.channel,
+            image_path,
+            content="<@" + message.author.id + ">",
+            tts=False
+        )
+
+        os.remove(image_path)
+
+    elif message.content.startswith("!scout11"):
         cards = scout_cards(11, True)
         circle_image_urls = []
 
@@ -163,8 +204,56 @@ async def handle_message_task(message):
 
         os.remove(image_path)
 
+    elif message.content.startswith("!scout aqours"):
+        card = scout_cards(1, False, "aqours")[0]
+        url = ""
+        reply = "<@" + message.author.id + "> "
+
+        if card["card_image"] == None:
+            url = "http:" + card["card_idolized_image"]
+        else:
+            url = "http:" + card["card_image"]
+
+        image_path = scout_image_generator.OUTPUT_PATH
+        image_path += str(time.clock()) + message.author.id + ".png"
+
+        scout_image_generator.download_image_from_url(url, image_path)
+
+        await client.send_file(
+            message.channel,
+            image_path,
+            content="<@" + message.author.id + ">",
+            tts=False
+        )
+
+        os.remove(image_path)
+
+    elif message.content.startswith("!scout muse"):
+        card = scout_cards(1, False, "µ's")[0]
+        url = ""
+        reply = "<@" + message.author.id + "> "
+
+        if card["card_image"] == None:
+            url = "http:" + card["card_idolized_image"]
+        else:
+            url = "http:" + card["card_image"]
+
+        image_path = scout_image_generator.OUTPUT_PATH
+        image_path += str(time.clock()) + message.author.id + ".png"
+
+        scout_image_generator.download_image_from_url(url, image_path)
+
+        await client.send_file(
+            message.channel,
+            image_path,
+            content="<@" + message.author.id + ">",
+            tts=False
+        )
+
+        os.remove(image_path)
+
     elif message.content.startswith("!scout"):
-        card = scout_card()
+        card = scout_cards(1)[0]
         url = ""
         reply = "<@" + message.author.id + "> "
 
@@ -201,17 +290,18 @@ async def on_message(message):
 @client.event
 async def on_error(event, *args, **kwargs):
     time.sleep(5)
-
-    # Get login token from text file and attempt to reconnect
-    fp_token = open("token.txt", "r")
-    token = fp_token.read().strip("\n")
-    client.run(token)
+    run_bot()
 
 @client.event
 async def on_ready():
     print("Logged in")
 
-# Get login token from text file and run client
-fp_token = open("token.txt", "r")
-token = fp_token.read().strip("\n")
-client.run(token)
+# wrape run_bot in loop that handle exceptions
+while True:
+    try:
+        run_bot()
+    except BaseException as e:
+        print("critical error")
+        time.sleep(5)
+
+    print("relaunching")
