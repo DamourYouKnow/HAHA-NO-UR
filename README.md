@@ -8,5 +8,5 @@ https://discordapp.com/oauth2/authorize?client_id=311284054333063168&scope=bot&p
 # Commands
 [] represents optional arguments  
   
-!scout [muse, aqours] - Solo pull
+!scout [muse, aqours] - Solo pull  
 !scout11 [muse, aqours] - 10+1 pull (guaranteed SR)
