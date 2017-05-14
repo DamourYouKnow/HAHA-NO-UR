@@ -29,9 +29,7 @@ def run_bot():
 
 '''
 Generates a random rarity based on the defined scouting rates
-
 guaranteed_sr: Boolean - Whether an R will flip to an SR
-
 return: String - rarity represented as a string ("UR", "SSR", "SR", "R")
 '''
 def roll_rarity(guaranteed_sr = False):
@@ -51,11 +49,9 @@ def roll_rarity(guaranteed_sr = False):
 
 '''
 Scouts a specified number of cards of a given rarity
-
 count: Integer - number of cards to scouted
 rarity: String - rarity of all cards in scout
 unit: unit of card to scout
-
 return: List - cards scouted
 '''
 def scout_by_rarity(count, rarity, unit = None):
@@ -80,11 +76,9 @@ def scout_by_rarity(count, rarity, unit = None):
 
 '''
 Scouts a specified number of cards
-
 count: Integer - number of cards to scouted
 guaranteed_sr: Boolean - whether at least one card in the scout will be an SR
 unit: String - unit of cards to scout
-
 return: List - cards scouted
 '''
 def scout_cards(count, guaranteed_sr = False, unit = None):
@@ -113,7 +107,6 @@ def scout_cards(count, guaranteed_sr = False, unit = None):
 
 '''
 Runs task that will handle a message
-
 message: message object
 '''
 async def handle_message_task(message):
