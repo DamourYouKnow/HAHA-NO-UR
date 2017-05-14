@@ -1,7 +1,7 @@
 import discord
 import random
 import json
-import requests
+import aiohttp
 import asyncio
 import os
 import time
@@ -54,7 +54,7 @@ rarity: String - rarity of all cards in scout
 unit: unit of card to scout
 return: List - cards scouted
 '''
-def scout_by_rarity(count, rarity, unit = None):
+async def scout_request(count, rarity, unit = None):
     if count == 0:
         return []
 
@@ -69,8 +69,9 @@ def scout_by_rarity(count, rarity, unit = None):
 
     request_url += "&page_size=" + str(count)
 
-    response = requests.get(request_url)
-    response_obj = json.loads(response.text)
+    response = await aiohttp.get(request_url)
+    response_json = await response.text()
+    response_obj = json.loads(response_json)
 
     return response_obj["results"]
 
@@ -81,7 +82,7 @@ guaranteed_sr: Boolean - whether at least one card in the scout will be an SR
 unit: String - unit of cards to scout
 return: List - cards scouted
 '''
-def scout_cards(count, guaranteed_sr = False, unit = None):
+async def scout_cards(count, guaranteed_sr = False, unit = None):
     rarities = []
 
     if guaranteed_sr:
@@ -97,10 +98,10 @@ def scout_cards(count, guaranteed_sr = False, unit = None):
             rarities.append(roll_rarity())
 
     results = []
-    results += scout_by_rarity(rarities.count("R"), "R", unit)
-    results += scout_by_rarity(rarities.count("SR"), "SR", unit)
-    results += scout_by_rarity(rarities.count("SSR"), "SSR", unit)
-    results += scout_by_rarity(rarities.count("UR"), "UR", unit)
+    results += await scout_request(rarities.count("R"), "R", unit)
+    results += await scout_request(rarities.count("SR"), "SR", unit)
+    results += await scout_request(rarities.count("SSR"), "SSR", unit)
+    results += await scout_request(rarities.count("UR"), "UR", unit)
     random.shuffle(results)
 
     return results
@@ -109,11 +110,11 @@ def scout_cards(count, guaranteed_sr = False, unit = None):
 Runs task that will handle a message
 message: message object
 '''
-async def handle_message_task(message):
+async def handle_message(message):
     reply = ""
     # TODO: delegate some of this stuff to functions
     if message.content.startswith("!scout11 aqours"):
-        cards = scout_cards(11, True, "aqours")
+        cards = await scout_cards(11, True, "aqours")
         circle_image_urls = []
 
         for card in cards:
@@ -126,7 +127,7 @@ async def handle_message_task(message):
                     "http:" + card["round_card_image"]
                 )
 
-        image_path = scout_image_generator.create_image(
+        image_path = await scout_image_generator.create_image(
             circle_image_urls,
             2,
             str(time.clock()) + message.author.id + ".png"
@@ -142,7 +143,7 @@ async def handle_message_task(message):
         os.remove(image_path)
 
     elif message.content.startswith("!scout11 muse"):
-        cards = scout_cards(11, True, "µ's")
+        cards = await scout_cards(11, True, "µ's")
         circle_image_urls = []
 
         for card in cards:
@@ -155,7 +156,7 @@ async def handle_message_task(message):
                     "http:" + card["round_card_image"]
                 )
 
-        image_path = scout_image_generator.create_image(
+        image_path = await scout_image_generator.create_image(
             circle_image_urls,
             2,
             str(time.clock()) + message.author.id + ".png"
@@ -171,7 +172,7 @@ async def handle_message_task(message):
         os.remove(image_path)
 
     elif message.content.startswith("!scout11"):
-        cards = scout_cards(11, True)
+        cards = await scout_cards(11, True)
         circle_image_urls = []
 
         for card in cards:
@@ -184,7 +185,7 @@ async def handle_message_task(message):
                     "http:" + card["round_card_image"]
                 )
 
-        image_path = scout_image_generator.create_image(
+        image_path = await scout_image_generator.create_image(
             circle_image_urls,
             2,
             str(time.clock()) + message.author.id + ".png"
@@ -200,7 +201,8 @@ async def handle_message_task(message):
         os.remove(image_path)
 
     elif message.content.startswith("!scout aqours"):
-        card = scout_cards(1, False, "aqours")[0]
+        card = await scout_cards(1, False, "aqours")
+        card = card[0]
         url = ""
         reply = "<@" + message.author.id + "> "
 
@@ -212,7 +214,7 @@ async def handle_message_task(message):
         image_path = scout_image_generator.IDOL_IMAGES_PATH
         image_path += posixpath.basename(urllib.parse.urlsplit(url).path)
 
-        scout_image_generator.download_image_from_url(url, image_path)
+        await scout_image_generator.download_image_from_url(url, image_path)
 
         await client.send_file(
             message.channel,
@@ -222,7 +224,8 @@ async def handle_message_task(message):
         )
 
     elif message.content.startswith("!scout muse"):
-        card = scout_cards(1, False, "µ's")[0]
+        card = await scout_cards(1, False, "µ's")
+        card = card[0]
         url = ""
         reply = "<@" + message.author.id + "> "
 
@@ -234,7 +237,7 @@ async def handle_message_task(message):
         image_path = scout_image_generator.IDOL_IMAGES_PATH
         image_path += posixpath.basename(urllib.parse.urlsplit(url).path)
 
-        scout_image_generator.download_image_from_url(url, image_path)
+        await scout_image_generator.download_image_from_url(url, image_path)
 
         await client.send_file(
             message.channel,
@@ -244,7 +247,8 @@ async def handle_message_task(message):
         )
 
     elif message.content.startswith("!scout"):
-        card = scout_cards(1)[0]
+        card = await scout_cards(1)
+        card = card[0]
         url = ""
         reply = "<@" + message.author.id + "> "
 
@@ -256,7 +260,7 @@ async def handle_message_task(message):
         image_path = scout_image_generator.IDOL_IMAGES_PATH
         image_path += posixpath.basename(urllib.parse.urlsplit(url).path)
 
-        scout_image_generator.download_image_from_url(url, image_path)
+        await scout_image_generator.download_image_from_url(url, image_path)
 
         await client.send_file(
             message.channel,
@@ -268,12 +272,7 @@ async def handle_message_task(message):
 @client.event
 async def on_message(message):
     try:
-        #client.loop.create_task(handle_message_task(message))
-
-        #loop = asyncio.get_event_loop()
-        #future = loop.run_until_complete(handle_message_task, message)
-
-        await handle_message_task(message)
+        await handle_message(message)
 
     except Exception as e:
         err = "<@" + message.author.id + "> A transmission error occured.\n\n"

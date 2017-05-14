@@ -2,6 +2,7 @@ import os
 import shutil
 import urllib
 import requests
+import aiohttp
 import posixpath
 from PIL import Image
 
@@ -18,11 +19,7 @@ output_filename: String - name of output image file
 
 return: String - path pointing to created image.
 '''
-def create_image(idol_circle_urls, num_rows, output_filename):
-    # Create directories for stroing images if they do not exist
-    ensure_path_exists(IDOL_IMAGES_PATH)
-    ensure_path_exists(OUTPUT_PATH)
-
+async def create_image(idol_circle_urls, num_rows, output_filename):
     image_filepaths = [] # list of image filepaths
 
     # Save images that do not exists
@@ -31,7 +28,7 @@ def create_image(idol_circle_urls, num_rows, output_filename):
         filename = posixpath.basename(url_path)
         image_filepaths.append(IDOL_IMAGES_PATH + filename)
 
-        download_image_from_url(image_url, IDOL_IMAGES_PATH + filename)
+        await download_image_from_url(image_url, IDOL_IMAGES_PATH + filename)
 
     # Load images
     circle_images = []
@@ -42,6 +39,27 @@ def create_image(idol_circle_urls, num_rows, output_filename):
     image.save(OUTPUT_PATH + output_filename, "PNG")
 
     return OUTPUT_PATH + output_filename
+
+'''
+Downloads an image from a url and saves it to a specified location
+
+url: String - url of image
+path: String - path where the image will be saved to
+'''
+async def download_image_from_url(url, path):
+    # Create directories for storing images if they do not exist
+    ensure_path_exists(IDOL_IMAGES_PATH)
+    ensure_path_exists(OUTPUT_PATH)
+
+    if not os.path.exists(path):
+        print("Saving " + url + " to " + path)
+        fp = open(path, "wb")
+        response = await aiohttp.get(url)
+        image = await response.read()
+        fp.write(image)
+        fp.close()
+
+    return path
 
 '''
 Stitches together a list of images to an output image.
@@ -88,21 +106,6 @@ def build_image(circle_images, num_rows, x_distance, y_distance):
         y += circle_height + y_distance
 
     return image
-
-'''
-Downloads an image from a url and saves it to a specified location
-
-url: String - url of image
-path: String - path where the image will be saved to
-'''
-def download_image_from_url(url, path):
-    if not os.path.exists(path):
-        print("Saving " + url + " to " + path)
-        fp = open(path, "wb")
-        fp.write(requests.get(url).content)
-        fp.close()
-
-    return path
 
 '''
 Makes sure a path exists. Creates new directory if it does not.
