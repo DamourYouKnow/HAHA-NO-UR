@@ -268,7 +268,9 @@ async def handle_message_task(message):
 @client.event
 async def on_message(message):
     try:
-        client.loop.create_task(handle_message_task(message))
+        #client.loop.create_task(handle_message_task(message))
+        loop = asyncio.get_event_loop()
+        future = loop.run_until_complete(handle_message_task, message)
 
     except Exception as e:
         err = "<@" + message.author.id + "> A transmission error occured.\n\n"
@@ -289,14 +291,4 @@ async def on_ready():
     print("Logged in")
 
 # wrap run_bot in loop that handle exceptions
-while True:
-    try:
-        run_bot()
-    except:
-        print("critical error")
-        traceback.print_exc()
-        client.close()
-        #time.sleep(5)
-        #client = discord.Client()
-
-    print("relaunching")
+run_bot()
