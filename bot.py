@@ -268,9 +268,12 @@ async def handle_message_task(message):
 @client.event
 async def on_message(message):
     try:
-        client.loop.create_task(handle_message_task(message))
+        #client.loop.create_task(handle_message_task(message))
+
         #loop = asyncio.get_event_loop()
         #future = loop.run_until_complete(handle_message_task, message)
+
+        await handle_message_task(message)
 
     except Exception as e:
         err = "<@" + message.author.id + "> A transmission error occured.\n\n"
@@ -278,13 +281,9 @@ async def on_message(message):
         traceback.print_exc()
         client.send_message(message.channel, err)
 
-'''
 @client.event
 async def on_error(event, *args, **kwargs):
     traceback.print_exc()
-    time.sleep(5)
-    run_bot()
-'''
 
 @client.event
 async def on_ready():
