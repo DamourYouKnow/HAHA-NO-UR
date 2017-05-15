@@ -85,10 +85,8 @@ def build_image(circle_images, num_rows, x_distance, y_distance):
 
     i = 0
     for circle_image in circle_images:
-        i += 1
         circle_rows[i % len(circle_rows)].append(circle_image)
-
-    circle_rows[0].append(circle_rows[1].pop())
+        i += 1
 
     x = 0
     y = 0
