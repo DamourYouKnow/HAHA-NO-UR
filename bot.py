@@ -191,7 +191,7 @@ async def handle_scout(message, scout_command, scout_arg=None):
     if scout_arg == "muse":
         unit = "µ's"
     elif scout_arg == "aqours":
-        unit == "aqours"
+        unit = "aqours"
 
     i = 0
     while unit == None and name == None and i < len(IDOL_NAMES):
