@@ -18,11 +18,15 @@ API_URL = "http://schoolido.lu/api/"
 # Constants for scouting rates
 RATES = {"R": 0.80, "SR": 0.15, "SSR": 0.04, "UR": 0.01}
 
+# Other constants
 IDOL_NAMES =  idol_info.get_idol_names()
 MAIN_UNITS = ["µ's'", "aqours"]
 
 client = discord.Client()
 
+'''
+Get the token and run the bot's main event loop
+'''
 def run_bot():
     # Get login token from text file and run client
     fp_token = open("token.txt", "r")
@@ -78,11 +82,46 @@ async def scout_request(count, rarity, unit=None, name=None):
 
     request_url += "&page_size=" + str(count)
 
+    # Get and return response
     response = await aiohttp.get(request_url)
     response_json = await response.text()
     response_obj = json.loads(response_json)
 
-    return response_obj["results"]
+    return response_obj#["results"]
+
+'''
+Adjusts a pull of a single rarity by checking if a card should flip to a similar
+    one and by duplicating random cards in the scout if there were not enough
+    scouted.
+
+scout: Dictionary - dictionary representing the scout. All these cards will have
+    the same rarity.
+required_count: Integer - the number of cards that need to be scouted
+
+return: List - adjusted list of cards scouted
+'''
+async def get_adjusted_scout(scout, required_count):
+    # Traverse scout and roll for flips
+    for card_index in range(0, len(scout["results"])):
+        for flip_card_index in range(0, len(scout["results"])):
+            # Do not roll to flip self
+            if flip_card_index == card_index:
+                continue
+
+            roll = random.uniform(0, 1)
+            if roll <  1 / scout["count"]:
+                scout["results"][flip_card_index] = scout["results"][card_index]
+
+    # Add missing cards to scout by duplicating random cards already present
+    current_count = len(scout["results"])
+    while (current_count < required_count):
+        scout["results"].append(
+            scout["results"][random.randint(0, len(scout["results"]) - 1)]
+        )
+        current_count += 1
+        print("Adding to scout")
+
+    return scout["results"]
 
 '''
 Scouts a specified number of cards
@@ -109,10 +148,13 @@ async def scout_cards(count, guaranteed_sr=False, unit=None, name=None):
             rarities.append(roll_rarity())
 
     results = []
-    results += await scout_request(rarities.count("R"), "R", unit, name)
-    results += await scout_request(rarities.count("SR"), "SR", unit, name)
-    results += await scout_request(rarities.count("SSR"), "SSR", unit, name)
-    results += await scout_request(rarities.count("UR"), "UR", unit, name)
+
+    for rarity in RATES.keys():
+        if rarities.count(rarity) > 0:
+            scout = await scout_request(
+                rarities.count(rarity), rarity, unit, name
+            )
+            results += await get_adjusted_scout(scout, rarities.count(rarity))
 
     random.shuffle(results)
 
