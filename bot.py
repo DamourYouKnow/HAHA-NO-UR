@@ -16,10 +16,7 @@ import idol_info
 API_URL = "http://schoolido.lu/api/"
 
 # Constants for scouting rates
-R_RATE = 0.80
-SR_RATE = 0.15
-SSR_RATE = 0.04
-UR_RATE = 0.01
+RATES = {"R": 0.80, "SR": 0.15, "SSR": 0.04, "UR": 0.01}
 
 IDOL_NAMES =  idol_info.get_idol_names()
 MAIN_UNITS = ["µ's'", "aqours"]
@@ -34,7 +31,9 @@ def run_bot():
 
 '''
 Generates a random rarity based on the defined scouting rates
+
 guaranteed_sr: Boolean - Whether an R will flip to an SR
+
 return: String - rarity represented as a string ("UR", "SSR", "SR", "R")
 '''
 def roll_rarity(guaranteed_sr = False):
@@ -54,9 +53,11 @@ def roll_rarity(guaranteed_sr = False):
 
 '''
 Scouts a specified number of cards of a given rarity
+
 count: Integer - number of cards to scouted
 rarity: String - rarity of all cards in scout
 unit: unit of card to scout
+
 return: List - cards scouted
 '''
 async def scout_request(count, rarity, unit=None, name=None):
@@ -85,9 +86,11 @@ async def scout_request(count, rarity, unit=None, name=None):
 
 '''
 Scouts a specified number of cards
+
 count: Integer - number of cards to scouted
 guaranteed_sr: Boolean - whether at least one card in the scout will be an SR
 unit: String - unit of cards to scout
+
 return: List - cards scouted
 '''
 async def scout_cards(count, guaranteed_sr=False, unit=None, name=None):
@@ -212,6 +215,7 @@ async def handle_scout(message, scout_command, scout_arg=None):
 
 '''
 Runs task that will handle a message
+
 message: message object
 '''
 async def handle_message(message):
@@ -233,6 +237,21 @@ async def handle_message(message):
         if command.startswith("!scout"):
             await handle_scout(message, command, command_arg)
 
+        elif command.startswith("!info"):
+            reply = "Instructions for how to use the bot can be found here:\n"
+            reply += "<https://github.com/DamourYouKnow/HAHA-NO-UR>\n\n"
+            reply += "If you have any suggestions for new feautures or "
+            reply += "improvements contact D'Amour#2601 on discord or submit "
+            reply += "a request here:\n"
+            reply += "<https://github.com/DamourYouKnow/HAHA-NO-UR/issues>\n\n"
+            reply += "Feel free to add this bot to your own server or host "
+            reply += "your own version of it. If you are interested in "
+            reply += "contributing to the bot please contact me. "
+            reply += "I'm willing to teach so don't worry about not having any "
+            reply += "programming experience."
+
+            await client.send_message(message.channel, reply)
+
 @client.event
 async def on_message(message):
     try:
@@ -251,6 +270,9 @@ async def on_error(event, *args, **kwargs):
 @client.event
 async def on_ready():
     print("Logged in")
+    print(str(len(client.servers)) + " servers detected")
+
+    await client.change_presence(game=discord.Game(name="!info"))
 
 # wrap run_bot in loop that handle exceptions
 run_bot()

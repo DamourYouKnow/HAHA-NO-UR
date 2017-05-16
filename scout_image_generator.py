@@ -35,7 +35,7 @@ async def create_image(idol_circle_urls, num_rows, output_filename):
     for image_filepath in image_filepaths:
         circle_images.append(Image.open(image_filepath))
 
-    image = build_image(circle_images, num_rows, 10, 10)
+    image = await build_image(circle_images, num_rows, 10, 10)
     image.save(OUTPUT_PATH + output_filename, "PNG")
 
     return OUTPUT_PATH + output_filename
@@ -71,7 +71,7 @@ y_distane: Integer - y spacing between each image
 
 return: Object - ouput image object
 '''
-def build_image(circle_images, num_rows, x_distance, y_distance):
+async def build_image(circle_images, num_rows, x_distance, y_distance):
     # Compute required height and width
     circle_width, circle_height = circle_images[0].size
     out_height = num_rows * (circle_height + y_distance)
