@@ -39,11 +39,11 @@ return: String - rarity represented as a string ("UR", "SSR", "SR", "R")
 def roll_rarity(guaranteed_sr = False):
     roll = random.uniform(0, 1)
 
-    if roll < UR_RATE:
+    if roll < RATES["UR"]:
         return "UR"
-    elif roll < SSR_RATE + UR_RATE:
+    elif roll < RATES["SSR"] + RATES["UR"]:
         return "SSR"
-    elif roll < SR_RATE + UR_RATE + SSR_RATE:
+    elif roll < RATES["SR"] + RATES["UR"] + RATES["SSR"]:
         return "SR"
     else:
         if guaranteed_sr:
