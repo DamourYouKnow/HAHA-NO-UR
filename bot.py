@@ -110,12 +110,12 @@ async def get_adjusted_scout(scout, required_count):
         current_count += 1
 
     # Traverse scout and roll for flips
-    for card_index in range(1, len(scout["results"])):
+    for card_index in range(0, len(scout["results"]) - 1):
         # for each card there is a (1 / total cards) chance that we should dupe
         # the previous card
         roll = random.uniform(0, 1)
         if roll <  1 / scout["count"]:
-            scout["results"][card_index] = scout["results"][card_index - 1]
+            scout["results"][card_index] = scout["results"][card_index + 1]
 
     return scout["results"]
 
