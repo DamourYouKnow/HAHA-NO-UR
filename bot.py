@@ -101,25 +101,21 @@ required_count: Integer - the number of cards that need to be scouted
 return: List - adjusted list of cards scouted
 '''
 async def get_adjusted_scout(scout, required_count):
-    # Traverse scout and roll for flips
-    for card_index in range(0, len(scout["results"])):
-        for flip_card_index in range(0, len(scout["results"])):
-            # Do not roll to flip self
-            if flip_card_index == card_index:
-                continue
-
-            roll = random.uniform(0, 1)
-            if roll <  1 / scout["count"]:
-                scout["results"][flip_card_index] = scout["results"][card_index]
-
     # Add missing cards to scout by duplicating random cards already present
     current_count = len(scout["results"])
     while (current_count < required_count):
         scout["results"].append(
-            scout["results"][random.randint(0, len(scout["results"]) - 1)]
+            scout["results"][random.randint(0, current_count - 1)]
         )
         current_count += 1
-        print("Adding to scout")
+
+    # Traverse scout and roll for flips
+    for card_index in range(1, len(scout["results"])):
+        # for each card there is a (1 / total cards) chance that we should dupe
+        # the previous card
+        roll = random.uniform(0, 1)
+        if roll <  1 / scout["count"]:
+            scout["results"][card_index] = scout["results"][card_index - 1]
 
     return scout["results"]
 
