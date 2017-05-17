@@ -14,7 +14,3 @@ https://discordapp.com/oauth2/authorize?client_id=311284054333063168&scope=bot&p
 **Optional argunments:**  
 - main unit name (aqours, muse)  
 - idol name (honoka, chika)  
-
-# Known issues
-- It is currently not possible to pull two of the same card when doing a 10+1 pull  
-- 10+1 pulls for a certain Aqours members won't generate enough cards  
