@@ -159,8 +159,9 @@ async def scout_cards(count, guaranteed_sr=False, unit=None, name=None):
 '''
 Handles a solo scout
 
-scout_command: String - the scout command used ("!scout", "!scout11")
-scout_arg: String - optional argument passed to scout
+message: Object - message object from user requesting scout
+unit: String - name of unit being scouted for
+name: String - name of idol being scouted for
 '''
 async def handle_solo_scout(message, unit=None, name=None):
     card = await scout_cards(1, False, unit, name)
@@ -187,8 +188,9 @@ async def handle_solo_scout(message, unit=None, name=None):
 '''
 Handles a scout with multiple cards
 
-scout_command: String - the scout command used ("!scout", "!scout11")
-scout_arg: String - optional argument passed to scout
+message: Object - message object from user requesting scout
+unit: String - name of unit being scouted for
+name: String - name of idol being scouted for
 '''
 async def handle_multiple_scout(message, unit=None, name=None):
     cards = await scout_cards(11, True, unit, name)
@@ -222,6 +224,7 @@ async def handle_multiple_scout(message, unit=None, name=None):
 '''
 Handles a scout
 
+message: Object - message object from user requesting scout
 scout_command: String - the scout command used ("!scout", "!scout11")
 scout_arg: String - optional argument passed to scout
 '''
