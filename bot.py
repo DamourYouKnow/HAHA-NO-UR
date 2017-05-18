@@ -239,7 +239,7 @@ async def handle_scout(message, scout_command, scout_arg=None):
         curr_name_split = IDOL_NAMES[i].split(' ')
 
         if len(curr_name_split) < 2:
-            break
+            continue
 
         if scout_arg == curr_name_split[1].lower():
             name = IDOL_NAMES[i]
@@ -248,7 +248,7 @@ async def handle_scout(message, scout_command, scout_arg=None):
     if scout_command == "!scout":
         await handle_solo_scout(message, unit, name)
 
-    elif scout_command in "!scout11":
+    elif scout_command == "!scout11":
         await handle_multiple_scout(message, unit, name)
 
 '''
