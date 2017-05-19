@@ -278,9 +278,6 @@ async def handle_message(message):
         if command.startswith("!scout"):
             await handle_scout(message, command, command_arg)
 
-    if not message.channel.permissions_for(client.user).attach_files:
-        return
-
 # The rest of handle scout ...
         elif command.startswith("!info"):
             reply = "Instructions for how to use the bot can be found here:\n"
