@@ -272,10 +272,12 @@ async def handle_scout(message, scout_command, scout_arg=None):
     while unit == None and name == None and i < len(IDOL_NAMES):
         curr_name_split = IDOL_NAMES[i].split(' ')
 
+        print(curr_name_split)
+
         if len(curr_name_split) == 0:
             continue
         elif len(curr_name_split) == 1:
-            if scout_arg == curr_name_split[0]:
+            if scout_arg == curr_name_split[0].lower():
                 name = IDOL_NAMES[i]
         elif scout_arg == curr_name_split[1].lower():
             name = IDOL_NAMES[i]
