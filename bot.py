@@ -16,7 +16,12 @@ import idol_info
 API_URL = "http://schoolido.lu/api/"
 
 # Constants for scouting rates
-RATES = {"R": 0.80, "SR": 0.15, "SSR": 0.04, "UR": 0.01}
+RATES = {
+    "regular": {"N": 0.95, "R": 0.05, "SR": 0.00, "SSR": 0.00, "UR": 0.00},
+    "honour": {"N": 0.00, "R": 0.80, "SR": 0.15, "SSR": 0.04, "UR": 0.01},
+    "coupon": {"N": 0.00, "R": 0.00, "SR": 0.80, "SSR": 0.00, "UR": 0.20}
+}
+
 
 # Other constants
 IDOL_NAMES =  idol_info.get_idol_names()
@@ -40,20 +45,32 @@ guaranteed_sr: Boolean - Whether an R will flip to an SR
 
 return: String - rarity represented as a string ("UR", "SSR", "SR", "R")
 '''
-def roll_rarity(guaranteed_sr = False):
+def roll_rarity(box, guaranteed_sr = False):
     roll = random.uniform(0, 1)
 
-    if roll < RATES["UR"]:
+    required_roll = RATES[box]["UR"]
+    if roll < required_roll:
         return "UR"
-    elif roll < RATES["SSR"] + RATES["UR"]:
+
+    required_roll = RATES[box]["SSR"] + RATES[box]["UR"]
+    if roll < required_roll:
         return "SSR"
-    elif roll < RATES["SR"] + RATES["UR"] + RATES["SSR"]:
+
+    required_roll = RATES[box]["SR"] + RATES[box]["SSR"]
+    required_roll += RATES[box]["UR"]
+    if roll < required_roll:
         return "SR"
-    else:
+
+    required_roll = RATES[box]["R"] + RATES[box]["SR"]
+    required_roll += RATES[box]["SSR"] + RATES[box]["UR"]
+    if roll < required_roll:
         if guaranteed_sr:
             return "SR"
         else:
             return "R"
+
+    else:
+        return "N"
 
 '''
 Scouts a specified number of cards of a given rarity
@@ -78,7 +95,9 @@ async def scout_request(count, rarity, unit=None, name=None):
         request_url += "&idol_main_unit=" + unit
     elif name != None:
         names = name.split(' ')
-        request_url += "&name=" + names[0] + "%" + "20" + names[1]
+        request_url += "&name=" + names[0]
+        if len(names) == 2:
+            request_url += "%" + "20" + names[1]
 
     request_url += "&page_size=" + str(count)
 
@@ -103,6 +122,11 @@ return: List - adjusted list of cards scouted
 async def get_adjusted_scout(scout, required_count):
     # Add missing cards to scout by duplicating random cards already present
     current_count = len(scout["results"])
+
+    # Something bad happened, return an empty list
+    if (current_count == 0):
+        return []
+
     while (current_count < required_count):
         scout["results"].append(
             scout["results"][random.randint(0, current_count - 1)]
@@ -128,28 +152,29 @@ unit: String - unit of cards to scout
 
 return: List - cards scouted
 '''
-async def scout_cards(count, guaranteed_sr=False, unit=None, name=None):
+async def scout_cards(count, box, guaranteed_sr=False, unit=None, name=None):
     rarities = []
 
     if guaranteed_sr:
         for r in range(0, count - 1):
-            rarities.append(roll_rarity())
+            rarities.append(roll_rarity(box))
 
-        if rarities.count("R") == count - 1:
-            rarities.append(roll_rarity(True))
+        if rarities.count("R") + rarities.count("N") == count - 1:
+            rarities.append(roll_rarity(box, True))
         else:
-            rarities.append(roll_rarity())
+            rarities.append(roll_rarity(box))
     else:
         for r in range(0, count):
-            rarities.append(roll_rarity())
+            rarities.append(roll_rarity(box))
 
     results = []
 
-    for rarity in RATES.keys():
+    for rarity in RATES[box].keys():
         if rarities.count(rarity) > 0:
             scout = await scout_request(
                 rarities.count(rarity), rarity, unit, name
             )
+
             results += await get_adjusted_scout(scout, rarities.count(rarity))
 
     random.shuffle(results)
@@ -163,8 +188,8 @@ message: Object - message object from user requesting scout
 unit: String - name of unit being scouted for
 name: String - name of idol being scouted for
 '''
-async def handle_solo_scout(message, unit=None, name=None):
-    card = await scout_cards(1, False, unit, name)
+async def handle_solo_scout(message, box, unit=None, name=None):
+    card = await scout_cards(1, box, False, unit, name)
     card = card[0]
     url = ""
 
@@ -192,8 +217,14 @@ message: Object - message object from user requesting scout
 unit: String - name of unit being scouted for
 name: String - name of idol being scouted for
 '''
-async def handle_multiple_scout(message, unit=None, name=None):
-    cards = await scout_cards(11, True, unit, name)
+async def handle_multiple_scout(message, count, box, unit=None, name=None):
+    cards = None
+
+    if (box == "honour"):
+        cards = await scout_cards(count, box, True, unit, name)
+    else:
+        cards = await scout_cards(count, box, False, unit, name)
+
     circle_image_urls = []
 
     for card in cards:
@@ -241,18 +272,30 @@ async def handle_scout(message, scout_command, scout_arg=None):
     while unit == None and name == None and i < len(IDOL_NAMES):
         curr_name_split = IDOL_NAMES[i].split(' ')
 
-        if len(curr_name_split) < 2:
+        if len(curr_name_split) == 0:
             continue
-
-        if scout_arg == curr_name_split[1].lower():
+        elif len(curr_name_split) == 1:
+            if scout_arg == curr_name_split[0]:
+                name = IDOL_NAMES[i]
+        elif scout_arg == curr_name_split[1].lower():
             name = IDOL_NAMES[i]
+
         i += 1
 
     if scout_command == "!scout":
-        await handle_solo_scout(message, unit, name)
+        await handle_solo_scout(message, "honour", unit, name)
 
     elif scout_command == "!scout11":
-        await handle_multiple_scout(message, unit, name)
+        await handle_multiple_scout(message, 11, "honour", unit, name)
+
+    elif scout_command == "!scoutregular":
+        await handle_solo_scout(message, "regular", None, name)
+
+    elif scout_command == "!scoutregular10":
+        await handle_multiple_scout(message, 10, "regular", None, name)
+
+    elif scout_command == "!scoutcoupon":
+        await handle_solo_scout(message, "coupon", unit, name)
 
 '''
 Runs task that will handle a message
@@ -281,7 +324,8 @@ async def handle_message(message):
 # The rest of handle scout ...
         elif command.startswith("!info"):
             reply = "Instructions for how to use the bot can be found here:\n"
-            reply += "<https://github.com/DamourYouKnow/HAHA-NO-UR>\n\n"
+            reply += "<https://github.com/DamourYouKnow/"
+            reply += "HAHA-NO-UR/blob/master/README.md>\n\n"
             reply += "If you have any suggestions for new feautures or "
             reply += "improvements contact D'Amour#2601 on discord or submit "
             reply += "a request here:\n"
@@ -314,7 +358,7 @@ async def on_ready():
     print("Logged in")
     print(str(len(client.servers)) + " servers detected")
 
-    await client.change_presence(game=discord.Game(name="!info"))
+    await client.change_presence(game=discord.Game(name="NEW !info"))
 
 # wrap run_bot in loop that handle exceptions
 run_bot()
