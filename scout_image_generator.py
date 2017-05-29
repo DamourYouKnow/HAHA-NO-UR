@@ -36,8 +36,8 @@ async def create_image(idol_circle_urls, num_rows, output_filename):
         circle_images.append(Image.open(image_filepath))
 
     image = await build_image(circle_images, num_rows, 10, 10)
-    image.save(OUTPUT_PATH + output_filename, "PNG")
 
+    image.save(OUTPUT_PATH + output_filename, "PNG")
     return OUTPUT_PATH + output_filename
 
 '''

@@ -163,6 +163,12 @@ async def scout_cards(count, box, guaranteed_sr=False, unit=None, name=None):
             rarities.append(roll_rarity(box, True))
         else:
             rarities.append(roll_rarity(box))
+
+    # Case where a normal character is selected
+    elif box == "regular" and name != None:
+        for r in range(0, count - 1):
+            rarities.append("N")
+
     else:
         for r in range(0, count):
             rarities.append(roll_rarity(box))
@@ -190,6 +196,15 @@ name: String - name of idol being scouted for
 '''
 async def handle_solo_scout(message, box, unit=None, name=None):
     card = await scout_cards(1, box, False, unit, name)
+
+    # Send error message if no card was returned
+    if len(card) == 0:
+        await client.send_message(
+            message.channel,
+            "<@" + message.author.id + "> A transmission error occured."
+        )
+        return
+
     card = card[0]
     url = ""
 
@@ -233,9 +248,15 @@ async def handle_multiple_scout(message, count, box, unit=None, name=None):
                 "http:" + card["round_card_idolized_image"]
             )
         else:
-            circle_image_urls.append(
-                "http:" + card["round_card_image"]
-            )
+            circle_image_urls.append("http:" + card["round_card_image"])
+
+    # Send error message if no cards were scouted
+    if len(circle_image_urls) == 0:
+        await client.send_message(
+            message.channel,
+            "<@" + message.author.id + "> A transmission error occured."
+        )
+        return
 
     image_path = await scout_image_generator.create_image(
         circle_image_urls,
@@ -272,8 +293,6 @@ async def handle_scout(message, scout_command, scout_arg=None):
     while unit == None and name == None and i < len(IDOL_NAMES):
         curr_name_split = IDOL_NAMES[i].split(' ')
 
-        print(curr_name_split)
-
         if len(curr_name_split) == 0:
             continue
         elif len(curr_name_split) == 1:
@@ -290,13 +309,13 @@ async def handle_scout(message, scout_command, scout_arg=None):
     elif scout_command == "!scout11":
         await handle_multiple_scout(message, 11, "honour", unit, name)
 
-    elif scout_command == "!scoutregular":
+    elif scout_command == "!scoutregular" or scout_command == "!scoutr":
         await handle_solo_scout(message, "regular", None, name)
 
-    elif scout_command == "!scoutregular10":
+    elif scout_command == "!scoutregular10" or scout_command == "!scoutr10":
         await handle_multiple_scout(message, 10, "regular", None, name)
 
-    elif scout_command == "!scoutcoupon":
+    elif scout_command == "!scoutcoupon" or scout_command == "!scoutc":
         await handle_solo_scout(message, "coupon", unit, name)
 
 '''
@@ -324,7 +343,7 @@ async def handle_message(message):
             await handle_scout(message, command, command_arg)
 
 # The rest of handle scout ...
-        elif command.startswith("!info"):
+        elif command.startswith("!info") or command.startswith("!help"):
             reply = "Instructions for how to use the bot can be found here:\n"
             reply += "<https://github.com/DamourYouKnow/"
             reply += "HAHA-NO-UR/blob/master/README.md>\n\n"
@@ -360,7 +379,7 @@ async def on_ready():
     print("Logged in")
     print(str(len(client.servers)) + " servers detected")
 
-    await client.change_presence(game=discord.Game(name="NEW !info"))
+    await client.change_presence(game=discord.Game(name="!info"))
 
 # wrap run_bot in loop that handle exceptions
 run_bot()
