@@ -10,9 +10,9 @@ https://discordapp.com/oauth2/authorize?client_id=311284054333063168&scope=bot&p
   
 - !scout [arg] - Solo pull  
 - !scout11 [arg] - 10+1 pull (guaranteed SR)  
-- !scoutregular [arg]  
-- !scoutregular10 [arg]  
-- !scoutcoupon [arg]  
+- !scoutregular/!scoutr [arg]  
+- !scoutregular10/!scoutr10 [arg]  
+- !scoutcoupon/!scoutc [arg]  
 
 **Optional argunments:**  
 - main unit name (aqours, muse)  
