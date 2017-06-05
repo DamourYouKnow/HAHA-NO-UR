@@ -12,6 +12,7 @@ import posixpath
 import urllib
 import scout_image_generator
 import idol_info
+import logger
 
 API_URL = "http://schoolido.lu/api/"
 
@@ -317,6 +318,8 @@ async def handle_scout(message, scout_command, scout_arg=None):
 
     elif scout_command == "!scoutcoupon" or scout_command == "!scoutc":
         await handle_solo_scout(message, "coupon", unit, name)
+
+    logger.log_request(message, "scout")
 
 '''
 Runs task that will handle a message
