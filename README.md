@@ -17,3 +17,11 @@ https://discordapp.com/oauth2/authorize?client_id=311284054333063168&scope=bot&p
 **Optional argunments:**  
 - main unit name (aqours, muse)  
 - idol first name (honoka, chika)  
+
+# Acknowledgements
+This bot would not have been possible without the following projects:  
+
+- School Idol Tomodachi API https://github.com/SchoolIdolTomodachi/SchoolIdolAPI/wiki/LoveLive!-School-Idol-API  
+- discord.py https://github.com/Rapptz/discord.py  
+- Python Pillow https://python-pillow.org/  
+
