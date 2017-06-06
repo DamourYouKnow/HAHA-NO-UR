@@ -1,12 +1,11 @@
 import os
 import posixpath
 import urllib.parse
-
 import aiohttp
 from PIL import Image
 
-IDOL_IMAGES_PATH = "idol_images/"
-OUTPUT_PATH = "scout_output/"
+IDOL_IMAGES_PATH = 'idol_images/'
+OUTPUT_PATH = 'scout_output/'
 CIRCLE_DISTANCE = 10
 
 
@@ -16,12 +15,10 @@ async def create_image(
     Creates a stitched together image of idol circles.
 
     :param idol_circle_urls: urls of idol circle images to be stitched together.
-
     :param num_rows: Number of rows to use in the image
+    :param output_filename: name of output image file
 
-    :param output_filename:  name of output image file
-
-    :return: path pointing to created image.
+    :return: path pointing to created image
     """
     image_filepaths = []  # list of image filepaths
 
@@ -38,28 +35,28 @@ async def create_image(
     for image_filepath in image_filepaths:
         circle_images.append(Image.open(image_filepath))
 
-    image = await build_image(circle_images, num_rows, 10, 10)
+    image = await _build_image(circle_images, num_rows, 10, 10)
 
-    image.save(OUTPUT_PATH + output_filename, "PNG")
+    image.save(OUTPUT_PATH + output_filename, 'PNG')
     return OUTPUT_PATH + output_filename
 
 
-'''
-Downloads an image from a url and saves it to a specified location
+async def download_image_from_url(url: str, path: str) -> str:
+    """
+    Downloads an image from a url and saves it to a specified location.
 
-url: String - url of image
-path: String - path where the image will be saved to
-'''
+    :param url: url of image
+    :param path: path where image will be saved to
 
-
-async def download_image_from_url(url, path):
+    :return: path of saved image
+    """
     # Create directories for storing images if they do not exist
-    ensure_path_exists(IDOL_IMAGES_PATH)
-    ensure_path_exists(OUTPUT_PATH)
+    _ensure_path_exists(IDOL_IMAGES_PATH)
+    _ensure_path_exists(OUTPUT_PATH)
 
     if not os.path.exists(path):
-        print("Saving " + url + " to " + path)
-        fp = open(path, "wb")
+        print('Saving ' + url + ' to ' + path)
+        fp = open(path, 'wb')
         response = await aiohttp.get(url)
         image = await response.read()
         fp.write(image)
@@ -68,25 +65,24 @@ async def download_image_from_url(url, path):
     return path
 
 
-'''
-Stitches together a list of images to an output image.
+async def _build_image(circle_images: list, num_rows: int,
+        x_distance: int, y_distance: int) -> object:
+    """
+    Stitches together a list of images to an output image.
 
-circle_images: Object - list of image object being stitched together
-num_rows: Integer - number of rows to lay the image out in
-x_distance: Integer - x spacing between each image
-y_distane: Integer - y spacing between each image
+    :param circle_images: list of image object being stitched together
+    :param num_rows: number of rows to lay the image out in
+    :param: x_distance: x spacing between each image
+    :param y_distane: y spacing between each image
 
-return: Object - ouput image object
-'''
-
-
-async def build_image(circle_images, num_rows, x_distance, y_distance):
+    :return: ouput image object
+    """
     # Compute required height and width
     circle_width, circle_height = circle_images[0].size
     out_height = num_rows * (circle_height + y_distance)
     out_width = ((len(circle_images) + 1) * (circle_width + x_distance)) // 2
 
-    image = Image.new("RGBA", (out_width, out_height))
+    image = Image.new('RGBA', (out_width, out_height))
 
     circle_rows = []
     for row_index in range(0, num_rows):
@@ -115,14 +111,12 @@ async def build_image(circle_images, num_rows, x_distance, y_distance):
     return image
 
 
-'''
-Makes sure a path exists. Creates new directory if it does not.
+def _ensure_path_exists(path: str):
+    """
+    Makes sure a path exists. Creates new directory if it does not.
 
-path: String - path being checked
-'''
-
-
-def ensure_path_exists(path):
+    :param path: path being checked
+    """
     try:
         os.mkdir(path)
     except OSError as Exception:

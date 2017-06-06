@@ -11,26 +11,34 @@ from scout_image_generator import IDOL_IMAGES_PATH, create_image, \
 API_URL = 'http://schoolido.lu/api/'
 
 
-async def get_idol_names():
+async def get_idol_names() -> list:
+    """
+    Gets a list of every idol name (Last First)
+
+    :return: List of names
+    """
     count_url = API_URL + 'idols'
     res_url = API_URL + 'idols/?page_size='
-    async with ClientSession() as session:
 
+    async with ClientSession() as session:
         async with session.get(count_url) as count_response:
             if count_response.status != 200:
                 return
+
             count = await count_response.json()
             count = count['count']
 
         async with session.get(res_url + str(count)) as result_response:
             if result_response.status != 200:
                 return
+
             res_lst = await result_response.json()
             res_lst = res_lst['results']
+
     return [res['name'] for res in res_lst]
 
 
-def roll_rarity(rates: dict, box, guaranteed_sr: bool = False) -> str:
+def roll_rarity(rates: dict, box: str, guaranteed_sr: bool=False) -> str:
     """
     Generates a random rarity based on the defined scouting rates
 
@@ -68,15 +76,17 @@ def roll_rarity(rates: dict, box, guaranteed_sr: bool = False) -> str:
         return 'N'
 
 
-async def scout_request(count: int, rarity: str, unit=None, name=None) -> dict:
+async def scout_request(count: int, rarity: str,
+        unit: str=None, name: str=None) -> dict:
     """
     Scouts a specified number of cards of a given rarity
 
-    :param count: number of cards to scouted
-    :param rarity: rarity of all cards in scout
-    :param unit: unit of card to scout
-    :param name:
-    :return: cards scouted
+    :param count: Number of cards to scouted
+    :param rarity: Rarity of all cards in scout
+    :param unit: Unit of card to scout
+    :param name: Name of idol to scout for
+
+    :return: Cards scouted
     """
     if count == 0:
         return {}
@@ -111,12 +121,12 @@ def get_adjusted_scout(scout: dict, required_count: int) -> list:
     a similar one and by duplicating random cards in the scout if there were
     not enough scouted.
 
-    :param scout: dictionary representing the scout.
-    All these cards will have the same rarity.
+    :param scout: Dictionary representing the scout.
+        All these cards will have the same rarity.
 
-    :param required_count: the number of cards that need to be scouted.
+    :param required_count: The number of cards that need to be scouted.
 
-    :return: adjusted list of cards scouted
+    :return: Adjusted list of cards scouted
     """
     # Add missing cards to scout by duplicating random cards already present
     current_count = len(scout['results'])
@@ -143,16 +153,18 @@ def get_adjusted_scout(scout: dict, required_count: int) -> list:
 
 
 async def scout_cards(
-        rates, count: int, box: str,
-        guaranteed_sr: bool = False, unit: str = None, name=None) -> list:
+        rates: dict, count: int, box: str,
+        guaranteed_sr: bool=False, unit: str=None, name: str=None) -> list:
     """
     Scouts a specified number of cards
-    :param rates:
-    :param count: number of cards to scouted
-    :param box:
-    :param guaranteed_sr: whether at least one card in the scout will be an SR
-    :param unit: unit of cards to scout
-    :param name:
+
+    :param rates: Rates dictionary defining scout odds
+    :param count: Number of cards to scouted
+    :param box: Box being scouted in
+    :param guaranteed_sr: Whether at least one card in the scout will be an SR
+    :param unit: Unit of cards to scout
+    :param name: Name of idol scout
+
     :return: cards scouted
     """
     rarities = []
@@ -168,7 +180,7 @@ async def scout_cards(
 
     # Case where a normal character is selected
     elif box == "regular" and name is not None:
-        for r in range(0, count - 1):
+        for r in range(0, count):
             rarities.append("N")
 
     else:
@@ -188,9 +200,17 @@ async def scout_cards(
     return results
 
 
-async def handle_solo_scout(rates, box, unit: str = None, name: str = None):
+async def handle_solo_scout(rates: dict, box: str,
+        unit: str=None, name: str=None) -> str:
     """
     Handles a solo scout
+
+    :param rates: Rates dictionary defining scout odds
+    :param box: Box being scouted in ("regular", "honour", "coupon")
+    :param unit: Name of unit being scouted for
+    :param name: Name of idol being scouted for
+
+    :return: Path of scout image
     """
     card = await scout_cards(rates, 1, box, False, unit, name)
 
@@ -211,14 +231,20 @@ async def handle_solo_scout(rates, box, unit: str = None, name: str = None):
 
     return image_path
 
-
-async def handle_multiple_scout(ctx, rates, count, box, unit=None, name=None):
+# TODO change how we give scout image a filename so we don't need to pass ctx
+async def handle_multiple_scout(ctx: object, rates: dict, count: int, box: str,
+        unit: str=None, name: str=None) -> str:
     """
     Handles a scout with multiple cards
 
-    message: Object - message object from user requesting scout
-    unit: String - name of unit being scouted for
-    name: String - name of idol being scouted for
+    :param ctx: Message object from user requesting scout
+    :param rates: Rates dictionary defining scout odds
+    :param count: Number of cards to scout
+    :param box: Box being scouted in ("regular", "honour", "coupon")
+    :param unit: Name of unit being scouted for
+    :param name: Name of idol being scouted for
+
+    :return: Path of scout image
     """
     if box == "honour":
         cards = await scout_cards(rates, count, box, True, unit, name)
@@ -247,20 +273,29 @@ async def handle_multiple_scout(ctx, rates, count, box, unit=None, name=None):
     return image_path
 
 
-def parse_arguments(idol_names: list, args: tuple):
+def parse_arguments(idol_names: list, args: tuple) -> tuple:
     """
     Parse user input arguments and return the
-    :param idol_names: the list of idol names
-    :param args: the user input to be parsed
-    :return: a tuple of (unit, name)
+
+    :param idol_names: The list of idol names
+    :param args: The user input to be parsed
+
+    :return: A tuple of (unit, name)
     """
     unit = None
     name = None
+
     for arg in args:
         if arg.lower() == "muse":
             unit = "µ's"
         elif arg.lower() == "aqours":
             unit = "aqours"
-        elif arg.lower() in idol_names:
-            name = arg.lower()
+
+
+        for full_name in idol_names:
+            name_split = full_name.split(" ")
+            if arg.title() == name_split[len(name_split) - 1]:
+                name = full_name
+                break
+
     return unit, name

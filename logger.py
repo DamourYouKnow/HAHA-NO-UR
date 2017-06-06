@@ -10,10 +10,11 @@ def log_message(content: str):
     """
     Writes a message to the log file
 
-    content: String - message being logged
+    :param content: message being logged
     """
     with open(FILENAME, 'a') as fp:
-        fp.write(timestamp() + ' | ' + content + '\n')
+        fp.write(_timestamp() + ' | ' + content + '\n')
+        fp.close()
 
 
 def log_request(message: Message, request_name=None):
@@ -21,7 +22,7 @@ def log_request(message: Message, request_name=None):
     Writes a request to a log file
 
     :param message: message object of requester
-    :param request_name:
+    :param request_name: optional identifier for request
     """
     content = ''
     if request_name is not None:
@@ -33,11 +34,11 @@ def log_request(message: Message, request_name=None):
     log_message(content)
 
 
-def timestamp():
+def _timestamp():
     """
     Gets the current timestamp
 
-    return: String - timestamp
+    :return: timestamp string with format yyyy-MM-dd hh:mm:ss AP/PM
     """
     time = datetime.now(timezone('US/Eastern'))
     return time.strftime('%Y-%m-%d %I:%M:%S %p')
