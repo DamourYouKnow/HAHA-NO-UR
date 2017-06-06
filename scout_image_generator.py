@@ -1,26 +1,29 @@
 import os
-import shutil
-import urllib
-import requests
-import aiohttp
 import posixpath
+import urllib.parse
+
+import aiohttp
 from PIL import Image
 
 IDOL_IMAGES_PATH = "idol_images/"
 OUTPUT_PATH = "scout_output/"
 CIRCLE_DISTANCE = 10
 
-'''
-Creates a stitched together image of idol circles.
 
-idol_circles: List - urls of idol circle images to be stitched together
-num_rows: Integer - Number of rows to use in the image
-output_filename: String - name of output image file
+async def create_image(
+        idol_circle_urls: list, num_rows: int, output_filename: str) -> str:
+    """
+    Creates a stitched together image of idol circles.
 
-return: String - path pointing to created image.
-'''
-async def create_image(idol_circle_urls, num_rows, output_filename):
-    image_filepaths = [] # list of image filepaths
+    :param idol_circle_urls: urls of idol circle images to be stitched together.
+
+    :param num_rows: Number of rows to use in the image
+
+    :param output_filename:  name of output image file
+
+    :return: path pointing to created image.
+    """
+    image_filepaths = []  # list of image filepaths
 
     # Save images that do not exists
     for image_url in idol_circle_urls:
@@ -40,12 +43,15 @@ async def create_image(idol_circle_urls, num_rows, output_filename):
     image.save(OUTPUT_PATH + output_filename, "PNG")
     return OUTPUT_PATH + output_filename
 
+
 '''
 Downloads an image from a url and saves it to a specified location
 
 url: String - url of image
 path: String - path where the image will be saved to
 '''
+
+
 async def download_image_from_url(url, path):
     # Create directories for storing images if they do not exist
     ensure_path_exists(IDOL_IMAGES_PATH)
@@ -61,6 +67,7 @@ async def download_image_from_url(url, path):
 
     return path
 
+
 '''
 Stitches together a list of images to an output image.
 
@@ -71,6 +78,8 @@ y_distane: Integer - y spacing between each image
 
 return: Object - ouput image object
 '''
+
+
 async def build_image(circle_images, num_rows, x_distance, y_distance):
     # Compute required height and width
     circle_width, circle_height = circle_images[0].size
@@ -105,11 +114,14 @@ async def build_image(circle_images, num_rows, x_distance, y_distance):
 
     return image
 
+
 '''
 Makes sure a path exists. Creates new directory if it does not.
 
 path: String - path being checked
 '''
+
+
 def ensure_path_exists(path):
     try:
         os.mkdir(path)
