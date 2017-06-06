@@ -6,6 +6,7 @@ import requests
 import asyncio
 import os
 import time
+import math
 import traceback
 import threading
 import posixpath
@@ -23,10 +24,12 @@ RATES = {
     "coupon": {"N": 0.00, "R": 0.00, "SR": 0.80, "SSR": 0.00, "UR": 0.20}
 }
 
-
 # Other constants
 IDOL_NAMES =  idol_info.get_idol_names()
 MAIN_UNITS = ["µ's'", "aqours"]
+
+# Used to handle rate limits
+rate_limits = {}
 
 client = discord.Client()
 
@@ -322,6 +325,41 @@ async def handle_scout(message, scout_command, scout_arg=None):
     logger.log_request(message, "scout")
 
 '''
+Updates rate limiting and checks if a request by a user exceed their rate limit
+
+message: Object - sender's message object
+
+Return: Boolean - True if rate limit exceeded, otherwise false
+'''
+def rate_limit_check(message):
+    INTERVAL = 2.50 # Seconds
+    MAX_COUNT = 5
+
+    user_id = message.author.id
+
+    # Add rate limit info for user if it does not exist
+    if not user_id in rate_limits.keys():
+        rate_limits[user_id] = {"count": 0, "last": time.time()}
+
+    # Decrease count by one for each interval user has not made a request
+    curr_time = time.time()
+    time_delta = curr_time - rate_limits[user_id]["last"]
+    rate_limits[user_id]["count"] -= int(math.floor(time_delta / INTERVAL))
+
+    if rate_limits[user_id]["count"] < 0:
+        rate_limits[user_id]["count"] = 0
+
+    # Return true if limit exceeded
+    if rate_limits[user_id]["count"] > MAX_COUNT:
+        return True
+
+    # Otherwise increase count
+    rate_limits[user_id]["count"] += 1
+    rate_limits[user_id]["last"] = curr_time
+
+    return False
+
+'''
 Runs task that will handle a message
 
 message: message object
@@ -343,7 +381,14 @@ async def handle_message(message):
 
     if command != None:
         if command.startswith("!scout"):
-            await handle_scout(message, command, command_arg)
+            if not rate_limit_check(message):
+                await handle_scout(message, command, command_arg)
+            else:
+                await client.send_message(
+                    message.channel,
+                    "<@" + message.author.id + "> slow down! Spamming this "
+                    + "command slows me down for others."
+                )
 
 # The rest of handle scout ...
         elif command.startswith("!info") or command.startswith("!help"):
