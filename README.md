@@ -14,12 +14,12 @@ https://discordapp.com/oauth2/authorize?client_id=311284054333063168&scope=bot&p
 - !scoutregular10/!scoutr10 [arg]  
 - !scoutcoupon/!scoutc [arg]  
 
-**Optional argunments:**  
-- main unit name (aqours, muse, saint snow, a-rise)  
-- idol sub unit (lily white, cyaron, ...)  
-- idol first name (honoka, chika, ...)  
-- attribute (smile, pure, cool)  
-- year (first, second, third)  
+**Optional arguments:**  
+- Main unit name (Aqours, Muse, Saint Snow, A-RISE)  
+- Sub unit name (Lily White, CYaRon, ...)  
+- Idol first name (Honoka, Chika, ...)  
+- Attribute (smile, pure, cool)  
+- Year (first, second, third)  
 
 # Acknowledgements
 This bot would not have been possible without the following projects:  
