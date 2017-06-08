@@ -1,6 +1,7 @@
 from discord import Game
 from discord.ext.commands import Bot
 from websockets.exceptions import ConnectionClosed
+
 from logger import log_request
 
 
@@ -24,11 +25,10 @@ class HahaNoUR(Bot):
             try:
                 await self.wait_until_ready()
                 await self.change_presence(game=Game(name="NEW !info"))
-
             except ConnectionClosed:
                 await self.logout()
                 await self.login()
-                __change_presence()
+                await __change_presence()
 
         await __change_presence()
 
@@ -39,6 +39,5 @@ class HahaNoUR(Bot):
         """
         if message.author.bot:
             return
-
         await super().process_commands(message)
         log_request(message, 'request')
