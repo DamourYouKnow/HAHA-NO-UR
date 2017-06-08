@@ -61,7 +61,7 @@ def __get_file_handler(path: Path, start_time: int):
     :return: the file handler
     """
     handler = logging.FileHandler(
-        filename=path.joinpath('{}.log'.format(start_time)),
+        filename=str(path.joinpath('{}.log'.format(start_time))),
         encoding='utf-8',
         mode='w+'
     )
