@@ -10,3 +10,7 @@ idol_images/*.png
 token\.txt
 
 log\.txt
+
+config/config\.json
+
+*.log
