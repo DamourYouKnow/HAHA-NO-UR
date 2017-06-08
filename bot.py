@@ -1,7 +1,6 @@
 from discord import Game
 from discord.ext.commands import Bot
 from websockets.exceptions import ConnectionClosed
-from core import get_idol_names
 from logger import log_request
 
 
@@ -12,31 +11,19 @@ class HahaNoUR(Bot):
 
         :param prefix: the bot prefix
         """
-        self.idol_names = None
-        self.main_units = ["µ's'", 'Aqours']
-        self.rates = {
-            "regular": {"N": 0.95, "R": 0.05, "SR": 0.00, "SSR": 0.00,
-                        "UR": 0.00},
-            "honour": {"N": 0.00, "R": 0.80, "SR": 0.15, "SSR": 0.04,
-                       "UR": 0.01},
-            "coupon": {"N": 0.00, "R": 0.00, "SR": 0.80, "SSR": 0.00,
-                       "UR": 0.20}
-        }
-
         super().__init__(prefix)
 
     async def on_ready(self):
         """
         Event for when the bot is ready.
         """
-        self.idol_names = await get_idol_names()
         print("Logged in")
         print(str(len(self.servers)) + " servers detected")
 
         async def __change_presence():
             try:
                 await self.wait_until_ready()
-                await self.change_presence(game=Game(name="!info"))
+                await self.change_presence(game=Game(name="NEW !info"))
 
             except ConnectionClosed:
                 await self.logout()
