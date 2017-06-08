@@ -1,10 +1,12 @@
 
+*.iml
+
 \.idea/
+
+__pycache__/
+
+idol_images/
 
 token\.txt
 
 log\.txt
-
-idol_images/
-
-__pycache__/
