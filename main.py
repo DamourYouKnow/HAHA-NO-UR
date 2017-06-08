@@ -1,4 +1,4 @@
-from json import loads
+from json import load
 from pathlib import Path
 
 from bot import HahaNoUR
@@ -7,7 +7,7 @@ from bot_commands import BotCommands
 
 def main():
     with Path('config/config.json').open() as f:
-        config = loads(f)
+        config = load(f)
         f.close()
     bot = HahaNoUR(config['default_prefix'])
     bot.remove_command('help')

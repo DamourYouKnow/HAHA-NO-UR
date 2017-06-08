@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 from time import time
 from traceback import format_exc
@@ -6,7 +7,7 @@ from discord import Game
 from discord.ext.commands import Bot, CommandNotFound, CommandOnCooldown
 from websockets.exceptions import ConnectionClosed
 
-from logger import command_formatter, setup_logging, timestamp
+from logger import command_formatter, info, setup_logging
 
 
 class HahaNoUR(Bot):
@@ -17,8 +18,8 @@ class HahaNoUR(Bot):
         :param prefix: the bot prefix
         """
         self.prefix = prefix
-        self.log_path = Path(__file__).joinpath('logs')
-        self.start_time = time()
+        self.log_path = Path(Path(__file__).parent.joinpath('logs'))
+        self.start_time = int(time())
         self.logger = setup_logging(self.start_time, self.log_path)
         super().__init__(prefix)
 
@@ -51,10 +52,9 @@ class HahaNoUR(Bot):
         content = message.content
         command_name = content.split(' ')[0][len(self.prefix):]
         if 'scout' in command_name.lower():
-            self.logger.log(
-                'INFO',
-                timestamp() + ' | ' + command_formatter(message, command_name)
-            )
+            log_entry = command_formatter(message, command_name)
+            self.logger.log(logging.INFO, log_entry)
+            info(log_entry, date=True)
 
     async def on_command_error(self, exception, context):
         """
@@ -81,7 +81,7 @@ class HahaNoUR(Bot):
                       '{0}Type: {2}\n' \
                       '{0}Exception: {3}\n{4}' \
                     .format(four_space, triggered, ex_type, str_ex, tb)
-                self.logger.log('WARNING', msg)
+                self.logger.log(logging.WARNING, msg)
 
     async def handle_command_error(self, exception, context):
         """
