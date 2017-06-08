@@ -5,7 +5,7 @@
 
 __pycache__/
 
-idol_images/
+idol_images/*.png
 
 token\.txt
 
