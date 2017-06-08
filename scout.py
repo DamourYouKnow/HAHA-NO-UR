@@ -1,23 +1,25 @@
-from core import get_idol_names
-
-from scout_image_generator import IDOL_IMAGES_PATH, create_image, \
-    download_image_from_url
-
-from aiohttp import ClientConnectionError, ClientSession
+import urllib.parse
+from pathlib import Path
+from posixpath import basename
 from random import randint, shuffle, uniform
 from time import clock
-from posixpath import basename
-import urllib.parse
+from typing import Optional
+
+from aiohttp import ClientConnectionError, ClientSession
+
+from get_names import get_idol_names
+from scout_image_generator import IDOL_IMAGES_PATH, create_image, \
+    download_image_from_url
 
 API_URL = 'http://schoolido.lu/api/'
 
 RATES = {
-        "regular": {"N": 0.95, "R": 0.05, "SR": 0.00, "SSR": 0.00,
-                    "UR": 0.00},
-        "honour": {"N": 0.00, "R": 0.80, "SR": 0.15, "SSR": 0.04,
-                   "UR": 0.01},
-        "coupon": {"N": 0.00, "R": 0.00, "SR": 0.80, "SSR": 0.00,
-                   "UR": 0.20}
+    "regular": {"N": 0.95, "R": 0.05, "SR": 0.00, "SSR": 0.00,
+                "UR": 0.00},
+    "honour": {"N": 0.00, "R": 0.80, "SR": 0.15, "SSR": 0.04,
+               "UR": 0.01},
+    "coupon": {"N": 0.00, "R": 0.00, "SR": 0.80, "SSR": 0.00,
+               "UR": 0.20}
 }
 
 IDOL_NAMES = get_idol_names()
@@ -46,13 +48,111 @@ SUB_UNIT_NAMES_DICT = {
     ("cyaron", "cyaron!", "crayon", "crayon!"): "cyaron!"
 }
 
+
+def _get_adjusted_scout(scout: dict, required_count: int) -> list:
+    """
+    Adjusts a pull of a single rarity by checking if a card should flip to
+    a similar one and by duplicating random cards in the scout if there were
+    not enough scouted.
+
+    :param scout: Dictionary representing the scout.
+        All these cards will have the same rarity.
+
+    :param required_count: The number of cards that need to be scouted.
+
+    :return: Adjusted list of cards scouted
+    """
+    # Add missing cards to scout by duplicating random cards already present
+    current_count = len(scout['results'])
+
+    # Something bad happened, return an empty list
+    if current_count == 0:
+        return []
+
+    while current_count < required_count:
+        scout['results'].append(
+            scout['results'][randint(0, current_count - 1)]
+        )
+        current_count += 1
+
+    # Traverse scout and roll for flips
+    for card_index in range(0, len(scout['results']) - 1):
+        # for each card there is a (1 / total cards)
+        # chance that we should dupe
+        # the previous card
+        roll = uniform(0, 1)
+        if roll < 1 / scout['count']:
+            scout['results'][card_index] = scout['results'][card_index + 1]
+
+    return scout['results']
+
+
+def _parse_arguments(args: tuple) -> tuple:
+    """
+    Parse user argument
+
+    :param args: The user input to be parsed
+
+    :return: A tuple of (arg_type, arg)
+    """
+    if len(args) > 0:
+        arg = args[0].lower()
+    else:
+        arg = "none"
+
+    arg_type = None
+    arg_value = ""
+
+    # Check for unit
+    for key in MAIN_UNIT_NAMES_DICT:
+        if arg in key:
+            arg_type = "main_unit"
+            arg_value = MAIN_UNIT_NAMES_DICT[key]
+            break
+
+    for key in SUB_UNIT_NAMES_DICT:
+        if arg in key:
+            arg_type = "sub_unit"
+            arg_value = SUB_UNIT_NAMES_DICT[key]
+            break
+
+    # Check for years
+    if arg in ["first", "second", "third"]:
+        arg_type = "year"
+        arg_value = arg
+
+    # Check for attribute
+    if arg in ["cool", "smile", "pure"]:
+        arg_type = "attribute"
+        arg_value = arg.title()
+
+    # Check for names
+    for full_name in IDOL_NAMES:
+        name_split = full_name.split(" ")
+
+        # Check if name is exact match
+        if arg.title() == name_split[len(name_split) - 1]:
+            arg_type = "name"
+            arg_value = full_name
+            break
+
+        # Check if name is in dictionary
+        for key in IDOL_NAMES_DICT:
+            if arg in key:
+                arg_type = "name"
+                arg_value = IDOL_NAMES_DICT[key]
+                break
+
+    return arg_type, arg_value.replace(" ", "%20")
+
+
 class Scout:
     """
     Provides scouting functionality for bot.
     """
 
-    def __init__(self, box: str="honour", count: int=1,
-            guaranteed_sr: bool=False, args: tuple=()):
+    def __init__(self, box: str = "honour", count: int = 1,
+                 guaranteed_sr: bool = False, args: tuple = ()):
         """
         Constructor for a Scout.
 
@@ -63,7 +163,7 @@ class Scout:
         self._box = box
         self._count = count
         self._guaranteed_sr = guaranteed_sr
-        self._arg_type, self._arg_value = self._parse_arguments(args)
+        self._arg_type, self._arg_value = _parse_arguments(args)
 
     async def do_scout(self):
         if self._count > 1:
@@ -71,7 +171,7 @@ class Scout:
         else:
             return await self._handle_solo_scout()
 
-    async def _handle_multiple_scout(self) -> str:
+    async def _handle_multiple_scout(self) -> Optional[Path]:
         """
         Handles a scout with multiple cards
 
@@ -103,7 +203,7 @@ class Scout:
 
         return image_path
 
-    async def _handle_solo_scout(self) -> str:
+    async def _handle_solo_scout(self) -> Optional[Path]:
         """
         Handles a solo scout
 
@@ -122,10 +222,11 @@ class Scout:
         else:
             url = "http:" + card["card_image"]
 
-        image_path = IDOL_IMAGES_PATH \
-            + basename(urllib.parse.urlsplit(url).path)
-
-        await download_image_from_url(url, image_path)
+        image_path = IDOL_IMAGES_PATH.joinpath(
+            basename(urllib.parse.urlsplit(url).path))
+        session = ClientSession()
+        await download_image_from_url(url, image_path, session)
+        session.close()
 
         return image_path
 
@@ -148,8 +249,8 @@ class Scout:
 
         # Case where a normal character is selected
         elif self._box == "regular" and self._arg_type == "name":
-                for r in range(0, self._count):
-                    rarities.append("N")
+            for r in range(0, self._count):
+                rarities.append("N")
 
         else:
             for r in range(0, self._count):
@@ -163,48 +264,12 @@ class Scout:
                     rarities.count(rarity), rarity
                 )
 
-                results += self._get_adjusted_scout(
+                results += _get_adjusted_scout(
                     scout, rarities.count(rarity)
                 )
 
         shuffle(results)
         return results
-
-    def _get_adjusted_scout(self, scout: dict, required_count: int) -> list:
-        """
-        Adjusts a pull of a single rarity by checking if a card should flip to
-        a similar one and by duplicating random cards in the scout if there were
-        not enough scouted.
-
-        :param scout: Dictionary representing the scout.
-            All these cards will have the same rarity.
-
-        :param required_count: The number of cards that need to be scouted.
-
-        :return: Adjusted list of cards scouted
-        """
-        # Add missing cards to scout by duplicating random cards already present
-        current_count = len(scout['results'])
-
-        # Something bad happened, return an empty list
-        if current_count == 0:
-            return []
-
-        while current_count < required_count:
-            scout['results'].append(
-                scout['results'][randint(0, current_count - 1)]
-            )
-            current_count += 1
-
-        # Traverse scout and roll for flips
-        for card_index in range(0, len(scout['results']) - 1):
-            # for each card there is a (1 / total cards) chance that we should dupe
-            # the previous card
-            roll = uniform(0, 1)
-            if roll < 1 / scout['count']:
-                scout['results'][card_index] = scout['results'][card_index + 1]
-
-        return scout['results']
 
     async def _scout_request(self, count: int, rarity: str) -> dict:
         """
@@ -243,7 +308,7 @@ class Scout:
                 response_json = await response.json()
                 return response_json
 
-    def _roll_rarity(self, guaranteed_sr: bool=False) -> str:
+    def _roll_rarity(self, guaranteed_sr: bool = False) -> str:
         """
         Generates a random rarity based on the defined scouting rates
 
@@ -275,63 +340,3 @@ class Scout:
                 return 'R'
         else:
             return 'N'
-
-    def _parse_arguments(self, args: tuple) -> tuple:
-        """
-        Parse user argument
-
-        :param args: The user input to be parsed
-
-        :return: A tuple of (arg_type, arg)
-        """
-        if len(args) > 0:
-            arg = args[0].lower()
-        else:
-            arg = "none"
-
-        arg_type = None
-        arg_value = ""
-
-        # Check for unit
-        for key in MAIN_UNIT_NAMES_DICT:
-            if arg in key:
-                arg_type = "main_unit"
-                arg_value = MAIN_UNIT_NAMES_DICT[key]
-                break
-
-        for key in SUB_UNIT_NAMES_DICT:
-            if arg in key:
-                arg_type = "sub_unit"
-                arg_value = SUB_UNIT_NAMES_DICT[key]
-                break
-
-        # Check for years
-        if arg in ["first", "second", "third"]:
-            arg_type = "year"
-            arg_value = arg
-
-        # Check for attribute
-        if arg in ["cool", "smile", "pure"]:
-            arg_type = "attribute"
-            arg_value = arg.title()
-
-        # Check for names
-        idol_names = IDOL_NAMES
-
-        for full_name in idol_names:
-            name_split = full_name.split(" ")
-
-            # Check if name is exact match
-            if arg.title() == name_split[len(name_split) - 1]:
-                arg_type = "name"
-                arg_value = full_name
-                break
-
-            # Check if name is in dictionary
-            for key in IDOL_NAMES_DICT:
-                if arg in key:
-                    arg_type = "name"
-                    arg_value = IDOL_NAMES_DICT[key]
-                    break
-
-        return arg_type, arg_value.replace(" ", "%20")

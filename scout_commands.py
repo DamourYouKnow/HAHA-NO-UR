@@ -3,7 +3,7 @@ from os import remove
 from discord.ext import commands
 
 from bot import HahaNoUR
-from core import handle_multiple_scout, handle_solo_scout, parse_arguments
+from get_names import handle_multiple_scout, handle_solo_scout, parse_arguments
 
 
 class Scout:

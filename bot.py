@@ -51,7 +51,7 @@ class HahaNoUR(Bot):
         await super().process_commands(message)
         content = message.content
         command_name = content.split(' ')[0][len(self.prefix):]
-        if 'scout' in command_name.lower():
+        if 'scout' in command_name.lower() and command_name in self.commands:
             log_entry = command_formatter(message, command_name)
             self.logger.log(logging.INFO, log_entry)
             info(log_entry, date=True)
@@ -63,7 +63,7 @@ class HahaNoUR(Bot):
         :param context: the context of the command
         """
         if isinstance(exception, CommandOnCooldown):
-            await self.handle_command_error(exception, context)
+            await self._handle_command_error(exception, context)
         elif isinstance(exception, CommandNotFound):
             # Ignore this case
             return
@@ -83,7 +83,7 @@ class HahaNoUR(Bot):
                     .format(four_space, triggered, ex_type, str_ex, tb)
                 self.logger.log(logging.WARNING, msg)
 
-    async def handle_command_error(self, exception, context):
+    async def _handle_command_error(self, exception, context):
         """
         Handle expected errors so no traceback is printed
         :param exception: the exception raised.
