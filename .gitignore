@@ -1,0 +1,12 @@
+
+*.iml
+
+\.idea/
+
+__pycache__/
+
+idol_images/
+
+token\.txt
+
+log\.txt
