@@ -3,7 +3,7 @@ from os import remove
 from discord.ext import commands
 
 from bot import HahaNoUR
-from core import handle_multiple_scout, handle_solo_scout, parse_arguments
+from scout import Scout
 
 
 class BotCommands:
@@ -30,18 +30,19 @@ class BotCommands:
 
     @commands.command(aliases=['info', 'help'])
     async def _info(self):
-        reply = "Instructions for how to use the bot can be found here:\n"
-        "<https://github.com/DamourYouKnow/"
-        "HAHA-NO-UR/blob/master/README.md>\n\n"
-        "If you have any suggestions for new feautures or "
-        "improvements contact D'Amour#2601 on discord or submit "
-        "a request here:\n"
-        "<https://github.com/DamourYouKnow/HAHA-NO-UR/issues>\n\n"
-        "Feel free to add this bot to your own server or host "
-        "your own version of it. If you are interested in "
-        "contributing to the bot please contact me. "
-        "I'm willing to teach so don't worry about not having any "
-        "programming experience."
+        reply = "**2017-06-07:** New filters have been added!\n\n"
+        reply += "Instructions for how to use the bot can be found here:\n"
+        reply += "<https://github.com/DamourYouKnow/"
+        reply += "HAHA-NO-UR/blob/master/README.md>\n\n"
+        reply += "If you have any suggestions for new feautures or "
+        reply += "improvements contact D'Amour#2601 on discord or submit "
+        reply += "a request here:\n"
+        reply += "<https://github.com/DamourYouKnow/HAHA-NO-UR/issues>\n\n"
+        reply += "Feel free to add this bot to your own server or host "
+        reply += "your own version of it. If you are interested in "
+        reply += "contributing to the bot please contact me. "
+        reply += "I'm willing to teach so don't worry about not having any "
+        reply += "programming experience."
         await self.bot.say(reply)
 
     @commands.command(pass_context=True)
@@ -50,8 +51,8 @@ class BotCommands:
         """
         Command to do a solo scout
         """
-        unit, name = parse_arguments(self.bot.idol_names, args)
-        res = await handle_solo_scout(self.bot.rates, 'honour', unit, name)
+        scout = Scout("honour", 1, False, args)
+        res = await scout.do_scout()
         await self.__handle_result(ctx, res)
 
     @commands.command(pass_context=True)
@@ -60,10 +61,9 @@ class BotCommands:
         """
         Command do scout 11
         """
-        unit, name = parse_arguments(self.bot.idol_names, args)
-        res = await handle_multiple_scout(
-            ctx, self.bot.rates, 11, 'honour', unit, name)
-        await self.__handle_result(ctx, res, True)
+        scout = Scout("honour", 11, True, args)
+        res = await scout.do_scout()
+        await self.__handle_result(ctx, res)
 
     @commands.command(pass_context=True, aliases=['scoutregular', 'scoutr'])
     @commands.cooldown(rate=5, per=2.5, type=commands.BucketType.user)
@@ -71,9 +71,8 @@ class BotCommands:
         """
         Command to scout regular
         """
-        unit, name = parse_arguments(self.bot.idol_names, args)
-        print(name)
-        res = await handle_solo_scout(self.bot.rates, "regular", None, name)
+        scout = Scout("regular", 1, False, args)
+        res = await scout.do_scout()
         await self.__handle_result(ctx, res)
 
     @commands.command(pass_context=True, aliases=['scoutregular10', 'scoutr10'])
@@ -82,10 +81,9 @@ class BotCommands:
         """
         Command to scout 10
         """
-        unit, name = parse_arguments(self.bot.idol_names, args)
-        res = await handle_multiple_scout(
-            ctx, self.bot.rates, 10, 'regular', None, name)
-        await self.__handle_result(ctx, res, True)
+        scout = Scout("regular", 10, False, args)
+        res = await scout.do_scout()
+        await self.__handle_result(ctx, res)
 
     @commands.command(pass_context=True, aliases=['scoutcoupon', 'scoutc'])
     @commands.cooldown(rate=5, per=2.5, type=commands.BucketType.user)
@@ -93,6 +91,6 @@ class BotCommands:
         """
         Command to scout coupon
         """
-        unit, name = parse_arguments(self.bot.idol_names, args)
-        res = await handle_solo_scout(self.bot.rates, 'coupon', unit, name)
+        scout = Scout("coupon", 1, False, args)
+        res = await scout.do_scout()
         await self.__handle_result(ctx, res)
