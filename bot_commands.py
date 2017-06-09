@@ -19,7 +19,7 @@ class BotCommands:
             ctx.message.channel,
             '<@' + ctx.message.author.id + '> A transmission error occured.')
 
-    async def __handle_result(self, ctx, res, delete=False):
+    async def __handle_result(self, ctx, res, delete=True):
         if not res:
             await self.__send_error_msg(ctx)
         else:

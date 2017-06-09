@@ -15,7 +15,6 @@ async def create_image(
         idol_circle_urls: list, num_rows: int, output_filename: str) -> Path:
     """
     Creates a stitched together image of idol circles.
-
     :param idol_circle_urls: urls of idol circle images to be stitched together.
     :param num_rows: Number of rows to use in the image
     :param output_filename: name of output image file
@@ -42,7 +41,6 @@ async def download_image_from_url(
         url: str, path: Path, session: ClientSession) -> Path:
     """
     Downloads an image from a url and saves it to a specified location.
-
     :param url: url of image
     :param path: path where image will be saved to
     :param session: the aiohttp ClientSession
@@ -65,7 +63,6 @@ def _build_image(circle_images: list, num_rows: int,
                  x_padding: int, y_padding: int) -> Image:
     """
     Stitches together a list of images to an output image.
-
     :param circle_images: list of image object being stitched together
     :param num_rows: number of rows to lay the image out in
     :param x_padding: x spacing between each image
@@ -189,29 +186,3 @@ def _build_image_old(circle_images: list, num_rows: int,
         y += circle_height + y_distance
 
     return image
-
-
-if __name__ == '__main__':
-    from os import listdir
-    from random import choice
-    from time import time
-
-    images = [p for p in listdir('./idol_images') if p.endswith('.png')]
-    image_filepaths = ['idol_images/' + choice(images) for _ in range(11)]
-    circle_images = [Image.open(str(i)) for i in image_filepaths]
-    s = time()
-    for _ in range(5000):
-        image = _build_image(circle_images, 3, 10, 10)
-    e = time()
-    print('new avg time')
-    print((e - s) / 5000)
-    s = time()
-    for _ in range(5000):
-        image = _build_image_old(circle_images, 3, 10, 10)
-    e = time()
-    print('old avg time')
-    print((e - s) / 5000)
-
-    image = _build_image(circle_images, 3, 10, 10)
-    output_path = OUTPUT_PATH.joinpath('test.png')
-    image.save(str(output_path), 'PNG')

@@ -56,6 +56,14 @@ class HahaNoUR(Bot):
             self.logger.log(logging.INFO, log_entry)
             info(log_entry, date=True)
 
+    async def on_error(self, event_method, *args, **kwargs):
+        """
+        Runtime error handling
+        """
+        ig = 'Ignoring exception in {}\n'.format(event_method)
+        tb = traceback.format_exc()
+        self.logger.log(ERROR, '\n' + ig + '\n' + tb)
+
     async def on_command_error(self, exception, context):
         """
         Custom command error handling
