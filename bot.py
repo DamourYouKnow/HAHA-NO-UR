@@ -7,6 +7,7 @@ from discord import Game
 from discord.ext.commands import Bot, CommandNotFound, CommandOnCooldown
 from websockets.exceptions import ConnectionClosed
 
+from helpers import detailed_help, general_help_embed, get_command_collections
 from logger import command_formatter, info, setup_logging
 
 
@@ -17,11 +18,13 @@ class HahaNoUR(Bot):
 
         :param prefix: the bot prefix
         """
+        super().__init__(prefix)
         self.prefix = prefix
         self.log_path = Path(Path(__file__).parent.joinpath('logs'))
         self.start_time = int(time())
         self.logger = setup_logging(self.start_time, self.log_path)
-        super().__init__(prefix)
+        self.help_general = None
+        self.help_detailed = {}
 
     async def on_ready(self):
         """
@@ -40,6 +43,9 @@ class HahaNoUR(Bot):
                 await __change_presence()
 
         await __change_presence()
+        command_list, command_dict = get_command_collections(self)
+        self.help_general = general_help_embed(self, command_dict)
+        self.help_detailed = detailed_help(command_list)
 
     async def process_commands(self, message):
         """
@@ -61,8 +67,8 @@ class HahaNoUR(Bot):
         Runtime error handling
         """
         ig = 'Ignoring exception in {}\n'.format(event_method)
-        tb = traceback.format_exc()
-        self.logger.log(ERROR, '\n' + ig + '\n' + tb)
+        tb = format_exc()
+        self.logger.log(logging.CRITICAL, '\n' + ig + '\n' + tb)
 
     async def on_command_error(self, exception, context):
         """

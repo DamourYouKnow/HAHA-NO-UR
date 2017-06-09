@@ -48,6 +48,7 @@ ALIASES = {
     }
 }
 
+
 def _get_adjusted_scout(scout: dict, required_count: int) -> list:
     """
     Adjusts a pull of a single rarity by checking if a card should flip to
@@ -188,7 +189,7 @@ class Scout:
         else:
             return await self._handle_solo_scout()
 
-    async def _handle_multiple_scout(self) -> Optional[Path]:
+    async def _handle_multiple_scout(self) -> Optional[str]:
         """
         Handles a scout with multiple cards
 

@@ -50,6 +50,7 @@ def setup_logging(start_time: int, path: Path):
     logger = logging.getLogger('discord')
     logger.setLevel(logging.INFO)
     logger.addHandler(__get_file_handler(path, start_time))
+    logger.addHandler(__get_console_handler())
     return logger
 
 
@@ -92,7 +93,7 @@ def __get_console_handler():
             style='%'
         )
     )
-    console.setLevel(logging.INFO)
+    console.setLevel(logging.WARNING)
     return console
 
 

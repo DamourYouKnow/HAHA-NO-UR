@@ -12,7 +12,7 @@ CIRCLE_DISTANCE = 10
 
 
 async def create_image(
-        idol_circle_urls: list, num_rows: int, output_filename: str) -> Path:
+        idol_circle_urls: list, num_rows: int, output_filename: str) -> str:
     """
     Creates a stitched together image of idol circles.
     :param idol_circle_urls: urls of idol circle images to be stitched together.
@@ -142,47 +142,3 @@ def split(in_: Sequence, chunks: int) -> List[List]:
         in_[i * k + min(i, m):(i + 1) * k + min(i + 1, m)]
         for i in range(chunks)
     ]
-
-
-def _build_image_old(circle_images: list, num_rows: int,
-                     x_distance: int, y_distance: int):
-    """
-    Stitches together a list of images to an output image.
-    :param circle_images: list of image object being stitched together
-    :param num_rows: number of rows to lay the image out in
-    :param: x_distance: x spacing between each image
-    :param y_distance: y spacing between each image
-    :return: ouput image object
-    """
-    # Compute required height and width
-    circle_width, circle_height = circle_images[0].size
-    out_height = num_rows * (circle_height + y_distance)
-    out_width = ((len(circle_images) + 1) * (circle_width + x_distance)) // 2
-
-    image = Image.new('RGBA', (out_width, out_height))
-
-    circle_rows = []
-    for row_index in range(0, num_rows):
-        circle_rows.append([])
-
-    i = 0
-    for circle_image in circle_images:
-        circle_rows[i % len(circle_rows)].append(circle_image)
-        i += 1
-
-    x = 0
-    y = 0
-    for row_index in range(0, len(circle_rows)):
-        x = 0
-
-        # Offset row
-        if (row_index + 1) % 2 == 0:
-            x += circle_width // 2
-
-        for col_index in range(0, len(circle_rows[row_index])):
-            image.paste(circle_rows[row_index][col_index], (x, y))
-            x += circle_width + x_distance
-
-        y += circle_height + y_distance
-
-    return image
