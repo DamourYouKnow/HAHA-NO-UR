@@ -34,7 +34,7 @@ async def create_image(
     image = _build_image(circle_images, num_rows, 10, 10)
     output_path = OUTPUT_PATH.joinpath(output_filename)
     image.save(str(output_path), 'PNG')
-    return output_path
+    return str(output_path)
 
 
 async def download_image_from_url(

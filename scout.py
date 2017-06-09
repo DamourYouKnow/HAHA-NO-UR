@@ -222,10 +222,11 @@ class Scout:
         else:
             url = "http:" + card["card_image"]
 
-        image_path = IDOL_IMAGES_PATH \
-            + basename(urllib.parse.urlsplit(url).path)
-            
-        await download_image_from_url(url, image_path)
+        image_path = IDOL_IMAGES_PATH.joinpath(
+            basename(urllib.parse.urlsplit(url).path))
+        session = ClientSession()
+        await download_image_from_url(url, image_path, session)
+        session.close()
 
         return image_path
 
