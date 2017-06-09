@@ -24,30 +24,29 @@ RATES = {
 
 IDOL_NAMES = get_idol_names()
 
-IDOL_NAMES_DICT = {
-    ("honk"): "kousaka honoka",
-    ("eri"): "ayase eli",
-    ("yohane"): "tsushima yoshiko",
-    ("hana", "pana"): "koizumi hanayo",
-    ("tomato"): "nishikino maki"
+ALIASES = {
+    "name": {
+        ("honk"): "kousaka honoka",
+        ("eri"): "ayase eli",
+        ("yohane"): "tsushima yoshiko",
+        ("hana", "pana"): "koizumi hanayo",
+        ("tomato"): "nishikino maki"
+    },
+    "main_unit": {
+        ("muse", "µ's"): "µ's",
+        ("aqours", "aquas", "aquors"): "aqours",
+        ("a-rise", "arise"): "a-rise",
+        ("saint", "snow"): "saint snow"
+    },
+    "sub_unit": {
+        ("lily", "white"): "lily white",
+        ("bibi"): "bibi",
+        ("printemps"): "printemps",
+        ("guilty", "kiss"): "guilty kiss",
+        ("azalea"): "azalea",
+        ("cyaron", "cyaron!", "crayon", "crayon!"): "cyaron!"
+    }
 }
-
-MAIN_UNIT_NAMES_DICT = {
-    ("muse", "µ's"): "µ's",
-    ("aqours", "aquas", "aquors"): "aqours",
-    ("a-rise", "arise"): "a-rise",
-    ("saint", "snow"): "saint snow"
-}
-
-SUB_UNIT_NAMES_DICT = {
-    ("lily", "white"): "lily white",
-    ("bibi"): "bibi",
-    ("printemps"): "printemps",
-    ("guilty", "kiss"): "guilty kiss",
-    ("azalea"): "azalea",
-    ("cyaron", "cyaron!", "crayon", "crayon!"): "cyaron!"
-}
-
 
 def _get_adjusted_scout(scout: dict, required_count: int) -> list:
     """
@@ -100,20 +99,26 @@ def _parse_arguments(args: tuple) -> tuple:
     else:
         arg = "none"
 
-    arg_type = None
+    arg_type = ""
     arg_value = ""
 
-    # Check for unit
-    for key in MAIN_UNIT_NAMES_DICT:
-        if arg in key:
-            arg_type = "main_unit"
-            arg_value = MAIN_UNIT_NAMES_DICT[key]
+    # Check for names
+    for full_name in IDOL_NAMES:
+        name_split = full_name.split(" ")
+
+        # Check if name is exact match
+        if arg.title() == name_split[len(name_split) - 1]:
+            arg_type = "name"
+            arg_value = full_name
             break
 
-    for key in SUB_UNIT_NAMES_DICT:
-        if arg in key:
-            arg_type = "sub_unit"
-            arg_value = SUB_UNIT_NAMES_DICT[key]
+    # Check for unit and idol names by alias
+    for alias_dict in ALIASES:
+        search_result = _resolve_alias(arg, ALIASES[alias_dict])
+        print(search_result)
+        if search_result != "":
+            arg_type = alias_dict
+            arg_value = search_result
             break
 
     # Check for years
@@ -136,14 +141,26 @@ def _parse_arguments(args: tuple) -> tuple:
             arg_value = full_name
             break
 
-        # Check if name is in dictionary
-        for key in IDOL_NAMES_DICT:
-            if arg in key:
-                arg_type = "name"
-                arg_value = IDOL_NAMES_DICT[key]
-                break
-
     return arg_type, arg_value.replace(" ", "%20")
+
+
+def _resolve_alias(target: str, alias_dict: dict) -> str:
+    """
+    Resolves an alias from a given alias dicitonary.
+
+    :param target: Target string being searched for.
+    :alias_dict: Alias dicitonary being searched in.
+
+    :return: Alias result if found, otherwise returns an empty string.
+    """
+    for key in alias_dict:
+        if isinstance(key, str) and target == key:
+            return alias_dict[key]
+
+        if isinstance(key, tuple) and target in key:
+            return alias_dict[key]
+
+    return ""
 
 
 class Scout:
