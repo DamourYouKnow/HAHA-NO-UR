@@ -9,8 +9,8 @@ class InfoCommands:
 
     @commands.command()
     async def info(self):
-        reply = "**2017-06-07:** New filters have been added!\n\n"
-        reply += "Instructions for how to use the bot can be found here:\n"
+        # TODO D'Amour read this from file.
+        reply = "Instructions for how to use the bot can be found here:\n"
         reply += "<https://github.com/DamourYouKnow/"
         reply += "HAHA-NO-UR/blob/master/README.md>\n\n"
         reply += "If you have any suggestions for new feautures or "

@@ -32,7 +32,9 @@ class ScoutCommands:
     @commands.cooldown(rate=5, per=2.5, type=commands.BucketType.user)
     async def scout(self, ctx, *args: str):
         """
-        Command to do a solo scout
+        Solo honour scouting.
+
+        **Rates:** R: 80%, SR: 15%, SSR: 4%, UR: 1%
         """
         scout = Scout("honour", 1, False, args)
         res = await scout.do_scout()
@@ -42,7 +44,9 @@ class ScoutCommands:
     @commands.cooldown(rate=3, per=2.5, type=commands.BucketType.user)
     async def scout11(self, ctx, *args: str):
         """
-        Command do scout 11
+        10+1 honour scouting.
+
+        **Rates:** R: 80%, SR: 15%, SSR: 4%, UR: 1%
         """
         scout = Scout("honour", 11, True, args)
         res = await scout.do_scout()
@@ -52,12 +56,9 @@ class ScoutCommands:
     @commands.cooldown(rate=5, per=2.5, type=commands.BucketType.user)
     async def __scoutregular(self, ctx, *args: str):
         """
-        Command to scout regular
-        asdas
-        asdasd
-        asdasd
-        asdasda
-        sdasd
+        Solo regular scouting.
+
+        **Rates:** N: 90%, R: 5%
         """
         scout = Scout("regular", 1, False, args)
         res = await scout.do_scout()
@@ -67,7 +68,9 @@ class ScoutCommands:
     @commands.cooldown(rate=3, per=2.5, type=commands.BucketType.user)
     async def __scoutr10(self, ctx, *args: str):
         """
-        Command to scout 10
+        10 card regular scouting.
+
+        **Rates:** N: 90%, R: 5%
         """
         scout = Scout("regular", 10, False, args)
         res = await scout.do_scout()
@@ -77,7 +80,9 @@ class ScoutCommands:
     @commands.cooldown(rate=5, per=2.5, type=commands.BucketType.user)
     async def __scoutc(self, ctx, *args: str):
         """
-        Command to scout coupon
+        Blue scouting coupon scouting.
+
+        **Rates:** SR: 80%, UR: 20%
         """
         scout = Scout("coupon", 1, False, args)
         res = await scout.do_scout()
