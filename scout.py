@@ -100,7 +100,7 @@ def _parse_arguments(args: tuple) -> list:
     for arg in args:
         parsed_arg = _parse_argument(arg)
 
-        if arg != None:
+        if parsed_arg != None:
             parsed_args.append(parsed_arg)
 
     return parsed_args
