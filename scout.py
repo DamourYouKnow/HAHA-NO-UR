@@ -4,9 +4,11 @@ from posixpath import basename
 from random import randint, shuffle, uniform
 from time import clock
 from typing import Optional
+from discord import User
 
 from aiohttp import ClientConnectionError, ClientSession
 
+from mongo import DatabaseController
 from get_names import get_idol_names
 from scout_image_generator import IDOL_IMAGES_PATH, create_image, \
     download_image_from_url
@@ -176,25 +178,38 @@ class Scout:
     Provides scouting functionality for bot.
     """
 
-    def __init__(self, box: str = "honour", count: int = 1,
+    def __init__(self, user: User, box: str = "honour", count: int = 1,
                  guaranteed_sr: bool = False, args: tuple = ()):
         """
         Constructor for a Scout.
 
+        :param user: User requesting scout.
         :param box: Box to scout in (honour, regular, coupon).
         :param count: Number of cards in scout.
+        :param guaranteed_sr: Whether the scout will roll at least one SR.
         :param args: Scout command arguments
         """
+        self._user = user
         self._box = box
         self._count = count
         self._guaranteed_sr = guaranteed_sr
         self._args = _parse_arguments(args)
+        self._results = []
 
     async def do_scout(self):
+        output_path = ""
         if self._count > 1:
-            return await self._handle_multiple_scout()
+            output_path = await self._handle_multiple_scout()
         else:
-            return await self._handle_solo_scout()
+            output_path = await self._handle_solo_scout()
+
+        # Add results to database
+        db = DatabaseController()
+        if db.find_user(self._user) == None:
+            db.insert_user(self._user)
+        db.add_to_user_album(self._user, self._results)
+
+        return output_path
 
     async def _handle_multiple_scout(self) -> Optional[str]:
         """
@@ -294,6 +309,7 @@ class Scout:
                     scout, rarities.count(rarity)
                 )
 
+        self._results = results
         shuffle(results)
         return results
 
