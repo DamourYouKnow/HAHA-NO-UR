@@ -6,13 +6,13 @@ To add the bot to your server:
 https://discordapp.com/oauth2/authorize?client_id=311284054333063168&scope=bot&permissions=0
 
 # Commands
-[arg] represents optional argument  
+[args] represents optional arguments  
 
-- !scout [arg] - Solo pull  
-- !scout11 [arg] - 10+1 pull (guaranteed SR)  
-- !scoutregular/!scoutr [arg]  
-- !scoutregular10/!scoutr10 [arg]  
-- !scoutcoupon/!scoutc [arg]  
+- !scout [args] - Solo pull  
+- !scout11 [args] - 10+1 pull (guaranteed SR)  
+- !scoutregular/!scoutr [args]  
+- !scoutregular10/!scoutr10 [args]  
+- !scoutcoupon/!scoutc [args]  
 
 **Optional arguments:**  
 - Main unit name (Aqours, Muse, Saint Snow, A-RISE)  

@@ -6,7 +6,7 @@ from bot import HahaNoUR
 from scout import Scout
 
 
-class BotCommands:
+class ScoutCommands:
     """
     A class to hold all bot commands.
     """
@@ -28,28 +28,13 @@ class BotCommands:
             if delete:
                 remove(res)
 
-    @commands.command(aliases=['info', 'help'])
-    async def _info(self):
-        reply = "**2017-06-07:** New filters have been added!\n\n"
-        reply += "Instructions for how to use the bot can be found here:\n"
-        reply += "<https://github.com/DamourYouKnow/"
-        reply += "HAHA-NO-UR/blob/master/README.md>\n\n"
-        reply += "If you have any suggestions for new feautures or "
-        reply += "improvements contact D'Amour#2601 on discord or submit "
-        reply += "a request here:\n"
-        reply += "<https://github.com/DamourYouKnow/HAHA-NO-UR/issues>\n\n"
-        reply += "Feel free to add this bot to your own server or host "
-        reply += "your own version of it. If you are interested in "
-        reply += "contributing to the bot please contact me. "
-        reply += "I'm willing to teach so don't worry about not having any "
-        reply += "programming experience."
-        await self.bot.say(reply)
-
     @commands.command(pass_context=True)
     @commands.cooldown(rate=5, per=2.5, type=commands.BucketType.user)
     async def scout(self, ctx, *args: str):
         """
-        Command to do a solo scout
+        Solo honour scouting.
+
+        **Rates:** R: 80%, SR: 15%, SSR: 4%, UR: 1%
         """
         scout = Scout("honour", 1, False, args)
         res = await scout.do_scout()
@@ -59,7 +44,9 @@ class BotCommands:
     @commands.cooldown(rate=3, per=2.5, type=commands.BucketType.user)
     async def scout11(self, ctx, *args: str):
         """
-        Command do scout 11
+        10+1 honour scouting.
+
+        **Rates:** R: 80%, SR: 15%, SSR: 4%, UR: 1%
         """
         scout = Scout("honour", 11, True, args)
         res = await scout.do_scout()
@@ -67,9 +54,11 @@ class BotCommands:
 
     @commands.command(pass_context=True, aliases=['scoutregular', 'scoutr'])
     @commands.cooldown(rate=5, per=2.5, type=commands.BucketType.user)
-    async def _scoutregular(self, ctx, *args: str):
+    async def __scoutregular(self, ctx, *args: str):
         """
-        Command to scout regular
+        Solo regular scouting.
+
+        **Rates:** N: 90%, R: 5%
         """
         scout = Scout("regular", 1, False, args)
         res = await scout.do_scout()
@@ -77,9 +66,11 @@ class BotCommands:
 
     @commands.command(pass_context=True, aliases=['scoutregular10', 'scoutr10'])
     @commands.cooldown(rate=3, per=2.5, type=commands.BucketType.user)
-    async def _scoutr10(self, ctx, *args: str):
+    async def __scoutr10(self, ctx, *args: str):
         """
-        Command to scout 10
+        10 card regular scouting.
+
+        **Rates:** N: 90%, R: 5%
         """
         scout = Scout("regular", 10, False, args)
         res = await scout.do_scout()
@@ -87,9 +78,11 @@ class BotCommands:
 
     @commands.command(pass_context=True, aliases=['scoutcoupon', 'scoutc'])
     @commands.cooldown(rate=5, per=2.5, type=commands.BucketType.user)
-    async def _scoutc(self, ctx, *args: str):
+    async def __scoutc(self, ctx, *args: str):
         """
-        Command to scout coupon
+        Blue scouting coupon scouting.
+
+        **Rates:** SR: 80%, UR: 20%
         """
         scout = Scout("coupon", 1, False, args)
         res = await scout.do_scout()

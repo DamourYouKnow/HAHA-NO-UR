@@ -24,28 +24,28 @@ RATES = {
 
 IDOL_NAMES = get_idol_names()
 
-IDOL_NAMES_DICT = {
-    ("honk"): "kousaka honoka",
-    ("eri"): "ayase eli",
-    ("yohane"): "tsushima yoshiko",
-    ("hana", "pana"): "koizumi hanayo",
-    ("tomato"): "nishikino maki"
-}
-
-MAIN_UNIT_NAMES_DICT = {
-    ("muse", "µ's"): "µ's",
-    ("aqours", "aquas", "aquors"): "aqours",
-    ("a-rise", "arise"): "a-rise",
-    ("saint", "snow"): "saint snow"
-}
-
-SUB_UNIT_NAMES_DICT = {
-    ("lily", "white"): "lily white",
-    ("bibi"): "bibi",
-    ("printemps"): "printemps",
-    ("guilty", "kiss"): "guilty kiss",
-    ("azalea"): "azalea",
-    ("cyaron", "cyaron!", "crayon", "crayon!"): "cyaron!"
+ALIASES = {
+    "name": {
+        ("honk"): "kousaka honoka",
+        ("eri"): "ayase eli",
+        ("yohane"): "tsushima yoshiko",
+        ("hana", "pana"): "koizumi hanayo",
+        ("tomato"): "nishikino maki"
+    },
+    "main_unit": {
+        ("muse", "µ's"): "µ's",
+        ("aqours", "aquas", "aquors"): "aqours",
+        ("a-rise", "arise"): "a-rise",
+        ("saint", "snow"): "saint snow"
+    },
+    "sub_unit": {
+        ("lily", "white"): "lily white",
+        ("bibi"): "bibi",
+        ("printemps"): "printemps",
+        ("guilty", "kiss"): "guilty kiss",
+        ("azalea"): "azalea",
+        ("cyaron", "cyaron!", "crayon", "crayon!"): "cyaron!"
+    }
 }
 
 
@@ -87,33 +87,54 @@ def _get_adjusted_scout(scout: dict, required_count: int) -> list:
     return scout['results']
 
 
-def _parse_arguments(args: tuple) -> tuple:
+def _parse_arguments(args: tuple) -> list:
+    """
+    Parse all user arguments
+
+    :param args: Tuple of all arguments
+
+    :return: A list of tuples of (arg_type, arg_value)
+    """
+    parsed_args = []
+
+    for arg in args:
+        parsed_arg = _parse_argument(arg)
+
+        if arg != None:
+            parsed_args.append(parsed_arg)
+
+    return parsed_args
+
+
+def _parse_argument(arg: str) -> tuple:
     """
     Parse user argument
 
-    :param args: The user input to be parsed
+    :param arg: An argument
 
-    :return: A tuple of (arg_type, arg)
+    :return: A tuple of (arg_type, arg_value)
     """
-    if len(args) > 0:
-        arg = args[0].lower()
-    else:
-        arg = "none"
-
-    arg_type = None
+    arg = arg.lower()
+    arg_type = ""
     arg_value = ""
 
-    # Check for unit
-    for key in MAIN_UNIT_NAMES_DICT:
-        if arg in key:
-            arg_type = "main_unit"
-            arg_value = MAIN_UNIT_NAMES_DICT[key]
+    # Check for names
+    for full_name in IDOL_NAMES:
+        name_split = full_name.split(" ")
+
+        # Check if name is exact match
+        if arg.title() == name_split[len(name_split) - 1]:
+            arg_type = "name"
+            arg_value = full_name
             break
 
-    for key in SUB_UNIT_NAMES_DICT:
-        if arg in key:
-            arg_type = "sub_unit"
-            arg_value = SUB_UNIT_NAMES_DICT[key]
+    # Check for unit and idol names by alias
+    for alias_dict in ALIASES:
+        search_result = _resolve_alias(arg, ALIASES[alias_dict])
+        print(search_result)
+        if search_result != "":
+            arg_type = alias_dict
+            arg_value = search_result
             break
 
     # Check for years
@@ -126,24 +147,28 @@ def _parse_arguments(args: tuple) -> tuple:
         arg_type = "attribute"
         arg_value = arg.title()
 
-    # Check for names
-    for full_name in IDOL_NAMES:
-        name_split = full_name.split(" ")
+    if arg_type != "" and arg_value != "":
+        return arg_type, arg_value.replace(" ", "%20")
+    return None
 
-        # Check if name is exact match
-        if arg.title() == name_split[len(name_split) - 1]:
-            arg_type = "name"
-            arg_value = full_name
-            break
 
-        # Check if name is in dictionary
-        for key in IDOL_NAMES_DICT:
-            if arg in key:
-                arg_type = "name"
-                arg_value = IDOL_NAMES_DICT[key]
-                break
+def _resolve_alias(target: str, alias_dict: dict) -> str:
+    """
+    Resolves an alias from a given alias dicitonary.
 
-    return arg_type, arg_value.replace(" ", "%20")
+    :param target: Target string being searched for.
+    :alias_dict: Alias dicitonary being searched in.
+
+    :return: Alias result if found, otherwise returns an empty string.
+    """
+    for key in alias_dict:
+        if isinstance(key, str) and target == key:
+            return alias_dict[key]
+
+        if isinstance(key, tuple) and target in key:
+            return alias_dict[key]
+
+    return ""
 
 
 class Scout:
@@ -163,7 +188,7 @@ class Scout:
         self._box = box
         self._count = count
         self._guaranteed_sr = guaranteed_sr
-        self._arg_type, self._arg_value = _parse_arguments(args)
+        self._args = _parse_arguments(args)
 
     async def do_scout(self):
         if self._count > 1:
@@ -171,7 +196,7 @@ class Scout:
         else:
             return await self._handle_solo_scout()
 
-    async def _handle_multiple_scout(self) -> Optional[Path]:
+    async def _handle_multiple_scout(self) -> Optional[str]:
         """
         Handles a scout with multiple cards
 
@@ -248,7 +273,8 @@ class Scout:
                 rarities.append(self._roll_rarity())
 
         # Case where a normal character is selected
-        elif self._box == "regular" and self._arg_type == "name":
+        elif (self._box == "regular") \
+                and any("name" in arg for arg in self._args):
             for r in range(0, self._count):
                 rarities.append("N")
 
@@ -287,16 +313,19 @@ class Scout:
             API_URL + 'cards/?rarity=' + rarity \
             + '&ordering=random&is_promo=False&is_special=False'
 
-        if self._arg_type == "main_unit":
-            request_url += '&idol_main_unit=' + self._arg_value
-        elif self._arg_type == "sub_unit":
-            request_url += '&idol_sub_unit=' + self._arg_value
-        elif self._arg_type == "name":
-            request_url += "&name=" + self._arg_value
-        elif self._arg_type == "year":
-            request_url += "&idol_year=" + self._arg_value
-        elif self._arg_type == "attribute":
-            request_url += "&attribute=" + self._arg_value
+        for arg_tuple in self._args:
+            arg_type, arg_value = arg_tuple
+
+            if arg_type == "main_unit":
+                request_url += '&idol_main_unit=' + arg_value
+            elif arg_type == "sub_unit":
+                request_url += '&idol_sub_unit='+ arg_value
+            elif arg_type == "name":
+                request_url += "&name=" + arg_value
+            elif arg_type == "year":
+                request_url += "&idol_year=" + arg_value
+            elif arg_type == "attribute":
+                request_url += "&attribute=" + arg_value
 
         request_url += '&page_size=' + str(count)
 
