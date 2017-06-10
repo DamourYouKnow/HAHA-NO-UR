@@ -319,7 +319,7 @@ class Scout:
             if arg_type == "main_unit":
                 request_url += '&idol_main_unit=' + arg_value
             elif arg_type == "sub_unit":
-                request_url += '&idol_sub_unit='+ arg_value
+                request_url += '&idol_sub_unit=' + arg_value
             elif arg_type == "name":
                 request_url += "&name=" + arg_value
             elif arg_type == "year":
