@@ -1,6 +1,9 @@
 from re import findall
 
 from discord.embeds import Embed
+from yaml import safe_load
+
+from logger import warning
 
 
 def get_command_collections(bot) -> tuple:
@@ -64,8 +67,17 @@ def detailed_help(command_list):
     """
     res = {}
     for cmd_name, help_msg in command_list:
-        help_cmd = Embed(
-            colour=0x4286f4, title='/'.join(cmd_name), description=help_msg
-        )
+        try:
+            help_msg = safe_load(help_msg)
+            help_cmd = Embed(colour=0x4286f4, title='/'.join(cmd_name))
+            for key, val in help_msg.items():
+                help_cmd.add_field(name=key.title(), value=val, inline=False)
+        except Exception as e:
+            warning(str(e), date=True)
+            help_cmd = Embed(
+                colour=0x4286f4, title='/'.join(cmd_name), description=help_msg
+            )
+
         res[cmd_name] = help_cmd
+
     return res

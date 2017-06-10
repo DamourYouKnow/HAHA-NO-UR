@@ -32,9 +32,16 @@ class ScoutCommands:
     @commands.cooldown(rate=5, per=2.5, type=commands.BucketType.user)
     async def scout(self, ctx, *args: str):
         """
-        Solo honour scouting.
+        general: |
+            Solo honour scouting.
 
-        **Rates:** R: 80%, SR: 15%, SSR: 4%, UR: 1%
+            "**Rates:** R: 80%, SR: 15%, SSR: 4%, UR: 1%"
+        optional arguments: |
+            Main unit name (Aqours, Muse, Saint Snow, A-RISE)
+            Sub unit name (Lily White, CYaRon, ...)
+            Idol first name (Honoka, Chika, ...)
+            Attribute (smile, pure, cool)
+            Year (first, second, third)
         """
         scout = Scout("honour", 1, False, args)
         res = await scout.do_scout()
@@ -44,9 +51,16 @@ class ScoutCommands:
     @commands.cooldown(rate=3, per=2.5, type=commands.BucketType.user)
     async def scout11(self, ctx, *args: str):
         """
-        10+1 honour scouting.
+        general: |
+            10+1 honour scouting.
 
-        **Rates:** R: 80%, SR: 15%, SSR: 4%, UR: 1%
+            "**Rates:** R: 80%, SR: 15%, SSR: 4%, UR: 1%"
+        optional arguments: |
+            Main unit name (Aqours, Muse, Saint Snow, A-RISE)
+            Sub unit name (Lily White, CYaRon, ...)
+            Idol first name (Honoka, Chika, ...)
+            Attribute (smile, pure, cool)
+            Year (first, second, third)
         """
         scout = Scout("honour", 11, True, args)
         res = await scout.do_scout()
@@ -56,9 +70,12 @@ class ScoutCommands:
     @commands.cooldown(rate=5, per=2.5, type=commands.BucketType.user)
     async def __scoutregular(self, ctx, *args: str):
         """
-        Solo regular scouting.
+        general: |
+            Solo regular scouting.
 
-        **Rates:** N: 90%, R: 5%
+            "**Rates:** N: 90%, R: 5%"
+        optional arguments: |
+            Attribute (smile, pure, cool)
         """
         scout = Scout("regular", 1, False, args)
         res = await scout.do_scout()
@@ -68,9 +85,12 @@ class ScoutCommands:
     @commands.cooldown(rate=3, per=2.5, type=commands.BucketType.user)
     async def __scoutr10(self, ctx, *args: str):
         """
-        10 card regular scouting.
+        general: |
+            10 card regular scouting.
 
-        **Rates:** N: 90%, R: 5%
+            **Rates:** N: 90%, R: 5%
+        optional arguments: |
+            Attribute (smile, pure, cool)
         """
         scout = Scout("regular", 10, False, args)
         res = await scout.do_scout()
@@ -80,9 +100,16 @@ class ScoutCommands:
     @commands.cooldown(rate=5, per=2.5, type=commands.BucketType.user)
     async def __scoutc(self, ctx, *args: str):
         """
-        Blue scouting coupon scouting.
+        general: |
+            Blue scouting coupon scouting.
 
-        **Rates:** SR: 80%, UR: 20%
+            "**Rates:** SR: 80%, UR: 20%"
+        optional arguments: |
+            Main unit name (Aqours, Muse, Saint Snow, A-RISE)
+            Sub unit name (Lily White, CYaRon, ...)
+            Idol first name (Honoka, Chika, ...)
+            Attribute (smile, pure, cool)
+            Year (first, second, third)
         """
         scout = Scout("coupon", 1, False, args)
         res = await scout.do_scout()
