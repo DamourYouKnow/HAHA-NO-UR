@@ -10,7 +10,7 @@ class InfoCommands:
     @commands.command()
     async def info(self):
         # TODO D'Amour read this from file.
-        reply += "**2017-06-09:** combine arguments with spaces!\n\n"
+        reply = "**2017-06-09:** combine arguments with spaces!\n\n"
         reply += "Instructions for how to use the bot can be found here:\n"
         reply += "<https://github.com/DamourYouKnow/"
         reply += "HAHA-NO-UR/blob/master/README.md>\n\n"
