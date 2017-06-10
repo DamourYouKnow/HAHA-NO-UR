@@ -87,19 +87,34 @@ def _get_adjusted_scout(scout: dict, required_count: int) -> list:
     return scout['results']
 
 
-def _parse_arguments(args: tuple) -> tuple:
+def _parse_arguments(args: tuple) -> list:
+    """
+    Parse all user arguments
+
+    :param args: Tuple of all arguments
+
+    :return: A list of tuples of (arg_type, arg_value)
+    """
+    parsed_args = []
+
+    for arg in args:
+        parsed_arg = _parse_argument(arg)
+
+        if arg != None:
+            parsed_args.append(parsed_arg)
+
+    return parsed_args
+
+
+def _parse_argument(arg: str) -> tuple:
     """
     Parse user argument
 
-    :param args: The user input to be parsed
+    :param arg: An argument
 
-    :return: A tuple of (arg_type, arg)
+    :return: A tuple of (arg_type, arg_value)
     """
-    if len(args) > 0:
-        arg = args[0].lower()
-    else:
-        arg = "none"
-
+    arg = arg.lower()
     arg_type = ""
     arg_value = ""
 
@@ -132,17 +147,9 @@ def _parse_arguments(args: tuple) -> tuple:
         arg_type = "attribute"
         arg_value = arg.title()
 
-    # Check for names
-    for full_name in IDOL_NAMES:
-        name_split = full_name.split(" ")
-
-        # Check if name is exact match
-        if arg.title() == name_split[len(name_split) - 1]:
-            arg_type = "name"
-            arg_value = full_name
-            break
-
-    return arg_type, arg_value.replace(" ", "%20")
+    if arg_type != "" and arg_value != "":
+        return arg_type, arg_value.replace(" ", "%20")
+    return None
 
 
 def _resolve_alias(target: str, alias_dict: dict) -> str:
@@ -181,7 +188,7 @@ class Scout:
         self._box = box
         self._count = count
         self._guaranteed_sr = guaranteed_sr
-        self._arg_type, self._arg_value = _parse_arguments(args)
+        self._args = _parse_arguments(args)
 
     async def do_scout(self):
         if self._count > 1:
@@ -266,7 +273,8 @@ class Scout:
                 rarities.append(self._roll_rarity())
 
         # Case where a normal character is selected
-        elif self._box == "regular" and self._arg_type == "name":
+        elif (self._box == "regular") \
+                and any("name" in arg for arg in self._args):
             for r in range(0, self._count):
                 rarities.append("N")
 
@@ -305,16 +313,19 @@ class Scout:
             API_URL + 'cards/?rarity=' + rarity \
             + '&ordering=random&is_promo=False&is_special=False'
 
-        if self._arg_type == "main_unit":
-            request_url += '&idol_main_unit=' + self._arg_value
-        elif self._arg_type == "sub_unit":
-            request_url += '&idol_sub_unit=' + self._arg_value
-        elif self._arg_type == "name":
-            request_url += "&name=" + self._arg_value
-        elif self._arg_type == "year":
-            request_url += "&idol_year=" + self._arg_value
-        elif self._arg_type == "attribute":
-            request_url += "&attribute=" + self._arg_value
+        for arg_tuple in self._args:
+            arg_type, arg_value = arg_tuple
+
+            if arg_type == "main_unit":
+                request_url += '&idol_main_unit=' + arg_value
+            elif arg_type == "sub_unit":
+                request_url += '&idol_sub_unit='+ arg_value
+            elif arg_type == "name":
+                request_url += "&name=" + arg_value
+            elif arg_type == "year":
+                request_url += "&idol_year=" + arg_value
+            elif arg_type == "attribute":
+                request_url += "&attribute=" + arg_value
 
         request_url += '&page_size=' + str(count)
 
