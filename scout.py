@@ -4,12 +4,12 @@ from posixpath import basename
 from random import randint, shuffle, uniform
 from time import clock
 from typing import Optional
-from discord import User
 
 from aiohttp import ClientConnectionError, ClientSession
+from discord import User
 
-from mongo import DatabaseController
 from get_names import get_idol_names
+from mongo import DatabaseController
 from scout_image_generator import IDOL_IMAGES_PATH, create_image, \
     download_image_from_url
 
@@ -28,11 +28,11 @@ IDOL_NAMES = get_idol_names()
 
 ALIASES = {
     "name": {
-        ("honk"): "kousaka honoka",
-        ("eri"): "ayase eli",
-        ("yohane"): "tsushima yoshiko",
+        ("honk",): "kousaka honoka",
+        ("eri",): "ayase eli",
+        ("yohane",): "tsushima yoshiko",
         ("hana", "pana"): "koizumi hanayo",
-        ("tomato"): "nishikino maki"
+        ("tomato",): "nishikino maki"
     },
     "main_unit": {
         ("muse", "µ's"): "µ's",
@@ -42,10 +42,10 @@ ALIASES = {
     },
     "sub_unit": {
         ("lily", "white"): "lily white",
-        ("bibi"): "bibi",
-        ("printemps"): "printemps",
+        ("bibi",): "bibi",
+        ("printemps",): "printemps",
         ("guilty", "kiss"): "guilty kiss",
-        ("azalea"): "azalea",
+        ("azalea",): "azalea",
         ("cyaron", "cyaron!", "crayon", "crayon!"): "cyaron!"
     }
 }
@@ -78,7 +78,7 @@ def _get_adjusted_scout(scout: dict, required_count: int) -> list:
         current_count += 1
 
     # Traverse scout and roll for flips
-    for card_index in range(0, len(scout['results']) - 1):
+    for card_index in range(len(scout['results']) - 1):
         # for each card there is a (1 / total cards)
         # chance that we should dupe
         # the previous card
@@ -101,14 +101,13 @@ def _parse_arguments(args: tuple) -> list:
 
     for arg in args:
         parsed_arg = _parse_argument(arg)
-
-        if parsed_arg != None:
+        if parsed_arg:
             parsed_args.append(parsed_arg)
 
     return parsed_args
 
 
-def _parse_argument(arg: str) -> tuple:
+def _parse_argument(arg: str) -> Optional[tuple]:
     """
     Parse user argument
 
@@ -125,7 +124,7 @@ def _parse_argument(arg: str) -> tuple:
         name_split = full_name.split(" ")
 
         # Check if name is exact match
-        if arg.title() == name_split[len(name_split) - 1]:
+        if arg.title() == name_split[-1]:
             arg_type = "name"
             arg_value = full_name
             break
@@ -134,7 +133,7 @@ def _parse_argument(arg: str) -> tuple:
     for alias_dict in ALIASES:
         search_result = _resolve_alias(arg, ALIASES[alias_dict])
         print(search_result)
-        if search_result != "":
+        if search_result:
             arg_type = alias_dict
             arg_value = search_result
             break
@@ -149,7 +148,7 @@ def _parse_argument(arg: str) -> tuple:
         arg_type = "attribute"
         arg_value = arg.title()
 
-    if arg_type != "" and arg_value != "":
+    if arg_type and arg_value:
         return arg_type, arg_value.replace(" ", "%20")
     return None
 
@@ -164,10 +163,7 @@ def _resolve_alias(target: str, alias_dict: dict) -> str:
     :return: Alias result if found, otherwise returns an empty string.
     """
     for key in alias_dict:
-        if isinstance(key, str) and target == key:
-            return alias_dict[key]
-
-        if isinstance(key, tuple) and target in key:
+        if target in key:
             return alias_dict[key]
 
     return ""
@@ -178,7 +174,8 @@ class Scout:
     Provides scouting functionality for bot.
     """
 
-    def __init__(self, user: User, box: str = "honour", count: int = 1,
+    def __init__(self, db: DatabaseController, user: User,
+                 box: str = "honour", count: int = 1,
                  guaranteed_sr: bool = False, args: tuple = ()):
         """
         Constructor for a Scout.
@@ -195,19 +192,18 @@ class Scout:
         self._guaranteed_sr = guaranteed_sr
         self._args = _parse_arguments(args)
         self._results = []
+        self._db = db
 
     async def do_scout(self):
-        output_path = ""
         if self._count > 1:
             output_path = await self._handle_multiple_scout()
         else:
             output_path = await self._handle_solo_scout()
 
         # Add results to database
-        db = DatabaseController()
-        if db.find_user(self._user) == None:
-            db.insert_user(self._user)
-        db.add_to_user_album(self._user, self._results)
+        if not self._db.find_user(self._user):
+            self._db.insert_user(self._user)
+        self._db.add_to_user_album(self._user, self._results)
 
         return output_path
 
@@ -217,10 +213,7 @@ class Scout:
 
         :return: Path of scout image
         """
-        if self._box == "honour":
-            cards = await self._scout_cards()
-        else:
-            cards = await self._scout_cards()
+        cards = await self._scout_cards()
 
         circle_image_urls = []
 
@@ -252,7 +245,7 @@ class Scout:
         card = await self._scout_cards()
 
         # Send error message if no card was returned
-        if len(card) == 0:
+        if not card:
             return None
 
         card = card[0]
@@ -279,7 +272,7 @@ class Scout:
         rarities = []
 
         if self._guaranteed_sr:
-            for r in range(0, self._count - 1):
+            for r in range(self._count - 1):
                 rarities.append(self._roll_rarity())
 
             if rarities.count("R") + rarities.count("N") == self._count - 1:
@@ -290,11 +283,11 @@ class Scout:
         # Case where a normal character is selected
         elif (self._box == "regular") \
                 and any("name" in arg for arg in self._args):
-            for r in range(0, self._count):
+            for r in range(self._count):
                 rarities.append("N")
 
         else:
-            for r in range(0, self._count):
+            for r in range(self._count):
                 rarities.append(self._roll_rarity())
 
         results = []
@@ -329,8 +322,7 @@ class Scout:
             API_URL + 'cards/?rarity=' + rarity \
             + '&ordering=random&is_promo=False&is_special=False'
 
-        for arg_tuple in self._args:
-            arg_type, arg_value = arg_tuple
+        for arg_type, arg_value in self._args:
 
             if arg_type == "main_unit":
                 request_url += '&idol_main_unit=' + arg_value

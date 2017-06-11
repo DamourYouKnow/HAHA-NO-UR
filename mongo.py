@@ -4,6 +4,7 @@ from discord import User
 PORT = 27017
 DATABASE_NAME = "haha-no-ur"
 
+
 class DatabaseController:
     """
     Class for providing a controller that performs operations on
@@ -55,7 +56,7 @@ class DatabaseController:
         """
         return self._find_document("users", "_id", user.id)
 
-    def get_user_album(self, user: User, sort_by: str="card_id") -> dict:
+    def get_user_album(self, user: User, sort_by: str = "card_id") -> dict:
         """
         Gets the cards album of a user.
 
@@ -64,10 +65,10 @@ class DatabaseController:
 
         :return: Sorted card album dictionary.
         """
-        print("Not implemented")
+        raise NotImplementedError
 
     def add_to_user_album(self, user: User, new_cards: list,
-            idolized: bool=False):
+                          idolized: bool = False):
         """
         Adds a list of cards to a user's card album.
 
@@ -75,7 +76,7 @@ class DatabaseController:
         :param new_cards: List of dictionaries of new cards to add.
         :param idolized: Whether the new cards being added are idolized.
         """
-        print("Not implemented")
+        raise NotImplementedError
 
     def _find_document(self, collection: str, field_name: str, value) -> dict:
         return self._db[collection].find_one({field_name: value})
@@ -84,7 +85,7 @@ class DatabaseController:
         self._db[collection].insert_one(document)
 
     def _update_document(self, collection: str, document: dict):
-        print("Not implemented")
+        raise NotImplementedError
 
     def _delete_document(self, collection: str, field_name: str, value):
         self._db[collection].delete_one({field_name: value})

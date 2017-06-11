@@ -9,6 +9,7 @@ from websockets.exceptions import ConnectionClosed
 
 from helpers import detailed_help, general_help_embed, get_command_collections
 from logger import command_formatter, info, setup_logging
+from mongo import DatabaseController
 
 
 class HahaNoUR(Bot):
@@ -25,6 +26,7 @@ class HahaNoUR(Bot):
         self.logger = setup_logging(self.start_time, self.log_path)
         self.help_general = None
         self.help_detailed = {}
+        self.db = DatabaseController()
 
     async def on_ready(self):
         """

@@ -43,7 +43,7 @@ class ScoutCommands:
             Attribute (smile, pure, cool)
             Year (first, second, third)
         """
-        scout = Scout(ctx.message.author, "honour", 1, False, args)
+        scout = Scout(self.bot.db, ctx.message.author, "honour", 1, False, args)
         res = await scout.do_scout()
         await self.__handle_result(ctx, res)
 
@@ -62,7 +62,7 @@ class ScoutCommands:
             Attribute (smile, pure, cool)
             Year (first, second, third)
         """
-        scout = Scout(ctx.message.author, "honour", 11, True, args)
+        scout = Scout(self.bot.db, ctx.message.author, "honour", 11, True, args)
         res = await scout.do_scout()
         await self.__handle_result(ctx, res)
 
@@ -77,7 +77,8 @@ class ScoutCommands:
         optional arguments: |
             Attribute (smile, pure, cool)
         """
-        scout = Scout(ctx.message.author, "regular", 1, False, args)
+        scout = Scout(
+            self.bot.db, ctx.message.author, "regular", 1, False, args)
         res = await scout.do_scout()
         await self.__handle_result(ctx, res)
 
@@ -92,7 +93,8 @@ class ScoutCommands:
         optional arguments: |
             Attribute (smile, pure, cool)
         """
-        scout = Scout(ctx.message.author, "regular", 10, False, args)
+        scout = Scout(self.bot.db,
+                      ctx.message.author, "regular", 10, False, args)
         res = await scout.do_scout()
         await self.__handle_result(ctx, res)
 
@@ -111,6 +113,7 @@ class ScoutCommands:
             Attribute (smile, pure, cool)
             Year (first, second, third)
         """
-        scout = Scout(ctx.message.author, "coupon", 1, False, args)
+        scout = Scout(self.bot.db,
+                      ctx.message.author, "coupon", 1, False, args)
         res = await scout.do_scout()
         await self.__handle_result(ctx, res)
