@@ -4,6 +4,7 @@ from discord.ext import commands
 
 from bot import HahaNoUR
 from scout import Scout
+from mongo import DatabaseController
 
 
 class ScoutCommands:
@@ -19,14 +20,19 @@ class ScoutCommands:
             ctx.message.channel,
             '<@' + ctx.message.author.id + '> A transmission error occured.')
 
-    async def __handle_result(self, ctx, res, delete=True):
-        if not res:
+    async def __handle_result(self, ctx, results, image_path, delete=True):
+        if not image_path:
             await self.__send_error_msg(ctx)
         else:
             await self.bot.upload(
-                res, content='<@' + ctx.message.author.id + '>')
+                image_path, content='<@' + ctx.message.author.id + '>')
+
+            # Add to database
+            if (not self.bot.db.find_user(ctx.message.author)):
+                self.bot.db.insert_user(ctx.message.author)
+
             if delete:
-                remove(res)
+                remove(image_path)
 
     @commands.command(pass_context=True)
     @commands.cooldown(rate=5, per=2.5, type=commands.BucketType.user)
@@ -43,9 +49,9 @@ class ScoutCommands:
             Attribute (smile, pure, cool)
             Year (first, second, third)
         """
-        scout = Scout(self.bot.db, ctx.message.author, "honour", 1, False, args)
-        res = await scout.do_scout()
-        await self.__handle_result(ctx, res)
+        scout = Scout(ctx.message.author, "honour", 1, False, args)
+        await scout.do_scout()
+        await self.__handle_result(ctx, scout.results, scout.image_path)
 
     @commands.command(pass_context=True)
     @commands.cooldown(rate=3, per=2.5, type=commands.BucketType.user)
@@ -62,9 +68,9 @@ class ScoutCommands:
             Attribute (smile, pure, cool)
             Year (first, second, third)
         """
-        scout = Scout(self.bot.db, ctx.message.author, "honour", 11, True, args)
-        res = await scout.do_scout()
-        await self.__handle_result(ctx, res)
+        scout = Scout(ctx.message.author, "honour", 11, True, args)
+        await scout.do_scout()
+        await self.__handle_result(ctx, scout.results, scout.image_path)
 
     @commands.command(pass_context=True, aliases=['scoutregular', 'scoutr'])
     @commands.cooldown(rate=5, per=2.5, type=commands.BucketType.user)
@@ -77,10 +83,9 @@ class ScoutCommands:
         optional arguments: |
             Attribute (smile, pure, cool)
         """
-        scout = Scout(
-            self.bot.db, ctx.message.author, "regular", 1, False, args)
-        res = await scout.do_scout()
-        await self.__handle_result(ctx, res)
+        scout = Scout(ctx.message.author, "regular", 1, False, args)
+        await scout.do_scout()
+        await self.__handle_result(ctx, scout.result, scout.image_path)
 
     @commands.command(pass_context=True, aliases=['scoutregular10', 'scoutr10'])
     @commands.cooldown(rate=3, per=2.5, type=commands.BucketType.user)
@@ -93,10 +98,9 @@ class ScoutCommands:
         optional arguments: |
             Attribute (smile, pure, cool)
         """
-        scout = Scout(self.bot.db,
-                      ctx.message.author, "regular", 10, False, args)
-        res = await scout.do_scout()
-        await self.__handle_result(ctx, res)
+        scout = Scout(ctx.message.author, "regular", 10, False, args)
+        await scout.do_scout()
+        await self.__handle_result(ctx, scout.results, scout.image_path)
 
     @commands.command(pass_context=True, aliases=['scoutcoupon', 'scoutc'])
     @commands.cooldown(rate=5, per=2.5, type=commands.BucketType.user)
@@ -113,7 +117,6 @@ class ScoutCommands:
             Attribute (smile, pure, cool)
             Year (first, second, third)
         """
-        scout = Scout(self.bot.db,
-                      ctx.message.author, "coupon", 1, False, args)
-        res = await scout.do_scout()
-        await self.__handle_result(ctx, res)
+        scout = Scout(ctx.message.author, "coupon", 1, False, args)
+        await scout.do_scout()
+        await self.__handle_result(ctx, scout.results, scout.image_path)

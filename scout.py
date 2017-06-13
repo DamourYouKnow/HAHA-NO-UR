@@ -4,13 +4,10 @@ from posixpath import basename
 from random import randint, shuffle, uniform
 from time import clock
 from typing import Optional
-
 from aiohttp import ClientConnectionError, ClientSession
 from discord import User
-
 from get_names import get_idol_names
-from mongo import DatabaseController
-from scout_image_generator import IDOL_IMAGES_PATH, create_image, \
+from image_generator import IDOL_IMAGES_PATH, create_image, \
     download_image_from_url
 
 API_URL = 'http://schoolido.lu/api/'
@@ -49,6 +46,206 @@ ALIASES = {
         ("cyaron", "cyaron!", "crayon", "crayon!"): "cyaron!"
     }
 }
+
+
+class Scout:
+    """
+    Provides scouting functionality for bot.
+    """
+
+    def __init__(self, user: User, box: str = "honour", count: int = 1,
+                 guaranteed_sr: bool = False, args: tuple = ()):
+        """
+        Constructor for a Scout.
+
+        :param user: User requesting scout.
+        :param box: Box to scout in (honour, regular, coupon).
+        :param count: Number of cards in scout.
+        :param guaranteed_sr: Whether the scout will roll at least one SR.
+        :param args: Scout command arguments
+        """
+        self.results = []
+        self.image_path = None
+
+        self._user = user
+        self._box = box
+        self._count = count
+        self._guaranteed_sr = guaranteed_sr
+        self._args = _parse_arguments(args)
+
+    async def do_scout(self):
+        if self._count > 1:
+            await self._handle_multiple_scout()
+        else:
+            await self._handle_solo_scout()
+
+    async def _handle_multiple_scout(self) -> Optional[str]:
+        """
+        Handles a scout with multiple cards
+
+        :return: Path of scout image
+        """
+        cards = await self._scout_cards()
+
+        circle_image_urls = []
+
+        for card in cards:
+            if card["round_card_image"] is None:
+                circle_image_urls.append(
+                    "http:" + card["round_card_idolized_image"]
+                )
+            else:
+                circle_image_urls.append("http:" + card["round_card_image"])
+
+        if len(circle_image_urls) != self._count:
+            return
+
+        self.image_path = await create_image(
+            circle_image_urls,
+            2,
+            str(clock()) + str(randint(0, 100)) + ".png"
+        )
+
+    async def _handle_solo_scout(self) -> Optional[Path]:
+        """
+        Handles a solo scout
+
+        :return: Path of scout image
+        """
+        card = await self._scout_cards()
+
+        # Send error message if no card was returned
+        if not card:
+            return None
+
+        card = card[0]
+
+        if card["card_image"] is None:
+            url = "http:" + card["card_idolized_image"]
+        else:
+            url = "http:" + card["card_image"]
+
+        self.image_path = IDOL_IMAGES_PATH.joinpath(
+            basename(urllib.parse.urlsplit(url).path))
+
+        session = ClientSession()
+        await download_image_from_url(url, self.image_path, session)
+        session.close()
+
+    async def _scout_cards(self) -> list:
+        """
+        Scouts a specified number of cards
+
+        :return: cards scouted
+        """
+        rarities = []
+
+        if self._guaranteed_sr:
+            for r in range(self._count - 1):
+                rarities.append(self._roll_rarity())
+
+            if rarities.count("R") + rarities.count("N") == self._count - 1:
+                rarities.append(self._roll_rarity(True))
+            else:
+                rarities.append(self._roll_rarity())
+
+        # Case where a normal character is selected
+        elif (self._box == "regular") \
+                and any("name" in arg for arg in self._args):
+            for r in range(self._count):
+                rarities.append("N")
+
+        else:
+            for r in range(self._count):
+                rarities.append(self._roll_rarity())
+
+        results = []
+
+        for rarity in RATES[self._box].keys():
+            if rarities.count(rarity) > 0:
+                scout = await self._scout_request(
+                    rarities.count(rarity), rarity
+                )
+
+                results += _get_adjusted_scout(
+                    scout, rarities.count(rarity)
+                )
+
+        self.results = results
+        shuffle(results)
+        return results
+
+    async def _scout_request(self, count: int, rarity: str) -> dict:
+        """
+        Scouts a specified number of cards of a given rarity
+
+        :param rarity: Rarity of all cards in scout
+
+        :return: Cards scouted
+        """
+        if count == 0:
+            return {}
+
+        # Build request url
+        request_url = \
+            API_URL + 'cards/?rarity=' + rarity \
+            + '&ordering=random&is_promo=False&is_special=False'
+
+        for arg_type, arg_value in self._args:
+
+            if arg_type == "main_unit":
+                request_url += '&idol_main_unit=' + arg_value
+            elif arg_type == "sub_unit":
+                request_url += '&idol_sub_unit=' + arg_value
+            elif arg_type == "name":
+                request_url += "&name=" + arg_value
+            elif arg_type == "year":
+                request_url += "&idol_year=" + arg_value
+            elif arg_type == "attribute":
+                request_url += "&attribute=" + arg_value
+
+        request_url += '&page_size=' + str(count)
+
+        # Get and return response
+        async with ClientSession() as session:
+            async with session.get(request_url) as response:
+                if response.status != 200:
+                    raise ClientConnectionError
+                response_json = await response.json()
+                return response_json
+
+    def _roll_rarity(self, guaranteed_sr: bool = False) -> str:
+        """
+        Generates a random rarity based on the defined scouting rates
+
+        :param guaranteed_sr: Whether roll should be an SR
+
+        :return: rarity represented as a string ('UR', 'SSR', 'SR', 'R')
+        """
+        roll = uniform(0, 1)
+
+        required_roll = RATES[self._box]['UR']
+        if roll < required_roll:
+            return 'UR'
+
+        required_roll = RATES[self._box]['SSR'] + RATES[self._box]['UR']
+        if roll < required_roll:
+            return 'SSR'
+
+        required_roll = RATES[self._box]['SR'] + RATES[self._box]['SSR']
+        required_roll += RATES[self._box]['UR']
+        if roll < required_roll:
+            return 'SR'
+
+        required_roll = RATES[self._box]['R'] + RATES[self._box]['SR']
+        required_roll += RATES[self._box]['SSR'] + RATES[self._box]['UR']
+        if roll < required_roll:
+            if guaranteed_sr:
+                return 'SR'
+            else:
+                return 'R'
+        else:
+            return 'N'
 
 
 def _get_adjusted_scout(scout: dict, required_count: int) -> list:
@@ -167,213 +364,3 @@ def _resolve_alias(target: str, alias_dict: dict) -> str:
             return alias_dict[key]
 
     return ""
-
-
-class Scout:
-    """
-    Provides scouting functionality for bot.
-    """
-
-    def __init__(self, db: DatabaseController, user: User,
-                 box: str = "honour", count: int = 1,
-                 guaranteed_sr: bool = False, args: tuple = ()):
-        """
-        Constructor for a Scout.
-
-        :param user: User requesting scout.
-        :param box: Box to scout in (honour, regular, coupon).
-        :param count: Number of cards in scout.
-        :param guaranteed_sr: Whether the scout will roll at least one SR.
-        :param args: Scout command arguments
-        """
-        self._user = user
-        self._box = box
-        self._count = count
-        self._guaranteed_sr = guaranteed_sr
-        self._args = _parse_arguments(args)
-        self._results = []
-        self._db = db
-
-    async def do_scout(self):
-        if self._count > 1:
-            output_path = await self._handle_multiple_scout()
-        else:
-            output_path = await self._handle_solo_scout()
-
-        # Add results to database
-        if not self._db.find_user(self._user):
-            self._db.insert_user(self._user)
-        self._db.add_to_user_album(self._user, self._results)
-
-        return output_path
-
-    async def _handle_multiple_scout(self) -> Optional[str]:
-        """
-        Handles a scout with multiple cards
-
-        :return: Path of scout image
-        """
-        cards = await self._scout_cards()
-
-        circle_image_urls = []
-
-        for card in cards:
-            if card["round_card_image"] is None:
-                circle_image_urls.append(
-                    "http:" + card["round_card_idolized_image"]
-                )
-            else:
-                circle_image_urls.append("http:" + card["round_card_image"])
-
-        if len(circle_image_urls) != self._count:
-            return
-
-        image_path = await create_image(
-            circle_image_urls,
-            2,
-            str(clock()) + str(randint(0, 100)) + ".png"
-        )
-
-        return image_path
-
-    async def _handle_solo_scout(self) -> Optional[Path]:
-        """
-        Handles a solo scout
-
-        :return: Path of scout image
-        """
-        card = await self._scout_cards()
-
-        # Send error message if no card was returned
-        if not card:
-            return None
-
-        card = card[0]
-
-        if card["card_image"] is None:
-            url = "http:" + card["card_idolized_image"]
-        else:
-            url = "http:" + card["card_image"]
-
-        image_path = IDOL_IMAGES_PATH.joinpath(
-            basename(urllib.parse.urlsplit(url).path))
-        session = ClientSession()
-        await download_image_from_url(url, image_path, session)
-        session.close()
-
-        return image_path
-
-    async def _scout_cards(self) -> list:
-        """
-        Scouts a specified number of cards
-
-        :return: cards scouted
-        """
-        rarities = []
-
-        if self._guaranteed_sr:
-            for r in range(self._count - 1):
-                rarities.append(self._roll_rarity())
-
-            if rarities.count("R") + rarities.count("N") == self._count - 1:
-                rarities.append(self._roll_rarity(True))
-            else:
-                rarities.append(self._roll_rarity())
-
-        # Case where a normal character is selected
-        elif (self._box == "regular") \
-                and any("name" in arg for arg in self._args):
-            for r in range(self._count):
-                rarities.append("N")
-
-        else:
-            for r in range(self._count):
-                rarities.append(self._roll_rarity())
-
-        results = []
-
-        for rarity in RATES[self._box].keys():
-            if rarities.count(rarity) > 0:
-                scout = await self._scout_request(
-                    rarities.count(rarity), rarity
-                )
-
-                results += _get_adjusted_scout(
-                    scout, rarities.count(rarity)
-                )
-
-        self._results = results
-        shuffle(results)
-        return results
-
-    async def _scout_request(self, count: int, rarity: str) -> dict:
-        """
-        Scouts a specified number of cards of a given rarity
-
-        :param rarity: Rarity of all cards in scout
-
-        :return: Cards scouted
-        """
-        if count == 0:
-            return {}
-
-        # Build request url
-        request_url = \
-            API_URL + 'cards/?rarity=' + rarity \
-            + '&ordering=random&is_promo=False&is_special=False'
-
-        for arg_type, arg_value in self._args:
-
-            if arg_type == "main_unit":
-                request_url += '&idol_main_unit=' + arg_value
-            elif arg_type == "sub_unit":
-                request_url += '&idol_sub_unit=' + arg_value
-            elif arg_type == "name":
-                request_url += "&name=" + arg_value
-            elif arg_type == "year":
-                request_url += "&idol_year=" + arg_value
-            elif arg_type == "attribute":
-                request_url += "&attribute=" + arg_value
-
-        request_url += '&page_size=' + str(count)
-
-        # Get and return response
-        async with ClientSession() as session:
-            async with session.get(request_url) as response:
-                if response.status != 200:
-                    raise ClientConnectionError
-                response_json = await response.json()
-                return response_json
-
-    def _roll_rarity(self, guaranteed_sr: bool = False) -> str:
-        """
-        Generates a random rarity based on the defined scouting rates
-
-        :param guaranteed_sr: Whether roll should be an SR
-
-        :return: rarity represented as a string ('UR', 'SSR', 'SR', 'R')
-        """
-        roll = uniform(0, 1)
-
-        required_roll = RATES[self._box]['UR']
-        if roll < required_roll:
-            return 'UR'
-
-        required_roll = RATES[self._box]['SSR'] + RATES[self._box]['UR']
-        if roll < required_roll:
-            return 'SSR'
-
-        required_roll = RATES[self._box]['SR'] + RATES[self._box]['SSR']
-        required_roll += RATES[self._box]['UR']
-        if roll < required_roll:
-            return 'SR'
-
-        required_roll = RATES[self._box]['R'] + RATES[self._box]['SR']
-        required_roll += RATES[self._box]['SSR'] + RATES[self._box]['UR']
-        if roll < required_roll:
-            if guaranteed_sr:
-                return 'SR'
-            else:
-                return 'R'
-        else:
-            return 'N'
