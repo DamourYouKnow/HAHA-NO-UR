@@ -30,6 +30,7 @@ class ScoutCommands:
             # Add to database
             if (not self.bot.db.find_user(ctx.message.author)):
                 self.bot.db.insert_user(ctx.message.author)
+            self.bot.db.add_to_user_album(ctx.message.author, results)
 
             if delete:
                 remove(image_path)

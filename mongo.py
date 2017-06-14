@@ -33,10 +33,10 @@ class DatabaseController:
         """
         user_dict = {
             "_id": user.id,
-            "album": {}
+            "album": []
         }
 
-        self._insert_document("users", user_dict)
+        self._db["users"].insert_one(user_dict)
 
     def delete_user(self, user: User):
         """
@@ -44,7 +44,7 @@ class DatabaseController:
 
         :param user: User object of the user to delete.
         """
-        self._delete_document("users", "_id", user.id)
+        self._db["users"].delete_one({"_id": user.id})
 
     def find_user(self, user: User) -> dict:
         """
@@ -54,7 +54,7 @@ class DatabaseController:
 
         :return: Dictionary of found user.
         """
-        return self._find_document("users", "_id", user.id)
+        return self._db["users"].find_one({"_id": user.id})
 
     def get_user_album(self, user: User, sort_by: str = "card_id") -> dict:
         """
@@ -76,16 +76,40 @@ class DatabaseController:
         :param new_cards: List of dictionaries of new cards to add.
         :param idolized: Whether the new cards being added are idolized.
         """
-        raise NotImplementedError
+        for card in new_cards:
+            # User does not have this card, push to album
 
-    def _find_document(self, collection: str, field_name: str, value) -> dict:
-        return self._db[collection].find_one({field_name: value})
+            if not self._user_has_card(user, card["id"]):
+                card["unidolized_count"] = 0
+                card["idolized_count"] = 0
 
-    def _insert_document(self, collection: str, document: dict):
-        self._db[collection].insert_one(document)
+                sort = {"id": 1}
+                insert_card = {"$each": [card], "$sort": sort}
 
-    def _update_document(self, collection: str, document: dict):
-        raise NotImplementedError
+                self._db["users"].update_one(
+                    {"_id": user.id},
+                    {"$push": {"album": insert_card}}
+                )
 
-    def _delete_document(self, collection: str, field_name: str, value):
-        self._db[collection].delete_one({field_name: value})
+            # User has this card, increment count
+            else:
+                if idolized:
+                    self._db["users"].update(
+                        {"_id": user.id, "album.id": card["id"]},
+                        {"$inc": {"album.$.idolized_count": 1}}
+                    )
+                else:
+                    self._db["users"].update(
+                        {"_id": user.id, "album.id": card["id"]},
+                        {"$inc": {"album.$.unidolized_count": 1}}
+                    )
+
+    def _user_has_card(self, user: User, card_id: int) -> bool:
+        search_filter = {"$elemMatch": {"id": card_id}}
+
+        search = self._db["users"].find_one(
+            {"_id": user.id},
+            {"album": search_filter}
+        )
+
+        return len(search.keys()) > 1
