@@ -1,5 +1,6 @@
 import pymongo
 from discord import User
+import time
 
 PORT = 27017
 DATABASE_NAME = "haha-no-ur"
@@ -56,16 +57,29 @@ class DatabaseController:
         """
         return self._db["users"].find_one({"_id": user.id})
 
-    def get_user_album(self, user: User, sort_by: str = "card_id") -> dict:
+    def get_user_album(self, user: User, page: int=0, page_size: int=1000,
+            sort_by: str="card_id") -> dict:
         """
         Gets the cards album of a user.
 
         :param user: User object of the user to query the album from.
+        :param page: Only return results on selected page.
+        :param page_size: How many cards are on a page.
         :param sort_by: How the album will be sorted (defaults to card_id).
 
-        :return: Sorted card album dictionary.
+        :return: Card album dictionary.
         """
-        raise NotImplementedError
+        # Query cards in user's album.
+        cards = self.find_user(user)["album"]
+
+        # Sort list
+        # TODO
+
+        # Splice list and return.
+        start = page * page_size
+        end = (page * page_size) + page_size
+        cards = cards[start:end]
+        return cards
 
     def add_to_user_album(self, user: User, new_cards: list,
                           idolized: bool = False):
@@ -78,7 +92,6 @@ class DatabaseController:
         """
         for card in new_cards:
             # User does not have this card, push to album
-
             if not self._user_has_card(user, card["id"]):
                 card["unidolized_count"] = 0
                 card["idolized_count"] = 0
