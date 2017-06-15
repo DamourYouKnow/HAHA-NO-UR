@@ -57,7 +57,7 @@ class DatabaseController:
         """
         return self._db["users"].find_one({"_id": user.id})
 
-    def get_user_album(self, user: User, page: int=0, page_size: int=1000,
+    def get_user_album(self, user: User, page: int=0, page_size: int=32,
             sort_by: str="card_id") -> dict:
         """
         Gets the cards album of a user.

@@ -79,6 +79,8 @@ class Scout:
         else:
             await self._handle_solo_scout()
 
+        _shrink_results(self.results)
+
     async def _handle_multiple_scout(self) -> Optional[str]:
         """
         Handles a scout with multiple cards
@@ -98,7 +100,8 @@ class Scout:
                 circle_image_urls.append("http:" + card["round_card_image"])
 
         if len(circle_image_urls) != self._count:
-            return
+            self.results = None
+            return None
 
         self.image_path = await create_image(
             circle_image_urls,
@@ -116,6 +119,7 @@ class Scout:
 
         # Send error message if no card was returned
         if not card:
+            self.results = None
             return None
 
         card = card[0]
@@ -284,6 +288,73 @@ def _get_adjusted_scout(scout: dict, required_count: int) -> list:
             scout['results'][card_index] = scout['results'][card_index + 1]
 
     return scout['results']
+
+
+def _shrink_results(results: dict):
+    """
+    Removed uneeded information from scout results.
+
+    :param results: Scout results being shrunk.
+    """
+    if not results:
+        return
+
+    delete_fields = [
+        "game_id",
+        "idol",
+        "japanese_collection",
+        "translated_collection",
+        "japanese_attribute",
+        "is_promo",
+        "promo_item",
+        "promo_link",
+        "japan_only",
+        "event",
+        "other_event",
+        "is_special",
+        "hp",
+        "minimum_statistics_smile",
+        "minimum_statistics_pure",
+        "minimum_statistics_cool",
+        "non_idolized_maximum_statistics_smile",
+        "non_idolized_maximum_statistics_pure",
+        "non_idolized_maximum_statistics_cool",
+        "idolized_maximum_statistics_smile",
+        "idolized_maximum_statistics_pure",
+        "idolized_maximum_statistics_cool",
+        "skill",
+        "japanese_skill",
+        "skill_details",
+        "japanese_skill_details",
+        "center_skill",
+        "center_skill_details",
+        "japanese_center_skill",
+        "japanese_center_skill_details",
+        "english_card_image",
+        "english_card_idolized_image",
+        "english_round_card_image",
+        "english_round_card_idolized_image",
+        "video_story",
+        "japanese_video_story",
+        "website_url",
+        "non_idolized_max_level",
+        "idolized_max_level",
+        "clean_ur_idolized",
+        "skill_up_cards",
+        "ur_pair",
+        "total_owners",
+        "total_wishlist",
+        "ranking_attribute",
+        "ranking_rarity",
+        "ranking_special"
+    ]
+
+    for result in results:
+        # Copy name
+        result["name"] = result["idol"]["name"]
+
+        for field in delete_fields:
+            result.pop(field, None)
 
 
 def _parse_arguments(args: tuple) -> list:
