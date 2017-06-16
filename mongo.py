@@ -57,28 +57,16 @@ class DatabaseController:
         """
         return self._db["users"].find_one({"_id": user.id})
 
-    def get_user_album(self, user: User, page: int=0, page_size: int=32,
-            sort_by: str="card_id") -> dict:
+    def get_user_album(self, user: User) -> list:
         """
         Gets the cards album of a user.
 
         :param user: User object of the user to query the album from.
-        :param page: Only return results on selected page.
-        :param page_size: How many cards are on a page.
-        :param sort_by: How the album will be sorted (defaults to card_id).
 
-        :return: Card album dictionary.
+        :return: Card album list.
         """
         # Query cards in user's album.
         cards = self.find_user(user)["album"]
-
-        # Sort list
-        # TODO
-
-        # Splice list and return.
-        start = page * page_size
-        end = (page * page_size) + page_size
-        cards = cards[start:end]
         return cards
 
     def add_to_user_album(self, user: User, new_cards: list,

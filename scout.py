@@ -9,6 +9,7 @@ from discord import User
 from get_names import get_idol_names
 from image_generator import IDOL_IMAGES_PATH, create_image, \
     download_image_from_url
+from aliases import ALIASES
 
 API_URL = 'http://schoolido.lu/api/'
 
@@ -22,30 +23,6 @@ RATES = {
 }
 
 IDOL_NAMES = get_idol_names()
-
-ALIASES = {
-    "name": {
-        ("honk",): "kousaka honoka",
-        ("eri",): "ayase eli",
-        ("yohane",): "tsushima yoshiko",
-        ("hana", "pana"): "koizumi hanayo",
-        ("tomato",): "nishikino maki"
-    },
-    "main_unit": {
-        ("muse", "µ's"): "µ's",
-        ("aqours", "aquas", "aquors"): "aqours",
-        ("a-rise", "arise"): "a-rise",
-        ("saint", "snow"): "saint snow"
-    },
-    "sub_unit": {
-        ("lily", "white"): "lily white",
-        ("bibi",): "bibi",
-        ("printemps",): "printemps",
-        ("guilty", "kiss"): "guilty kiss",
-        ("azalea",): "azalea",
-        ("cyaron", "cyaron!", "crayon", "crayon!"): "cyaron!"
-    }
-}
 
 
 class Scout:
@@ -339,6 +316,7 @@ def _shrink_results(results: dict):
         "website_url",
         "non_idolized_max_level",
         "idolized_max_level",
+        "clean_ur",
         "clean_ur_idolized",
         "skill_up_cards",
         "ur_pair",
