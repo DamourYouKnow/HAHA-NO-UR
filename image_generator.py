@@ -20,6 +20,9 @@ async def create_image(
     :param output_filename: name of output image file
     :return: path pointing to created image
     """
+    if num_rows > len(idol_circle_urls):
+        num_rows = len(idol_circle_urls)
+
     image_filepaths = []  # list of image filepaths
     # Save images that do not exists
     session = ClientSession()

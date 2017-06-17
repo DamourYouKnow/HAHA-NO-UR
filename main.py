@@ -2,7 +2,7 @@ from json import load
 from pathlib import Path
 
 from bot import HahaNoUR
-from commands import InfoCommands, ScoutCommands
+from commands import InfoCommands, ScoutCommands, AlbumCommands
 
 
 def main():
@@ -11,7 +11,7 @@ def main():
         f.close()
     bot = HahaNoUR(config['default_prefix'])
     bot.remove_command('help')
-    cogs = [ScoutCommands(bot), InfoCommands(bot)]
+    cogs = [ScoutCommands(bot), AlbumCommands(bot), InfoCommands(bot)]
     for cog in cogs:
         bot.add_cog(cog)
     bot.run(config['token'])
