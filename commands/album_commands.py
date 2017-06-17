@@ -52,9 +52,6 @@ class AlbumCommands:
         user = ctx.message.author
         album = self.bot.db.get_user_album(user)
         _parse_arguments(args, user)
-        print(_last_user_args[user.id]["filter_type"])
-        print(_last_user_args[user.id]["filter_value"])
-        print(_last_user_args[user.id]["sort"])
         album = _apply_filter(album, user)
         album = _apply_sort(album, user)
         album_size = len(album)
