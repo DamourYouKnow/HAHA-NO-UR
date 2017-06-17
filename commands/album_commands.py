@@ -8,10 +8,12 @@ from get_names import get_idol_names
 from argument_parser import parse_arguments
 from image_generator import create_image
 from discord import User
+from operator import itemgetter
 
 PAGE_SIZE = 12
+ROWS = 2
 IDOL_NAMES = get_idol_names()
-SORTS = ["id", "name", "attribute", "rarity"]
+SORTS = ["id", "name", "attribute", "rarity", "year", "date", "unit", "subunit"]
 RARITIES = ["UR", "SSR", "SR", "R", "N"]
 ATRIBUTES = ["Smile", "Pure", "Cool"]
 
@@ -48,9 +50,26 @@ class AlbumCommands:
             if delete:
                 remove(image_path)
 
-    @commands.command(pass_context=True)
+    @commands.command(pass_context=True, aliases=['album', 'a'])
     @commands.cooldown(rate=3, per=2.5, type=commands.BucketType.user)
-    async def album(self, ctx, *args: str):
+    async def __album(self, ctx, *args: str):
+        """
+        general: |
+            View your album.
+
+            Your selected filters and sort will be remembered.
+            To clear filters, provide the argument <all>
+
+        optional arguments: |
+            Page (1, 2, 3, ...)
+            Sort (id, rarity, attribute, year, unit, subunit, date)
+            Main unit name (Aqours, Muse, Saint Snow, A-RISE)
+            Sub unit name (Lily White, CYaRon, ...)
+            Idol first name (Honoka, Chika, ...)
+            Attribute (smile, pure, cool)
+            Year (first, second, third)
+            Rarity (UR, SSR, SR, R, N)
+        """
         user = ctx.message.author
         album = self.bot.db.get_user_album(user)
         _parse_album_arguments(args, user)
@@ -69,7 +88,7 @@ class AlbumCommands:
         # TODO change this to call newer version of function that makes labels.
         if len(urls) > 0:
             image_path = await create_image(
-                    urls, 2, str(clock()) + str(randint(0, 100)) + ".png")
+                    urls, ROWS, str(clock()) + str(randint(0, 100)) + ".png")
         else:
             image_path = None
 
@@ -87,15 +106,17 @@ def _apply_filter(album: list, user: User):
     """
     filters = _last_user_args[user.id]["filters"]
 
-    for filt in filters:
-        filter_type = filt[0]
-        filter_values = filt[1]
+    for filter_type in filters:
+        filter_values = filters[filter_type]
+
+        if len(filter_values) == 0:
+            continue
 
         # Looping backwards since we are removing elements
         for i in range(len(album) - 1, -1, -1):
-            for filter_value in filter_values:
-                if album[i][filter_type] != filter_value:
-                    album.pop(i)
+            # Generic case
+            if album[i][filter_type] not in filter_values:
+                album.pop(i)
 
     return album
 
@@ -110,13 +131,20 @@ def _apply_sort(album: list, user: User) -> list:
     :return: Sorted album.
     """
     sort = _last_user_args[user.id]["sort"]
+    order = _last_user_args[user.id]["order"]
 
-    if sort == "rarity":
-        album.sort(key=lambda x: RARITIES.index(x["rarity"]))
-    elif sort == "attribute":
-        album.sort(key=lambda x: ATRIBUTES.index(x["attribute"]))
-    elif sort == "name":
-        album.sort(key=lambda x: k["name"])
+    if sort == None:
+        return album
+    if sort == "date":
+        sort = "release_date"
+    if sort == "unit":
+        sort = "main_unit"
+    if sort == "subunit":
+        sort == "sub_unit"
+
+    sort_descending = sort in ["rarity", "attribute", "release_date"]
+
+    album = sorted(album, key=itemgetter(sort, "id"), reverse=sort_descending)
 
     return album
 
@@ -156,14 +184,27 @@ def _parse_album_arguments(args: tuple, user: User):
     if not user.id in _last_user_args:
         _last_user_args[user.id] = {
             "page": 0,
-            "filters": [], # Filter "all" if []
-            "sort": None # Sort by ID if None
+            "filters": {
+                "name": [],
+                "main_unit": [],
+                "sub_unit": [],
+                "year": [],
+                "attribute": [],
+                "rarity": []
+            },
+            "sort": None,
+            "order": None # Sort by ID if None
         }
 
     # Get values of user's last album preview.
     page = _last_user_args[user.id]["page"]
     filters = _last_user_args[user.id]["filters"]
     sort = _last_user_args[user.id]["sort"]
+    order = _last_user_args[user.id]["order"]
+
+    new_filters = parse_arguments(args, True)
+    if _has_filter(new_filters):
+        filters = new_filters
 
     # Parse other arguments
     for arg in args:
@@ -171,15 +212,44 @@ def _parse_album_arguments(args: tuple, user: User):
 
         # Reset filter if "all" is given
         if arg == "all":
-            filters = []
+            filters = {
+                "name": [],
+                "main_unit": [],
+                "sub_unit": [],
+                "year": [],
+                "attribute": [],
+                "rarity": []
+            }
 
         # Parse sort
         if arg in SORTS:
-            _last_user_args[user.id]["sort"] = arg
+            sort = arg
+            page = 0
+
+        # Parse sort order
+        if arg in ["+", "-"]:
+            order = arg
+
+        # Parse if page number
+        if _is_number(arg):
+            page = int(arg)
 
         _last_user_args[user.id]["page"] = page
         _last_user_args[user.id]["filters"] = filters
         _last_user_args[user.id]["sort"] = sort
+
+def _has_filter(filters: dict) -> bool:
+    """
+    Checks if a filter dictionary has any active filters.
+
+    :param filters: Target filter dictionary.
+
+    :return: True if target has filters, otherwise False.
+    """
+    for key in filters:
+        if len(filters[key]) > 0:
+            return True
+    return False
 
 
 def _is_number(string: str) -> bool:

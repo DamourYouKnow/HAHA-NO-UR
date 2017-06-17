@@ -167,8 +167,6 @@ class Scout:
         if count == 0:
             return {}
 
-        print(self._args)
-
         # Build request url
         request_url = \
             API_URL + 'cards/?rarity=' + rarity \
@@ -182,19 +180,19 @@ class Scout:
             values_str = ",".join(arg_values)
             values_str = values_str.replace(" ", "%20")
 
-            if arg_type == "main_units":
+            if arg_type == "main_unit":
+                values_str = values_str.replace("Muse", "µ's")
                 request_url += '&idol_main_unit=' + values_str
-            elif arg_type == "sub_units":
+            elif arg_type == "sub_unit":
                 request_url += '&idol_sub_unit=' + values_str
-            elif arg_type == "names":
+            elif arg_type == "name":
                 request_url += "&name=" + values_str
-            elif arg_type == "years":
+            elif arg_type == "year":
                 request_url += "&idol_year=" + values_str
-            elif arg_type == "attributes":
+            elif arg_type == "attribute":
                 request_url += "&attribute=" + values_str
 
         request_url += '&page_size=' + str(count)
-        print(request_url)
 
         # Get and return response
         async with ClientSession() as session:
@@ -294,6 +292,10 @@ def _shrink_results(results: list):
 
     keep_fields = {
         "id",
+        "name",
+        "year",
+        "main_unit",
+        "sub_unit",
         "rarity",
         "attribute",
         "release_date",

@@ -66,7 +66,11 @@ class DatabaseController:
         :return: Card album list.
         """
         # Query cards in user's album.
-        cards = self.find_user(user)["album"]
+        user_doc = self.find_user(user)
+        if user_doc == None:
+            return []
+
+        cards = user_doc["album"]
         return cards
 
     def add_to_user_album(self, user: User, new_cards: list,

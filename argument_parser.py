@@ -3,26 +3,26 @@ from get_names import get_idol_names
 IDOL_NAMES = get_idol_names()
 
 ALIASES = {
-    "names": {
-        ("honk",): "kousaka honoka",
-        ("eri",): "ayase eli",
-        ("yohane",): "tsushima yoshiko",
-        ("hana", "pana"): "koizumi hanayo",
-        ("tomato",): "nishikino maki"
+    "name": {
+        ("honk",): "Kousaka Honoka",
+        ("eri",): "Ayase Eli",
+        ("yohane",): "Tsushima Yoshiko",
+        ("hana", "pana"): "Koizumi Hanayo",
+        ("tomato",): "Nishikino Maki"
     },
-    "main_units": {
-        ("muse", "µ's"): "µ's",
-        ("aqours", "aquas", "aquors"): "aqours",
-        ("a-rise", "arise"): "a-rise",
-        ("saint", "snow"): "saint snow"
+    "main_unit": {
+        ("muse", "μ's", "µ's"): "μ's",
+        ("aqours", "aquas", "aquors"): "Aqours",
+        ("a-rise", "arise"): "A-RISE",
+        ("saint", "snow"): "Saint Snow"
     },
-    "sub_units": {
-        ("lily", "white"): "lily white",
-        ("bibi",): "bibi",
-        ("printemps",): "printemps",
-        ("guilty", "kiss"): "guilty kiss",
-        ("azalea",): "azalea",
-        ("cyaron", "cyaron!", "crayon", "crayon!"): "cyaron!"
+    "sub_unit": {
+        ("lily", "white"): "Lily White",
+        ("bibi",): "Bibi",
+        ("printemps",): "Printemps",
+        ("guilty", "kiss"): "Guilty Kiss",
+        ("azalea",): "Azalea",
+        ("cyaron", "cyaron!", "crayon", "crayon!"): "CYaRon!"
     }
 }
 
@@ -37,12 +37,12 @@ def parse_arguments(args: tuple, allow_unsupported_lists: bool=False) -> dict:
     :return: A list of tuples of (arg_type, arg_value)
     """
     parsed_args = {
-        "names": [],
-        "main_units": [],
-        "sub_units": [],
-        "years": [],
-        "attributes": [],
-        "rarities": [],
+        "name": [],
+        "main_unit": [],
+        "sub_unit": [],
+        "year": [],
+        "attribute": [],
+        "rarity": []
     }
 
     for arg in args:
@@ -56,12 +56,12 @@ def parse_arguments(args: tuple, allow_unsupported_lists: bool=False) -> dict:
 
     # Remove mutiple values from fields not supported
     if not allow_unsupported_lists:
-        if len(parsed_args["sub_units"]) > 1:
-            parsed_args["sub_units"] = [parsed_args["sub_units"][0]]
-        if len(parsed_args["attributes"]) > 1:
-            parsed_args["attributes"] = [parsed_args["attributes"][0]]
-        if len(parsed_args["years"]) > 1:
-            parsed_args["years"] = [parsed_args["years"][0]]
+        if len(parsed_args["sub_unit"]) > 1:
+            parsed_args["sub_unit"] = [parsed_args["sub_unit"][0]]
+        if len(parsed_args["attribute"]) > 1:
+            parsed_args["attribute"] = [parsed_args["attribute"][0]]
+        if len(parsed_args["year"]) > 1:
+            parsed_args["year"] = [parsed_args["year"][0]]
 
     return parsed_args
 
@@ -82,7 +82,7 @@ def _parse_argument(arg: str) -> tuple:
 
         # Check if name is exact match
         if arg.title() == name_split[-1]:
-            return ("names", full_name)
+            return ("name", full_name)
 
     # Check for unit and idol names by alias
     for alias_dict in ALIASES:
@@ -92,11 +92,15 @@ def _parse_argument(arg: str) -> tuple:
 
     # Check for years
     if arg in ["first", "second", "third"]:
-        return ("years", arg)
+        return ("year", arg.title())
 
     # Check for attribute
     if arg in ["cool", "smile", "pure"]:
-        return ("attributes", arg.title())
+        return ("attribute", arg.title())
+
+    # Check for rarity
+    if arg.upper() in ["N", "R", "SR", "SSR", "UR"]:
+        return ("rarity", arg.upper())
 
     return (None, None)
 
