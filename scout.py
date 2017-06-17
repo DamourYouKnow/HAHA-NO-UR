@@ -7,9 +7,9 @@ from typing import Optional
 from aiohttp import ClientConnectionError, ClientSession
 from discord import User
 from get_names import get_idol_names
+from argument_parser import parse_arguments
 from image_generator import IDOL_IMAGES_PATH, create_image, \
     download_image_from_url
-from aliases import ALIASES
 
 API_URL = 'http://schoolido.lu/api/'
 
@@ -48,7 +48,7 @@ class Scout:
         self._box = box
         self._count = count
         self._guaranteed_sr = guaranteed_sr
-        self._args = _parse_arguments(args)
+        self._args = parse_arguments(args)
 
     async def do_scout(self):
         if self._count > 1:
@@ -167,25 +167,34 @@ class Scout:
         if count == 0:
             return {}
 
+        print(self._args)
+
         # Build request url
         request_url = \
             API_URL + 'cards/?rarity=' + rarity \
             + '&ordering=random&is_promo=False&is_special=False'
 
-        for arg_type, arg_value in self._args:
+        for arg_type in self._args:
+            arg_values = self._args[arg_type]
+            if len(arg_values) == 0:
+                continue
 
-            if arg_type == "main_unit":
-                request_url += '&idol_main_unit=' + arg_value
-            elif arg_type == "sub_unit":
-                request_url += '&idol_sub_unit=' + arg_value
-            elif arg_type == "name":
-                request_url += "&name=" + arg_value
-            elif arg_type == "year":
-                request_url += "&idol_year=" + arg_value
-            elif arg_type == "attribute":
-                request_url += "&attribute=" + arg_value
+            values_str = ",".join(arg_values)
+            values_str = values_str.replace(" ", "%20")
+
+            if arg_type == "main_units":
+                request_url += '&idol_main_unit=' + values_str
+            elif arg_type == "sub_units":
+                request_url += '&idol_sub_unit=' + values_str
+            elif arg_type == "names":
+                request_url += "&name=" + values_str
+            elif arg_type == "years":
+                request_url += "&idol_year=" + values_str
+            elif arg_type == "attributes":
+                request_url += "&attribute=" + values_str
 
         request_url += '&page_size=' + str(count)
+        print(request_url)
 
         # Get and return response
         async with ClientSession() as session:
@@ -267,7 +276,7 @@ def _get_adjusted_scout(scout: dict, required_count: int) -> list:
     return scout['results']
 
 
-def _shrink_results(results: dict):
+def _shrink_results(results: list):
     """
     Removed uneeded information from scout results.
 
@@ -276,142 +285,33 @@ def _shrink_results(results: dict):
     if not results:
         return
 
-    delete_fields = [
-        "game_id",
-        "idol",
-        "japanese_collection",
-        "translated_collection",
-        "japanese_attribute",
-        "is_promo",
-        "promo_item",
-        "promo_link",
-        "japan_only",
-        "event",
-        "other_event",
-        "is_special",
-        "hp",
-        "minimum_statistics_smile",
-        "minimum_statistics_pure",
-        "minimum_statistics_cool",
-        "non_idolized_maximum_statistics_smile",
-        "non_idolized_maximum_statistics_pure",
-        "non_idolized_maximum_statistics_cool",
-        "idolized_maximum_statistics_smile",
-        "idolized_maximum_statistics_pure",
-        "idolized_maximum_statistics_cool",
-        "skill",
-        "japanese_skill",
-        "skill_details",
-        "japanese_skill_details",
-        "center_skill",
-        "center_skill_details",
-        "japanese_center_skill",
-        "japanese_center_skill_details",
-        "english_card_image",
-        "english_card_idolized_image",
-        "english_round_card_image",
-        "english_round_card_idolized_image",
-        "video_story",
-        "japanese_video_story",
-        "website_url",
-        "non_idolized_max_level",
-        "idolized_max_level",
-        "clean_ur",
-        "clean_ur_idolized",
-        "skill_up_cards",
-        "ur_pair",
-        "total_owners",
-        "total_wishlist",
-        "ranking_attribute",
-        "ranking_rarity",
-        "ranking_special"
-    ]
+    # Remove dupes
+    dupeless = []
+    for card in results:
+        if card not in dupeless:
+            dupeless.append(card)
+    results = dupeless
+
+    keep_fields = {
+        "id",
+        "rarity",
+        "attribute",
+        "release_date",
+        "round_card_image",
+        "round_card_idolized_image"
+    }
 
     for result in results:
-        # Copy name
-        if "idol" not in result:
-            result["name"] = result["name"]
-        else:
-            result["name"] = result["idol"]["name"]
+        # Copy needed fields under idol
+        result["name"] = result["idol"]["name"]
+        result["year"] = result["idol"]["year"]
+        result["main_unit"] = result["idol"]["main_unit"]
+        result["sub_unit"] = result["idol"]["sub_unit"]
 
+        # Delete uneeded fields
+        delete_fields = []
+        for field in result:
+            if field not in keep_fields:
+                delete_fields.append(field)
         for field in delete_fields:
             result.pop(field, None)
-
-
-def _parse_arguments(args: tuple) -> list:
-    """
-    Parse all user arguments
-
-    :param args: Tuple of all arguments
-
-    :return: A list of tuples of (arg_type, arg_value)
-    """
-    parsed_args = []
-
-    for arg in args:
-        parsed_arg = _parse_argument(arg)
-        if parsed_arg:
-            parsed_args.append(parsed_arg)
-
-    return parsed_args
-
-
-def _parse_argument(arg: str) -> Optional[tuple]:
-    """
-    Parse user argument
-
-    :param arg: An argument
-
-    :return: A tuple of (arg_type, arg_value)
-    """
-    arg = arg.lower()
-    arg_type = ""
-    arg_value = ""
-
-    # Check for names
-    for full_name in IDOL_NAMES:
-        name_split = full_name.split(" ")
-
-        # Check if name is exact match
-        if arg.title() == name_split[-1]:
-            arg_type = "name"
-            arg_value = full_name
-            break
-
-    # Check for unit and idol names by alias
-    for alias_dict in ALIASES:
-        search_result = _resolve_alias(arg, ALIASES[alias_dict])
-        if search_result:
-            arg_type = alias_dict
-            arg_value = search_result
-            break
-
-    # Check for years
-    if arg in ["first", "second", "third"]:
-        arg_type = "year"
-        arg_value = arg
-
-    # Check for attribute
-    if arg in ["cool", "smile", "pure"]:
-        arg_type = "attribute"
-        arg_value = arg.title()
-
-    if arg_type and arg_value:
-        return arg_type, arg_value.replace(" ", "%20")
-    return None
-
-
-def _resolve_alias(target: str, alias_dict: dict) -> str:
-    """
-    Resolves an alias from a given alias dicitonary.
-
-    :param target: Target string being searched for.
-    :alias_dict: Alias dicitonary being searched in.
-
-    :return: Alias result if found, otherwise returns an empty string.
-    """
-    for key in alias_dict:
-        if target in key:
-            return alias_dict[key]
-
-    return ""

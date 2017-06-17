@@ -5,9 +5,9 @@ import math
 from time import clock
 from random import randint
 from get_names import get_idol_names
+from argument_parser import parse_arguments
 from image_generator import create_image
 from discord import User
-from aliases import ALIASES
 
 PAGE_SIZE = 12
 IDOL_NAMES = get_idol_names()
@@ -53,7 +53,7 @@ class AlbumCommands:
     async def album(self, ctx, *args: str):
         user = ctx.message.author
         album = self.bot.db.get_user_album(user)
-        _parse_arguments(args, user)
+        _parse_album_arguments(args, user)
         album = _apply_filter(album, user)
         album = _apply_sort(album, user)
         album_size = len(album)
@@ -85,16 +85,17 @@ def _apply_filter(album: list, user: User):
 
     :return: Filtered album.
     """
-    filter_type = _last_user_args[user.id]["filter_type"]
-    filter_value = _last_user_args[user.id]["filter_value"]
+    filters = _last_user_args[user.id]["filters"]
 
-    if filter_type == None:
-        return album
+    for filt in filters:
+        filter_type = filt[0]
+        filter_values = filt[1]
 
-    # Looping backwards since we are removing elements
-    for i in range(len(album) - 1, -1, -1):
-        if album[i][filter_type] != filter_value:
-            album.pop(i)
+        # Looping backwards since we are removing elements
+        for i in range(len(album) - 1, -1, -1):
+            for filter_value in filter_values:
+                if album[i][filter_type] != filter_value:
+                    album.pop(i)
 
     return album
 
@@ -143,7 +144,7 @@ def _splice_page(album: list, user: User) -> list:
     return album[start:end]
 
 
-def _parse_arguments(args: tuple, user: User):
+def _parse_album_arguments(args: tuple, user: User):
     """
     Parse arguments to get how an album will be sorted and filtered. The parsed
         arguments are stored in the user's last used arguments dictionary.
@@ -155,60 +156,29 @@ def _parse_arguments(args: tuple, user: User):
     if not user.id in _last_user_args:
         _last_user_args[user.id] = {
             "page": 0,
-            "filter_type": None, # Filter "all" if None
-            "filter_value": None,
+            "filters": [], # Filter "all" if []
             "sort": None # Sort by ID if None
         }
 
     # Get values of user's last album preview.
     page = _last_user_args[user.id]["page"]
-    filter_type = _last_user_args[user.id]["filter_type"]
-    filter_value = _last_user_args[user.id]["filter_value"]
+    filters = _last_user_args[user.id]["filters"]
     sort = _last_user_args[user.id]["sort"]
 
-    # Parse arguments
+    # Parse other arguments
     for arg in args:
         arg = arg.lower()
 
-        # Parse page number
-        if _is_number(arg):
-            # -1 since we start indexing at 0.
-            page = int(arg) - 1
-
-        # Parse filters
+        # Reset filter if "all" is given
         if arg == "all":
-            filter_type = None
-            filter_value = None
-
-        if arg.upper() in RARITIES:
-            filter_type = "rarity"
-            filter_value = arg.upper()
-
-        if arg.title() in ATRIBUTES:
-            filter_type = "attribute"
-            filter_value = arg.title()
-
-        # Check for names
-        for full_name in IDOL_NAMES:
-            name_split = full_name.split(" ")
-
-            # Check if name is exact match
-            if arg.title() == name_split[-1]:
-                filter_type = "name"
-                filter_value = full_name
-
-        for key in ALIASES["name"]:
-            if arg in key:
-                filter_type = "name"
-                filter_value = ALIASES["name"][key].title()
+            filters = []
 
         # Parse sort
         if arg in SORTS:
             _last_user_args[user.id]["sort"] = arg
 
         _last_user_args[user.id]["page"] = page
-        _last_user_args[user.id]["filter_type"] = filter_type
-        _last_user_args[user.id]["filter_value"] = filter_value
+        _last_user_args[user.id]["filters"] = filters
         _last_user_args[user.id]["sort"] = sort
 
 
