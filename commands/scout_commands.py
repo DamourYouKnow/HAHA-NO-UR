@@ -86,7 +86,7 @@ class ScoutCommands:
         """
         scout = Scout(ctx.message.author, "regular", 1, False, args)
         await scout.do_scout()
-        await self.__handle_result(ctx, scout.result, scout.image_path)
+        await self.__handle_result(ctx, scout.results, scout.image_path)
 
     @commands.command(pass_context=True, aliases=['scoutregular10', 'scoutr10'])
     @commands.cooldown(rate=3, per=2.5, type=commands.BucketType.user)

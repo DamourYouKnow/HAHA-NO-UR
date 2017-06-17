@@ -58,7 +58,7 @@ class Scout:
 
         _shrink_results(self.results)
 
-    async def _handle_multiple_scout(self) -> Optional[str]:
+    async def _handle_multiple_scout(self):
         """
         Handles a scout with multiple cards
 
@@ -77,7 +77,7 @@ class Scout:
                 circle_image_urls.append("http:" + card["round_card_image"])
 
         if len(circle_image_urls) != self._count:
-            self.results = None
+            self.results = []
             return None
 
         self.image_path = await create_image(
@@ -86,7 +86,7 @@ class Scout:
             str(clock()) + str(randint(0, 100)) + ".png"
         )
 
-    async def _handle_solo_scout(self) -> Optional[Path]:
+    async def _handle_solo_scout(self):
         """
         Handles a solo scout
 
@@ -96,7 +96,7 @@ class Scout:
 
         # Send error message if no card was returned
         if not card:
-            self.results = None
+            self.results = []
             return None
 
         card = card[0]
@@ -329,7 +329,10 @@ def _shrink_results(results: dict):
 
     for result in results:
         # Copy name
-        result["name"] = result["idol"]["name"]
+        if "idol" not in result:
+            result["name"] = result["name"]
+        else:
+            result["name"] = result["idol"]["name"]
 
         for field in delete_fields:
             result.pop(field, None)
@@ -378,7 +381,6 @@ def _parse_argument(arg: str) -> Optional[tuple]:
     # Check for unit and idol names by alias
     for alias_dict in ALIASES:
         search_result = _resolve_alias(arg, ALIASES[alias_dict])
-        print(search_result)
         if search_result:
             arg_type = alias_dict
             arg_value = search_result
