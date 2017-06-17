@@ -40,6 +40,8 @@ class AlbumCommands:
             max_page = int(math.ceil(album_size / PAGE_SIZE))
             msg = '<@' + ctx.message.author.id + '> '
             msg += "Page " + str(page + 1) + " of " + str(max_page)
+            msg += "\nALBUMS WILL BE RESET ON 18-JUN-2017 AT 9PM EDT"
+            msg += " WHEN THE FEATURE GOES LIVE."
             await self.bot.upload(
                 image_path, content=msg)
 
