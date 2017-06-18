@@ -13,7 +13,7 @@ CIRCLE_DISTANCE = 10
 
 async def create_image(
         idol_circle_urls: list, num_rows: int, output_filename: str,
-        align: bool=True) -> str:
+        align: bool=False) -> str:
     """
     Creates a stitched together image of idol circles.
 
