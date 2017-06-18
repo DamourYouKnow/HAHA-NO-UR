@@ -22,7 +22,7 @@ def command_formatter(message: Message, command_name=None) -> str:
     """
     content = ''
     if command_name:
-        content += command_name.title() + ' '
+        content += command_name + ' '
 
     content += 'from ' + message.author.name + '(' + message.author.id + ') '
     if message.server:

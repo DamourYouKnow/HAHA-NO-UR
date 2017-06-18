@@ -81,3 +81,19 @@ def detailed_help(command_list):
         res[cmd_name] = help_cmd
 
     return res
+
+
+def get_valid_commands(bot):
+    """
+    Return a list of every valid user command, including aliases.
+
+    :param bot: The bot.
+
+    :return: Command list.
+    """
+    cmds = []
+    for cmd_and_aliases in get_command_collections(bot)[1].values():
+        for alias_tuple in cmd_and_aliases:
+            for alias in alias_tuple:
+                cmds.append(alias)
+    return cmds

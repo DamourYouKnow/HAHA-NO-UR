@@ -7,7 +7,8 @@ from discord import Game
 from discord.ext.commands import Bot, CommandNotFound, CommandOnCooldown
 from websockets.exceptions import ConnectionClosed
 
-from helpers import detailed_help, general_help_embed, get_command_collections
+from helpers import detailed_help, general_help_embed, \
+        get_command_collections, get_valid_commands
 from logger import command_formatter, info, setup_logging
 from mongo import DatabaseController
 
@@ -27,6 +28,7 @@ class HahaNoUR(Bot):
         self.help_general = None
         self.help_detailed = {}
         self.db = DatabaseController()
+        self.all_commands = []
 
     async def on_ready(self):
         """
@@ -48,6 +50,7 @@ class HahaNoUR(Bot):
         command_list, command_dict = get_command_collections(self)
         self.help_general = general_help_embed(self, command_dict)
         self.help_detailed = detailed_help(command_list)
+        self.all_commands = get_valid_commands(self)
 
     async def process_commands(self, message):
         """
@@ -58,9 +61,10 @@ class HahaNoUR(Bot):
             return
         await super().process_commands(message)
         content = message.content
+
         command_name = content.split(' ')[0][len(self.prefix):]
-        if 'scout' in command_name.lower() and command_name in self.commands:
-            log_entry = command_formatter(message, command_name)
+        if command_name in self.all_commands:
+            log_entry = command_formatter(message, self.prefix + command_name)
             self.logger.log(logging.INFO, log_entry)
             info(log_entry, date=True)
 
