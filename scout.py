@@ -317,3 +317,17 @@ def _shrink_results(results: list):
                 delete_fields.append(field)
         for field in delete_fields:
             result.pop(field, None)
+
+        # Replace None with empty string for sorting purposes.
+        _replace_none_with_empty_string(result)
+
+
+def _replace_none_with_empty_string(dictionary: dict):
+    """
+    Replaces none values in a dictionary with an empty string.
+
+    :param dictionary: Target dictionary.
+    """
+    for key in dictionary:
+        if dictionary[key] == None:
+            dictionary[key] = ""

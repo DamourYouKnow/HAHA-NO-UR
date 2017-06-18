@@ -10,8 +10,8 @@ from image_generator import create_image
 from discord import User
 from operator import itemgetter
 
-PAGE_SIZE = 12
-ROWS = 2
+PAGE_SIZE = 16
+ROWS = 4
 IDOL_NAMES = get_idol_names()
 SORTS = [
     "id",
@@ -159,7 +159,9 @@ def _apply_sort(album: list, user: User) -> list:
             "rarity",
             "attribute",
             "release_date",
-            "time_aquired"
+            "time_aquired",
+            "main_unit",
+            "sub_unit"
         ]
 
     album = sorted(album, key=itemgetter(sort, "id"), reverse=sort_descending)
