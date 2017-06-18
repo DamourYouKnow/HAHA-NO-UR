@@ -232,7 +232,7 @@ def _parse_album_arguments(args: tuple, user: User):
 
         # Parse if page number
         if _is_number(arg):
-            page = int(arg)
+            page = int(arg) - 1
 
         _last_user_args[user.id]["page"] = page
         _last_user_args[user.id]["filters"] = filters
