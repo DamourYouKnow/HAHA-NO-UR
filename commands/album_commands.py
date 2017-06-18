@@ -13,9 +13,17 @@ from operator import itemgetter
 PAGE_SIZE = 12
 ROWS = 2
 IDOL_NAMES = get_idol_names()
-SORTS = ["id", "name", "attribute", "rarity", "year", "date", "unit", "subunit"]
-RARITIES = ["UR", "SSR", "SR", "R", "N"]
-ATRIBUTES = ["Smile", "Pure", "Cool"]
+SORTS = [
+    "id",
+    "name",
+    "attribute",
+    "rarity",
+    "year",
+    "date",
+    "unit",
+    "subunit",
+    "newest"
+]
 
 # Dictionary mapping user ids to last used album arguments
 _last_user_args = {}
@@ -62,7 +70,7 @@ class AlbumCommands:
 
         optional arguments: |
             Page (1, 2, 3, ...)
-            Sort (id, rarity, attribute, year, unit, subunit, date)
+            Sort (id, rarity, newest, attribute, year, unit, subunit, date)
             Main unit name (Aqours, Muse, Saint Snow, A-RISE)
             Sub unit name (Lily White, CYaRon, ...)
             Idol first name (Honoka, Chika, ...)
@@ -143,9 +151,16 @@ def _apply_sort(album: list, user: User) -> list:
     if sort == "unit":
         sort = "main_unit"
     if sort == "subunit":
-        sort == "sub_unit"
+        sort = "sub_unit"
+    if sort == "newest":
+        sort = "time_aquired"
 
-    sort_descending = sort in ["rarity", "attribute", "release_date"]
+    sort_descending = sort in [
+            "rarity",
+            "attribute",
+            "release_date",
+            "time_aquired"
+        ]
 
     album = sorted(album, key=itemgetter(sort, "id"), reverse=sort_descending)
 

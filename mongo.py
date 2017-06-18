@@ -87,6 +87,7 @@ class DatabaseController:
             if not self._user_has_card(user, card["id"]):
                 card["unidolized_count"] = 0
                 card["idolized_count"] = 0
+                card["time_aquired"] = int(round(time.time() * 1000))
 
                 sort = {"id": 1}
                 insert_card = {"$each": [card], "$sort": sort}
