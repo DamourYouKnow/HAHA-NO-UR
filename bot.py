@@ -40,7 +40,7 @@ class HahaNoUR(Bot):
         async def __change_presence():
             try:
                 await self.wait_until_ready()
-                await self.change_presence(game=Game(name="combined args!"))
+                await self.change_presence(game=Game(name="!album"))
             except ConnectionClosed:
                 await self.logout()
                 await self.login()
