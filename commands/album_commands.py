@@ -88,7 +88,10 @@ class AlbumCommands:
         # TODO change this to call newer version of function that makes labels.
         if len(urls) > 0:
             image_path = await create_image(
-                    urls, ROWS, str(clock()) + str(randint(0, 100)) + ".png")
+                    urls,
+                    ROWS,
+                    str(clock()) + str(randint(0, 100)) + ".png",
+                    align=True)
         else:
             image_path = None
 

@@ -12,12 +12,15 @@ CIRCLE_DISTANCE = 10
 
 
 async def create_image(
-        idol_circle_urls: list, num_rows: int, output_filename: str) -> str:
+        idol_circle_urls: list, num_rows: int, output_filename: str,
+        align: bool=True) -> str:
     """
     Creates a stitched together image of idol circles.
+
     :param idol_circle_urls: urls of idol circle images to be stitched together.
     :param num_rows: Number of rows to use in the image
     :param output_filename: name of output image file
+
     :return: path pointing to created image
     """
     if num_rows > len(idol_circle_urls):
@@ -34,7 +37,7 @@ async def create_image(
     session.close()
     # Load images
     circle_images = [Image.open(str(i)) for i in image_filepaths]
-    image = _build_image(circle_images, num_rows, 10, 10)
+    image = _build_image(circle_images, num_rows, 10, 10, align)
     output_path = OUTPUT_PATH.joinpath(output_filename)
     image.save(str(output_path), 'PNG')
     return str(output_path)
@@ -44,9 +47,11 @@ async def download_image_from_url(
         url: str, path: Path, session: ClientSession) -> Path:
     """
     Downloads an image from a url and saves it to a specified location.
+
     :param url: url of image
     :param path: path where image will be saved to
     :param session: the aiohttp ClientSession
+
     :return: path of saved image
     """
     # Create directories for storing images if they do not exist
@@ -63,17 +68,20 @@ async def download_image_from_url(
 
 
 def _build_image(circle_images: list, num_rows: int,
-                 x_padding: int, y_padding: int) -> Image:
+                 x_padding: int, y_padding: int, align: bool) -> Image:
     """
     Stitches together a list of images to an output image.
+
     :param circle_images: list of image object being stitched together
     :param num_rows: number of rows to lay the image out in
     :param x_padding: x spacing between each image
     :param y_padding: y spacing between each row
+    :param align: Whether the rows are aligned or spaced out.
+
     :return: ouput image object
     """
     sizes = [circle.size for circle in circle_images]
-    positions, x, y = compute_pos(sizes, num_rows, x_padding, y_padding)
+    positions, x, y = compute_pos(sizes, num_rows, x_padding, y_padding, align)
     image_queue = deque(circle_images)
     img = Image.new('RGBA', (x, y))
     for row in positions:
@@ -84,13 +92,15 @@ def _build_image(circle_images: list, num_rows: int,
 
 def compute_pos(
         sizes: List[Tuple[int]], num_rows: int,
-        x_padding: int, y_padding: int) -> tuple:
+        x_padding: int, y_padding: int, align: bool) -> tuple:
     """
     Compute all images positions from the list of images and number of rows.
+
     :param sizes: A list of sizes for all images.
     :param num_rows: the number of rows.
     :param x_padding: x spacing between each image
     :param y_padding: y spacing between each row
+
     :return: Positions for all images, the total x size, the total y size
     """
     total_x, total_y = 0, 0
@@ -109,7 +119,7 @@ def compute_pos(
     for row, row_x, row_sizes in zip(res, row_x_sizes, rows):
         actual = row_sizes[-1][0] + row[-1][0]
         diff = round((total_x - actual) / 2)
-        if diff > 0:
+        if not align and diff > 0:
             res[i] = [(x + diff, y) for x, y in row]
         i += 1
     return res, total_x, total_y - y_padding
@@ -120,9 +130,11 @@ def compute_row(
         x_padding: int, y_pos: int) -> List[Tuple[int]]:
     """
     Compute the positions for a single row.
+
     :param row_sizes: the list of image sizes in that row.
     :param x_padding: the x padding in between images.
     :param y_pos: the y position of that row.
+
     :return: A list of (x, y) positions for that row.
     """
     res = []
@@ -136,8 +148,10 @@ def compute_row(
 def split(in_: Sequence, chunks: int) -> List[List]:
     """
     Split a sequence into roughly equal chunks.
+
     :param in_: the input sequence.
     :param chunks: the number of chunks.
+
     :return: the sequence split up into chunks.
     """
     k, m = divmod(len(in_), chunks)
