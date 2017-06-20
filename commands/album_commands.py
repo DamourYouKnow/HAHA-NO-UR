@@ -40,11 +40,12 @@ class AlbumCommands:
     async def __send_error_msg(self, ctx):
         await self.bot.send_message(
             ctx.message.channel,
-            '<@' + ctx.message.author.id + '> A transmission error occured.')
+            '<@' + ctx.message.author.id + '> No matching cards found.')
 
     async def __handle_result(self, ctx, album_size, image_path, delete=True):
         if not image_path:
             await self.__send_error_msg(ctx)
+            _last_user_args[ctx.message.author.id] = _get_new_user_args()
         else:
             page = _last_user_args[ctx.message.author.id]["page"]
             max_page = int(math.ceil(album_size / PAGE_SIZE))
@@ -201,19 +202,7 @@ def _parse_album_arguments(args: tuple, user: User):
     """
     # Add user to last used argument dictionary if they don't already exist.
     if not user.id in _last_user_args:
-        _last_user_args[user.id] = {
-            "page": 0,
-            "filters": {
-                "name": [],
-                "main_unit": [],
-                "sub_unit": [],
-                "year": [],
-                "attribute": [],
-                "rarity": []
-            },
-            "sort": None,
-            "order": None # Sort by ID if None
-        }
+        _last_user_args[user.id] = _get_new_user_args()
 
     # Get values of user's last album preview.
     page = _last_user_args[user.id]["page"]
@@ -256,6 +245,24 @@ def _parse_album_arguments(args: tuple, user: User):
         _last_user_args[user.id]["page"] = page
         _last_user_args[user.id]["filters"] = filters
         _last_user_args[user.id]["sort"] = sort
+
+
+def _get_new_user_args():
+    args = {
+        "page": 0,
+        "filters": {
+            "name": [],
+            "main_unit": [],
+            "sub_unit": [],
+            "year": [],
+            "attribute": [],
+            "rarity": []
+        },
+        "sort": None,
+        "order": None # Sort by ID if None
+    }
+    return args
+
 
 def _has_filter(filters: dict) -> bool:
     """
