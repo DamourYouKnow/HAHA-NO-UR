@@ -98,14 +98,17 @@ class AlbumCommands:
         # TODO change this to call newer version of function that makes labels.
         if len(urls) > 0:
             image_path = await create_image(
-                    urls,
-                    ROWS,
-                    str(clock()) + str(randint(0, 100)) + ".png",
-                    align=True)
+                self.bot.session_manager,
+                urls,
+                ROWS,
+                str(clock()) + str(
+                    randint(0, 100)) + ".png",
+                align=True)
         else:
             image_path = None
 
         await self.__handle_result(ctx, album_size, image_path)
+
 
 def _apply_filter(album: list, user: User):
     """
@@ -158,13 +161,13 @@ def _apply_sort(album: list, user: User) -> list:
         sort = "time_aquired"
 
     sort_descending = sort in [
-            "rarity",
-            "attribute",
-            "release_date",
-            "time_aquired",
-            "main_unit",
-            "sub_unit"
-        ]
+        "rarity",
+        "attribute",
+        "release_date",
+        "time_aquired",
+        "main_unit",
+        "sub_unit"
+    ]
 
     album = sorted(album, key=itemgetter(sort, "id"), reverse=sort_descending)
 
@@ -261,7 +264,7 @@ def _get_new_user_args():
             "rarity": []
         },
         "sort": None,
-        "order": None # Sort by ID if None
+        "order": None  # Sort by ID if None
     }
     return args
 
