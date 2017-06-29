@@ -3,7 +3,7 @@ from json import load
 from pathlib import Path
 from time import time
 
-from uvloop import EventLoopPolicy
+#from uvloop import EventLoopPolicy
 
 from bot import HahaNoUR, get_session_manager
 from bot.logger import setup_logging
@@ -15,7 +15,7 @@ def main():
     start_time = int(time())
     log_path = Path(Path(__file__).parent.joinpath('logs'))
     logger = setup_logging(start_time, log_path)
-    set_event_loop_policy(EventLoopPolicy())
+    #set_event_loop_policy(EventLoopPolicy())
     loop = get_event_loop()
     session_manager = loop.run_until_complete(get_session_manager(logger))
     db = DatabaseController()
