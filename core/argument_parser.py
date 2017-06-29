@@ -1,4 +1,4 @@
-from get_names import get_idol_names
+from core.get_names import get_idol_names
 
 IDOL_NAMES = get_idol_names()
 

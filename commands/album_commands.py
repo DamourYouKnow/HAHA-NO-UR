@@ -1,14 +1,16 @@
-from os import remove
-from discord.ext import commands
-from bot import HahaNoUR
 import math
-from time import clock
-from random import randint
-from get_names import get_idol_names
-from argument_parser import parse_arguments
-from image_generator import create_image
-from discord import User
 from operator import itemgetter
+from os import remove
+from random import randint
+from time import clock
+
+from discord import User
+from discord.ext import commands
+
+from bot import HahaNoUR
+from core.argument_parser import parse_arguments
+from core.get_names import get_idol_names
+from core.image_generator import create_image
 
 PAGE_SIZE = 16
 ROWS = 4

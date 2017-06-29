@@ -3,8 +3,7 @@ from os import remove
 from discord.ext import commands
 
 from bot import HahaNoUR
-from scout import Scout
-from mongo import DatabaseController
+from core.scout import Scout
 
 
 class ScoutCommands:
@@ -15,25 +14,27 @@ class ScoutCommands:
     def __init__(self, bot: HahaNoUR):
         self.bot = bot
 
-    async def __send_error_msg(self, ctx):
-        await self.bot.send_message(
-            ctx.message.channel,
-            '<@' + ctx.message.author.id + '> A transmission error occured.')
-
     async def __handle_result(self, ctx, results, image_path, delete=True):
-        if not image_path:
-            await self.__send_error_msg(ctx)
-        else:
-            await self.bot.upload(
-                image_path, content='<@' + ctx.message.author.id + '>')
+        """
+        Handle a scout result.
+        :param ctx: the context.
+        :param results: the scout results.
+        :param image_path: the path to the image.
+        :param delete: delete the image or not.
+        """
+        if image_path is None:
+            await self.bot.say('Sorry! Nothing found.')
+            return
+        await self.bot.upload(
+            image_path, content='<@' + ctx.message.author.id + '>')
 
-            # Add to database
-            if (not self.bot.db.find_user(ctx.message.author)):
-                self.bot.db.insert_user(ctx.message.author)
-            self.bot.db.add_to_user_album(ctx.message.author, results)
+        # Add to database
+        if not self.bot.db.find_user(ctx.message.author):
+            self.bot.db.insert_user(ctx.message.author)
+        self.bot.db.add_to_user_album(ctx.message.author, results)
 
-            if delete:
-                remove(image_path)
+        if delete:
+            remove(image_path)
 
     @commands.command(pass_context=True)
     @commands.cooldown(rate=5, per=2.5, type=commands.BucketType.user)
@@ -50,7 +51,10 @@ class ScoutCommands:
             Attribute (smile, pure, cool)
             Year (first, second, third)
         """
-        scout = Scout(ctx.message.author, "honour", 1, False, args)
+        scout = Scout(
+            self.bot.session_manager,
+            ctx.message.author, "honour", 1, False, args
+        )
         await scout.do_scout()
         await self.__handle_result(ctx, scout.results, scout.image_path)
 
@@ -69,7 +73,10 @@ class ScoutCommands:
             Attribute (smile, pure, cool)
             Year (first, second, third)
         """
-        scout = Scout(ctx.message.author, "honour", 11, True, args)
+        scout = Scout(
+            self.bot.session_manager,
+            ctx.message.author, "honour", 11, True, args
+        )
         await scout.do_scout()
         await self.__handle_result(ctx, scout.results, scout.image_path)
 
@@ -84,7 +91,10 @@ class ScoutCommands:
         optional arguments: |
             Attribute (smile, pure, cool)
         """
-        scout = Scout(ctx.message.author, "regular", 1, False, args)
+        scout = Scout(
+            self.bot.session_manager,
+            ctx.message.author, "regular", 1, False, args
+        )
         await scout.do_scout()
         await self.__handle_result(ctx, scout.results, scout.image_path)
 
@@ -99,7 +109,10 @@ class ScoutCommands:
         optional arguments: |
             Attribute (smile, pure, cool)
         """
-        scout = Scout(ctx.message.author, "regular", 10, False, args)
+        scout = Scout(
+            self.bot.session_manager,
+            ctx.message.author, "regular", 10, False, args
+        )
         await scout.do_scout()
         await self.__handle_result(ctx, scout.results, scout.image_path)
 
@@ -118,6 +131,9 @@ class ScoutCommands:
             Attribute (smile, pure, cool)
             Year (first, second, third)
         """
-        scout = Scout(ctx.message.author, "coupon", 1, False, args)
+        scout = Scout(
+            self.bot.session_manager,
+            ctx.message.author, "coupon", 1, False, args
+        )
         await scout.do_scout()
         await self.__handle_result(ctx, scout.results, scout.image_path)

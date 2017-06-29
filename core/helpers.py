@@ -1,9 +1,8 @@
+from logging import WARN
 from re import findall
 
 from discord.embeds import Embed
 from yaml import safe_load
-
-from logger import warning
 
 
 def get_command_collections(bot) -> tuple:
@@ -59,10 +58,11 @@ def general_help_embed(bot, command_dict):
     return help_general
 
 
-def detailed_help(command_list):
+def detailed_help(command_list, logger):
     """
     Build a dict of help messages for the bot.
     :param command_list: a list of (command name, help message)
+    :param logger: the logger
     :return: a dict of {command name tuple: help embed}
     """
     res = {}
@@ -73,7 +73,7 @@ def detailed_help(command_list):
             for key, val in help_msg.items():
                 help_cmd.add_field(name=key.title(), value=val, inline=False)
         except Exception as e:
-            warning(str(e), date=True)
+            logger.log(WARN, str(e))
             help_cmd = Embed(
                 colour=0x4286f4, title='/'.join(cmd_name), description=help_msg
             )

@@ -1,14 +1,14 @@
 import urllib.parse
-from pathlib import Path
 from posixpath import basename
 from random import randint, shuffle, uniform
 from time import clock
-from typing import Optional
-from aiohttp import ClientConnectionError, ClientSession
+
 from discord import User
-from get_names import get_idol_names
-from argument_parser import parse_arguments
-from image_generator import IDOL_IMAGES_PATH, create_image, \
+
+from bot import SessionManager
+from core.argument_parser import parse_arguments
+from core.get_names import get_idol_names
+from core.image_generator import IDOL_IMAGES_PATH, create_image, \
     download_image_from_url
 
 API_URL = 'http://schoolido.lu/api/'
@@ -30,11 +30,12 @@ class Scout:
     Provides scouting functionality for bot.
     """
 
-    def __init__(self, user: User, box: str = "honour", count: int = 1,
+    def __init__(self, session_manager: SessionManager, user: User,
+                 box: str = "honour", count: int = 1,
                  guaranteed_sr: bool = False, args: tuple = ()):
         """
         Constructor for a Scout.
-
+        :param session_manager: the SessionManager.
         :param user: User requesting scout.
         :param box: Box to scout in (honour, regular, coupon).
         :param count: Number of cards in scout.
@@ -43,7 +44,7 @@ class Scout:
         """
         self.results = []
         self.image_path = None
-
+        self.session_manager = session_manager
         self._user = user
         self._box = box
         self._count = count
@@ -56,7 +57,7 @@ class Scout:
         else:
             await self._handle_solo_scout()
 
-        _shrink_results(self.results)
+        self.results = _shrink_results(self.results)
 
     async def _handle_multiple_scout(self):
         """
@@ -81,6 +82,7 @@ class Scout:
             return None
 
         self.image_path = await create_image(
+            self.session_manager,
             circle_image_urls,
             2,
             str(clock()) + str(randint(0, 100)) + ".png"
@@ -109,9 +111,8 @@ class Scout:
         self.image_path = IDOL_IMAGES_PATH.joinpath(
             basename(urllib.parse.urlsplit(url).path))
 
-        session = ClientSession()
-        await download_image_from_url(url, self.image_path, session)
-        session.close()
+        await download_image_from_url(url, self.image_path,
+                                      self.session_manager)
 
     async def _scout_cards(self) -> list:
         """
@@ -166,15 +167,18 @@ class Scout:
         """
         if count == 0:
             return {}
-
+        params = {
+            'rarity': rarity,
+            'ordering': 'random',
+            'is_promo': 'False',
+            'is_special': 'False',
+            'page_size': str(count)
+        }
         # Build request url
-        request_url = \
-            API_URL + 'cards/?rarity=' + rarity \
-            + '&ordering=random&is_promo=False&is_special=False'
+        request_url = API_URL + 'cards/?'
 
-        for arg_type in self._args:
-            arg_values = self._args[arg_type]
-            if len(arg_values) == 0:
+        for arg_type, arg_values in self._args.items():
+            if not arg_values:
                 continue
 
             values_str = ",".join(arg_values)
@@ -182,25 +186,21 @@ class Scout:
 
             if arg_type == "main_unit":
                 values_str = values_str.replace("Muse", "µ's")
-                request_url += '&idol_main_unit=' + values_str
+                params['idol_main_unit'] = values_str
             elif arg_type == "sub_unit":
-                request_url += '&idol_sub_unit=' + values_str
+                params['idol_sub_unit'] = values_str
             elif arg_type == "name":
                 request_url += "&name=" + values_str
+            # FIXME Why the fuck does this not work.
+            # elif arg_type == "name":
+            #     params['name'] = values_str
             elif arg_type == "year":
-                request_url += "&idol_year=" + values_str
+                params['idol_year'] = values_str
             elif arg_type == "attribute":
-                request_url += "&attribute=" + values_str
-
-        request_url += '&page_size=' + str(count)
+                params['attribute'] = values_str
 
         # Get and return response
-        async with ClientSession() as session:
-            async with session.get(request_url) as response:
-                if response.status != 200:
-                    raise ClientConnectionError
-                response_json = await response.json()
-                return response_json
+        return await self.session_manager.get_json(request_url, params)
 
     def _roll_rarity(self, guaranteed_sr: bool = False) -> str:
         """
@@ -302,7 +302,7 @@ def _shrink_results(results: list):
         "round_card_image",
         "round_card_idolized_image"
     }
-
+    res = []
     for result in results:
         # Copy needed fields under idol
         result["name"] = result["idol"]["name"]
@@ -319,15 +319,6 @@ def _shrink_results(results: list):
             result.pop(field, None)
 
         # Replace None with empty string for sorting purposes.
-        _replace_none_with_empty_string(result)
-
-
-def _replace_none_with_empty_string(dictionary: dict):
-    """
-    Replaces none values in a dictionary with an empty string.
-
-    :param dictionary: Target dictionary.
-    """
-    for key in dictionary:
-        if dictionary[key] == None:
-            dictionary[key] = ""
+        replaced = {key: (val or '') for key, val in result.items()}
+        res.append(replaced)
+    return res

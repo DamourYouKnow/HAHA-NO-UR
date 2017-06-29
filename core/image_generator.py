@@ -1,22 +1,25 @@
 import urllib.parse
 from collections import deque
+from logging import INFO
 from pathlib import Path
 from typing import List, Sequence, Tuple
 
 from PIL import Image
-from aiohttp import ClientSession
+
+from bot import SessionManager
 
 IDOL_IMAGES_PATH = Path('idol_images')
 OUTPUT_PATH = Path('scout_output')
 CIRCLE_DISTANCE = 10
 
 
-async def create_image(
-        idol_circle_urls: list, num_rows: int, output_filename: str,
-        align: bool=False) -> str:
+async def create_image(session_manager: SessionManager,
+                       idol_circle_urls: list, num_rows: int,
+                       output_filename: str,
+                       align: bool = False) -> str:
     """
     Creates a stitched together image of idol circles.
-
+    :param session_manager: the SessionManager
     :param idol_circle_urls: urls of idol circle images to be stitched together.
     :param num_rows: Number of rows to use in the image
     :param output_filename: name of output image file
@@ -28,13 +31,11 @@ async def create_image(
 
     image_filepaths = []  # list of image filepaths
     # Save images that do not exists
-    session = ClientSession()
     for image_url in idol_circle_urls:
         url_path = urllib.parse.urlsplit(image_url).path
         file_path = IDOL_IMAGES_PATH.joinpath(Path(url_path).name)
         image_filepaths.append(file_path)
-        await download_image_from_url(image_url, file_path, session)
-    session.close()
+        await download_image_from_url(image_url, file_path, session_manager)
     # Load images
     circle_images = [Image.open(str(i)) for i in image_filepaths]
     image = _build_image(circle_images, num_rows, 10, 10, align)
@@ -44,13 +45,13 @@ async def create_image(
 
 
 async def download_image_from_url(
-        url: str, path: Path, session: ClientSession) -> Path:
+        url: str, path: Path, session_manager: SessionManager) -> Path:
     """
     Downloads an image from a url and saves it to a specified location.
 
     :param url: url of image
     :param path: path where image will be saved to
-    :param session: the aiohttp ClientSession
+    :param session_manager: the SessionManager
 
     :return: path of saved image
     """
@@ -59,10 +60,12 @@ async def download_image_from_url(
         IDOL_IMAGES_PATH.mkdir(parents=True, exist_ok=True)
     if not OUTPUT_PATH.is_dir():
         OUTPUT_PATH.mkdir(parents=True, exist_ok=True)
-    async with session.get(url) as r:
-        if r.status == 200 and not path.is_file():
-            print('Saving ' + url + ' to ' + str(path))
-            image = await r.read()
+    response = await session_manager.get(url)
+    async with response:
+        if not path.is_file():
+            session_manager.logger.log(
+                INFO, 'Saving ' + url + ' to ' + str(path))
+            image = await response.read()
             path.write_bytes(image)
     return path
 
