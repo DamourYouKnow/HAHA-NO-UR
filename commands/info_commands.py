@@ -11,6 +11,9 @@ class InfoCommands:
     async def info(self):
         # TODO D'Amour read this from file.
         reply = "**2017-06-18:** Albums have been added!\n\n"
+        reply += "Invite me to your server here: <https://discordapp.com/"
+        reply += "oauth2/authorize?client_id=311284054333063168&scope=bot&"
+        reply += "permissions=0>\n\n"
         reply += "Instructions for how to use the bot can be found here:\n"
         reply += "<https://github.com/DamourYouKnow/"
         reply += "HAHA-NO-UR/blob/master/README.md>\n\n"

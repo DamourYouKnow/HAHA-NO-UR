@@ -23,7 +23,9 @@ class ScoutCommands:
         :param delete: delete the image or not.
         """
         if image_path is None:
-            await self.bot.say('Sorry! Nothing found.')
+            msg = "<@" + ctx.message.author.id + "> "
+            msg += "A transmission error occured. No cards found!"
+            await self.bot.say(msg)
             return
         await self.bot.upload(
             image_path, content='<@' + ctx.message.author.id + '>')
