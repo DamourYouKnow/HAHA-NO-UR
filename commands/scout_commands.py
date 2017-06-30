@@ -58,7 +58,7 @@ class ScoutCommands:
             ctx.message.author, "honour", 1, False, args
         )
         await scout.do_scout()
-        await self.__handle_result(ctx, scout.results, scout.image_path)
+        await self.__handle_result(ctx, scout.results, scout.image_path, False)
 
     @commands.command(pass_context=True)
     @commands.cooldown(rate=3, per=2.5, type=commands.BucketType.user)

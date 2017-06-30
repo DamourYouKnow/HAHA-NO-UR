@@ -65,7 +65,7 @@ async def download_image_from_url(
     async with response:
         #  Checking if the image already exists in two different ways because
         # python is cross platform 4Head.
-        if not path.is_file() or not os.path.exists(str(path)):
+        if not path.is_file():
             session_manager.logger.log(
                 INFO, 'Saving ' + url + ' to ' + str(path))
             image = await response.read()

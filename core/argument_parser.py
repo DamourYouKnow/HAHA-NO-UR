@@ -8,7 +8,10 @@ ALIASES = {
         ("eri",): "Ayase Eli",
         ("yohane",): "Tsushima Yoshiko",
         ("hana", "pana"): "Koizumi Hanayo",
-        ("tomato",): "Nishikino Maki"
+        ("tomato",): "Nishikino Maki",
+        ("zura", "woah", "technology"): "Kunikida Hanamaru",
+        ("mike",): "Kurosawa Ruby", # Memes
+        ("nell",): "Yazawa Nico"
     },
     "main_unit": {
         ("muse", "μ's", "µ's"): "μ's",

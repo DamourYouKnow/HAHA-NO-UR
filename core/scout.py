@@ -2,7 +2,7 @@ import urllib.parse
 from posixpath import basename
 from random import randint, shuffle, uniform
 from time import clock
-
+from pathlib import Path
 from discord import User
 
 from bot import SessionManager
@@ -110,9 +110,8 @@ class Scout:
 
         self.image_path = IDOL_IMAGES_PATH.joinpath(
             basename(urllib.parse.urlsplit(url).path))
-        print(self.image_path)
 
-        await download_image_from_url(url, self.image_path,
+        await download_image_from_url(url, Path(self.image_path),
                                       self.session_manager)
 
     async def _scout_cards(self) -> list:
