@@ -110,6 +110,7 @@ class Scout:
 
         self.image_path = IDOL_IMAGES_PATH.joinpath(
             basename(urllib.parse.urlsplit(url).path))
+        print(self.image_path)
 
         await download_image_from_url(url, self.image_path,
                                       self.session_manager)
