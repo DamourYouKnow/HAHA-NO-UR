@@ -11,6 +11,7 @@ from bot.session_manager import SessionManager
 from core.helpers import detailed_help, general_help_embed, \
     get_command_collections, get_valid_commands
 from data_controller.mongo import DatabaseController
+from bot.logger import command_formatter
 
 
 class HahaNoUR(Bot):
@@ -81,6 +82,22 @@ class HahaNoUR(Bot):
         self.logger.log(
             logging.INFO, str(len(self.servers)) + " servers detected")
         await self.__change_presence()
+
+    async def process_commands(self, message):
+        """
+        Overwrites the process_commands method to ignore bot users and
+        log commands.
+        """
+        if message.author.bot:
+            return
+
+        content = message.content
+        command_name = content.split(' ')[0][len(self.prefix):]
+        if command_name in self.all_commands:
+            log_entry = command_formatter(message, self.prefix + command_name)
+            self.logger.log(logging.INFO, log_entry)
+
+        await super().process_commands(message)
 
     async def on_error(self, event_method, *args, **kwargs):
         """

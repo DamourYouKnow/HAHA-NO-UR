@@ -191,7 +191,7 @@ class Scout:
                 params['idol_sub_unit'] = values_str
             elif arg_type == "name":
                 request_url += "&name=" + values_str
-            # FIXME Why the fuck does this not work.
+            # FIXME Why the heck does this not work.
             # elif arg_type == "name":
             #     params['name'] = values_str
             elif arg_type == "year":

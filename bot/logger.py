@@ -2,6 +2,7 @@ import logging
 from datetime import datetime
 from pathlib import Path
 from sys import stdout
+from discord import Message
 
 from colorlog import ColoredFormatter
 from pytz import timezone
@@ -10,6 +11,22 @@ CONSOLE_FORMAT = ('%(asctime)s %(log_color)s%(levelname)s %(name)s: '
                   '%(message)s')
 FILE_FORMAT = '%(asctime)s %(levelname)s %(name)s: %(message)s'
 
+def command_formatter(message: Message, command_name=None) -> str:
+    """
+    Format a command into a message to be logged.
+
+    :param message: message object of requester
+    :param command_name: optional identifier for request
+    :return: the formatted log message.
+    """
+    content = ''
+    if command_name:
+        content += command_name + ' '
+
+    content += 'from ' + message.author.name + '(' + message.author.id + ') '
+    if message.server:
+         content += 'in ' + message.server.name + ' #' + message.channel.name
+    return content
 
 def timestamp(*args):
     """

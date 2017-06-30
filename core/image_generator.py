@@ -2,6 +2,7 @@ import urllib.parse
 from collections import deque
 from logging import INFO
 from pathlib import Path
+import os
 from typing import List, Sequence, Tuple
 
 from PIL import Image
@@ -62,7 +63,9 @@ async def download_image_from_url(
         OUTPUT_PATH.mkdir(parents=True, exist_ok=True)
     response = await session_manager.get(url)
     async with response:
-        if not path.is_file():
+        #  Checking if the image already exists in two different ways because
+        # python is cross platform 4Head.
+        if not path.is_file() or not os.path.exists(path):
             session_manager.logger.log(
                 INFO, 'Saving ' + url + ' to ' + str(path))
             image = await response.read()
