@@ -133,7 +133,7 @@ class Scout:
 
         # Case where a normal character is selected
         elif (self._box == "regular") \
-                and any("name" in arg for arg in self._args):
+                and len(self._args["name"]) > 0:
             for r in range(self._count):
                 rarities.append("N")
 
