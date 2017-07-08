@@ -1,33 +1,21 @@
 from discord.ext import commands
 
 from bot import HahaNoUR
+from data import data_path
 
 
 class InfoCommands:
     def __init__(self, bot: HahaNoUR):
         self.bot = bot
+        with data_path.joinpath('info.txt').open() as f:
+            self.info_msg = f.read()
 
     @commands.command()
     async def info(self):
-        # TODO D'Amour read this from file.
-        reply = "**2017-06-18:** Albums have been added!\n\n"
-        reply += "Invite me to your server here: <https://discordapp.com/"
-        reply += "oauth2/authorize?client_id=311284054333063168&scope=bot&"
-        reply += "permissions=0>\n\n"
-        reply += "Instructions for how to use the bot can be found here:\n"
-        reply += "<https://github.com/DamourYouKnow/"
-        reply += "HAHA-NO-UR/blob/master/README.md>\n\n"
-        reply += "If you have any suggestions for new features or "
-        reply += "improvements contact D'Amour#2601 on discord or submit "
-        reply += "a request on our dev channel or on github:\n"
-        reply += "https://discord.gg/aEkzE59\n"
-        reply += "<https://github.com/DamourYouKnow/HAHA-NO-UR/issues>\n\n"
-        reply += "Feel free to add this bot to your own server or host "
-        reply += "your own version of it. If you are interested in "
-        reply += "contributing to the bot please contact me. "
-        reply += "I'm willing to teach so don't worry about not having any "
-        reply += "programming experience."
-        await self.bot.say(reply)
+        """
+        Display a info message.
+        """
+        await self.bot.say(self.info_msg)
 
     @commands.command()
     async def help(self, command=None):
