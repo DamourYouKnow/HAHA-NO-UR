@@ -26,9 +26,7 @@ async def create_image(session_manager: SessionManager,
     :param align: to align middle the image or not.
     :return: path pointing to created image
     """
-    if num_rows > len(idol_circle_urls):
-        num_rows = len(idol_circle_urls)
-
+    num_rows = min((num_rows, idol_circle_urls))
     image_filepaths = []  # list of image filepaths
     # Save images that do not exists
     for image_url in idol_circle_urls:
@@ -62,7 +60,7 @@ async def download_image_from_url(
         scout_output_path.mkdir(parents=True, exist_ok=True)
     response = await session_manager.get(url)
     async with response:
-        #  Checking if the image already exists in two different ways because
+        # Checking if the image already exists in two different ways because
         # python is cross platform 4Head.
         if not path.is_file():
             session_manager.logger.log(
