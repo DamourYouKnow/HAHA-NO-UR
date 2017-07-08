@@ -2,14 +2,15 @@ import logging
 from datetime import datetime
 from pathlib import Path
 from sys import stdout
-from discord import Message
 
 from colorlog import ColoredFormatter
+from discord import Message
 from pytz import timezone
 
 CONSOLE_FORMAT = ('%(asctime)s %(log_color)s%(levelname)s %(name)s: '
                   '%(message)s')
 FILE_FORMAT = '%(asctime)s %(levelname)s %(name)s: %(message)s'
+
 
 def command_formatter(message: Message, command_name=None) -> str:
     """
@@ -25,8 +26,9 @@ def command_formatter(message: Message, command_name=None) -> str:
 
     content += 'from ' + message.author.name + '(' + message.author.id + ') '
     if message.server:
-         content += 'in ' + message.server.name + ' #' + message.channel.name
+        content += 'in ' + message.server.name + ' #' + message.channel.name
     return content
+
 
 def timestamp(*args):
     """

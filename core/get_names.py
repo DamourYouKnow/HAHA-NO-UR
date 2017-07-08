@@ -1,7 +1,8 @@
 from json import dump, load
-from pathlib import Path
 
 from requests import get
+
+from data import data_path
 
 API_URL = 'http://schoolido.lu/api/'
 
@@ -12,7 +13,7 @@ def get_idol_names() -> list:
 
     :return: List of names
     """
-    path = Path('data/names.json')
+    path = data_path.joinpath('names.json')
     try:
         size = (get(API_URL + "idols").json())["count"]
         result_list = get(

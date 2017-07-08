@@ -8,7 +8,7 @@ from discord import User
 from bot import SessionManager
 from core.argument_parser import parse_arguments
 from core.get_names import get_idol_names
-from core.image_generator import IDOL_IMAGES_PATH, create_image, \
+from core.image_generator import idol_img_path, create_image, \
     download_image_from_url
 
 API_URL = 'http://schoolido.lu/api/'
@@ -108,7 +108,7 @@ class Scout:
         else:
             url = "http:" + card["card_image"]
 
-        self.image_path = IDOL_IMAGES_PATH.joinpath(
+        self.image_path = idol_img_path.joinpath(
             basename(urllib.parse.urlsplit(url).path))
 
         await download_image_from_url(url, Path(self.image_path),

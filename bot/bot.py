@@ -7,11 +7,11 @@ from websockets.exceptions import ConnectionClosed
 
 from bot.error_handler import command_error_handler, format_command_error, \
     format_traceback
+from bot.logger import command_formatter
 from bot.session_manager import SessionManager
 from core.helpers import detailed_help, general_help_embed, \
     get_command_collections, get_valid_commands
 from data_controller.mongo import DatabaseController
-from bot.logger import command_formatter
 
 
 class HahaNoUR(Bot):

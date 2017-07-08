@@ -2,15 +2,14 @@ import urllib.parse
 from collections import deque
 from logging import INFO
 from pathlib import Path
-import os
 from typing import List, Sequence, Tuple
 
 from PIL import Image
 
 from bot import SessionManager
+from idol_images import idol_img_path
+from scout_output import scout_output_path
 
-IDOL_IMAGES_PATH = Path('idol_images')
-OUTPUT_PATH = Path('scout_output')
 CIRCLE_DISTANCE = 10
 
 
@@ -24,7 +23,7 @@ async def create_image(session_manager: SessionManager,
     :param idol_circle_urls: urls of idol circle images to be stitched together.
     :param num_rows: Number of rows to use in the image
     :param output_filename: name of output image file
-
+    :param align: to align middle the image or not.
     :return: path pointing to created image
     """
     if num_rows > len(idol_circle_urls):
@@ -34,13 +33,13 @@ async def create_image(session_manager: SessionManager,
     # Save images that do not exists
     for image_url in idol_circle_urls:
         url_path = urllib.parse.urlsplit(image_url).path
-        file_path = IDOL_IMAGES_PATH.joinpath(Path(url_path).name)
+        file_path = idol_img_path.joinpath(Path(url_path).name)
         image_filepaths.append(file_path)
         await download_image_from_url(image_url, file_path, session_manager)
     # Load images
     circle_images = [Image.open(str(i)) for i in image_filepaths]
     image = _build_image(circle_images, num_rows, 10, 10, align)
-    output_path = OUTPUT_PATH.joinpath(output_filename)
+    output_path = scout_output_path.joinpath(output_filename)
     image.save(str(output_path), 'PNG')
     return str(output_path)
 
@@ -57,10 +56,10 @@ async def download_image_from_url(
     :return: path of saved image
     """
     # Create directories for storing images if they do not exist
-    if not IDOL_IMAGES_PATH.is_dir():
-        IDOL_IMAGES_PATH.mkdir(parents=True, exist_ok=True)
-    if not OUTPUT_PATH.is_dir():
-        OUTPUT_PATH.mkdir(parents=True, exist_ok=True)
+    if not idol_img_path.is_dir():
+        idol_img_path.mkdir(parents=True, exist_ok=True)
+    if not scout_output_path.is_dir():
+        scout_output_path.mkdir(parents=True, exist_ok=True)
     response = await session_manager.get(url)
     async with response:
         #  Checking if the image already exists in two different ways because
@@ -106,7 +105,7 @@ def compute_pos(
     :param num_rows: the number of rows.
     :param x_padding: x spacing between each image
     :param y_padding: y spacing between each row
-
+    :param align: to align middle the image or not.
     :return: Positions for all images, the total x size, the total y size
     """
     total_x, total_y = 0, 0
