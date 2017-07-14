@@ -15,16 +15,23 @@ def main():
     logger = setup_logging(start_time, log_path)
     loop = get_event_loop()
     session_manager = loop.run_until_complete(get_session_manager(logger))
+
     with config_path.joinpath('config.json').open() as f:
         config = load(f)
+    with config_path.joinpath('auth.json').open() as f:
+        auth = load(f)
+
     db = DatabaseController() if config.get('mongo', True) else None
+
     bot = HahaNoUR(
         config['default_prefix'], start_time, int(config['colour'], base=16),
-        logger, session_manager, db, config['error_log']
+        logger, session_manager, db, auth['error_log']
     )
+
     bot.remove_command('help')
     cogs = [Scout(bot), Album(bot), Info(bot)]
-    bot.start_bot(cogs, config['token'])
+
+    bot.start_bot(cogs, auth['token'])
 
 
 if __name__ == '__main__':
