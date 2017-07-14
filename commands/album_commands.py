@@ -1,14 +1,12 @@
 import math
 from operator import itemgetter
-from os import remove
-from random import randint
-from time import clock
 
 from discord import User
 from discord.ext import commands
 
 from bot import HahaNoUR
 from core.argument_parser import parse_arguments
+from core.checks import check_mongo
 from core.get_names import get_idol_names
 from core.image_generator import create_image
 
@@ -16,15 +14,15 @@ PAGE_SIZE = 16
 ROWS = 4
 IDOL_NAMES = get_idol_names()
 SORTS = [
-    "id",
-    "name",
-    "attribute",
-    "rarity",
-    "year",
-    "date",
-    "unit",
-    "subunit",
-    "newest"
+    'id',
+    'name',
+    'attribute',
+    'rarity',
+    'year',
+    'date',
+    'unit',
+    'subunit',
+    'newest'
 ]
 
 # Dictionary mapping user ids to last used album arguments
@@ -42,26 +40,23 @@ class AlbumCommands:
     async def __send_error_msg(self, ctx):
         await self.bot.send_message(
             ctx.message.channel,
-            '<@' + ctx.message.author.id + '> No matching cards found.')
+            f'<@{ctx.message.author.id }> No matching cards found.'
+        )
 
-    async def __handle_result(self, ctx, album_size, image_path, delete=True):
-        if not image_path:
+    async def __handle_result(self, ctx, album_size, image):
+        if not image:
             await self.__send_error_msg(ctx)
             _last_user_args[ctx.message.author.id] = _get_new_user_args()
         else:
             page = _last_user_args[ctx.message.author.id]["page"]
             max_page = int(math.ceil(album_size / PAGE_SIZE))
-            msg = '<@' + ctx.message.author.id + '> '
-            msg += "Page " + str(page + 1) + " of " + str(max_page) + ". "
-            msg += "`!help album` for more info."
-            await self.bot.upload(
-                image_path, content=msg)
-
-            if delete:
-                remove(image_path)
+            msg = (f'<@{ctx.message.author.id}> Page {page+1} of {max_page}. '
+                   f'`!help album` for more info.')
+            await self.bot.upload(image, filename='a.png', content=msg)
 
     @commands.command(pass_context=True, aliases=['album', 'a'])
     @commands.cooldown(rate=3, per=2.5, type=commands.BucketType.user)
+    @commands.check(check_mongo)
     async def __album(self, ctx, *args: str):
         """
         general: |
@@ -85,29 +80,20 @@ class AlbumCommands:
         _parse_album_arguments(args, user)
         album = _apply_filter(album, user)
         album = _apply_sort(album, user)
-        album_size = len(album)
         album = _splice_page(album, user)
 
         urls = []
         for card in album:
-            if card["round_card_image"] is None:
-                urls.append("http:" + card["round_card_idolized_image"])
+            if not card['round_card_image']:
+                urls.append('http:' + card['round_card_idolized_image'])
             else:
-                urls.append("http:" + card["round_card_image"])
+                urls.append('http:' + card['round_card_image'])
 
         # TODO change this to call newer version of function that makes labels.
-        if len(urls) > 0:
-            image_path = await create_image(
-                self.bot.session_manager,
-                urls,
-                ROWS,
-                str(clock()) + str(
-                    randint(0, 100)) + ".png",
-                align=True)
-        else:
-            image_path = None
-
-        await self.__handle_result(ctx, album_size, image_path)
+        image = await create_image(
+            self.bot.session_manager, urls, ROWS, True
+        ) if urls else None
+        await self.__handle_result(ctx, len(album), image)
 
 
 def _apply_filter(album: list, user: User):
@@ -120,12 +106,12 @@ def _apply_filter(album: list, user: User):
 
     :return: Filtered album.
     """
-    filters = _last_user_args[user.id]["filters"]
+    filters = _last_user_args[user.id]['filters']
 
     for filter_type in filters:
         filter_values = filters[filter_type]
 
-        if len(filter_values) == 0:
+        if not filter_values:
             continue
 
         # Looping backwards since we are removing elements
@@ -146,32 +132,32 @@ def _apply_sort(album: list, user: User) -> list:
 
     :return: Sorted album.
     """
-    sort = _last_user_args[user.id]["sort"]
-    order = _last_user_args[user.id]["order"]
+    sort = _last_user_args[user.id]['sort']
 
-    if sort == None:
+    # FIXME This var doesn't seem to have any use.
+    order = _last_user_args[user.id]['order']
+
+    if not sort:
         return album
-    if sort == "date":
-        sort = "release_date"
-    if sort == "unit":
-        sort = "main_unit"
-    if sort == "subunit":
-        sort = "sub_unit"
-    if sort == "newest":
-        sort = "time_aquired"
+    if sort == 'date':
+        sort = 'release_date'
+    if sort == 'unit':
+        sort = 'main_unit'
+    if sort == 'subunit':
+        sort = 'sub_unit'
+    if sort == 'newest':
+        sort = 'time_aquired'
 
     sort_descending = sort in [
-        "rarity",
-        "attribute",
-        "release_date",
-        "time_aquired",
-        "main_unit",
-        "sub_unit"
+        'rarity',
+        'attribute',
+        'release_date',
+        'time_aquired',
+        'main_unit',
+        'sub_unit'
     ]
 
-    album = sorted(album, key=itemgetter(sort, "id"), reverse=sort_descending)
-
-    return album
+    return sorted(album, key=itemgetter(sort, 'id'), reverse=sort_descending)
 
 
 def _splice_page(album: list, user: User) -> list:
@@ -183,14 +169,14 @@ def _splice_page(album: list, user: User) -> list:
 
     :return: Spliced album.
     """
-    page = _last_user_args[user.id]["page"]
+    page = _last_user_args[user.id]['page']
     max_page = int(math.ceil(len(album) / PAGE_SIZE)) - 1
 
     if page > max_page:
         page = max_page
     if page < 0:
         page = 0
-    _last_user_args[user.id]["page"] = page
+    _last_user_args[user.id]['page'] = page
 
     start = PAGE_SIZE * page
     end = (PAGE_SIZE * page) + PAGE_SIZE
@@ -206,14 +192,16 @@ def _parse_album_arguments(args: tuple, user: User):
     :param user: User who requested the album.
     """
     # Add user to last used argument dictionary if they don't already exist.
-    if not user.id in _last_user_args:
+    if user.id not in _last_user_args:
         _last_user_args[user.id] = _get_new_user_args()
 
     # Get values of user's last album preview.
-    page = _last_user_args[user.id]["page"]
-    filters = _last_user_args[user.id]["filters"]
-    sort = _last_user_args[user.id]["sort"]
-    order = _last_user_args[user.id]["order"]
+    page = _last_user_args[user.id]['page']
+    filters = _last_user_args[user.id]['filters']
+    sort = _last_user_args[user.id]['sort']
+
+    # FIXME This var doesn't seem to have any use.
+    order = _last_user_args[user.id]['order']
 
     new_filters = parse_arguments(args, True)
     if _has_filter(new_filters):
@@ -224,14 +212,14 @@ def _parse_album_arguments(args: tuple, user: User):
         arg = arg.lower()
 
         # Reset filter if "all" is given
-        if arg == "all":
+        if arg == 'all':
             filters = {
-                "name": [],
-                "main_unit": [],
-                "sub_unit": [],
-                "year": [],
-                "attribute": [],
-                "rarity": []
+                'name': [],
+                'main_unit': [],
+                'sub_unit': [],
+                'year': [],
+                'attribute': [],
+                'rarity': []
             }
 
         # Parse sort
@@ -240,31 +228,32 @@ def _parse_album_arguments(args: tuple, user: User):
             page = 0
 
         # Parse sort order
-        if arg in ["+", "-"]:
+        if arg in ('+', '-'):
+            # FIXME This var doesn't seem to have any use.
             order = arg
 
         # Parse if page number
         if _is_number(arg):
             page = int(arg) - 1
 
-        _last_user_args[user.id]["page"] = page
-        _last_user_args[user.id]["filters"] = filters
-        _last_user_args[user.id]["sort"] = sort
+        _last_user_args[user.id]['page'] = page
+        _last_user_args[user.id]['filters'] = filters
+        _last_user_args[user.id]['sort'] = sort
 
 
 def _get_new_user_args():
     args = {
-        "page": 0,
-        "filters": {
-            "name": [],
-            "main_unit": [],
-            "sub_unit": [],
-            "year": [],
-            "attribute": [],
-            "rarity": []
+        'page': 0,
+        'filters': {
+            'name': [],
+            'main_unit': [],
+            'sub_unit': [],
+            'year': [],
+            'attribute': [],
+            'rarity': []
         },
-        "sort": None,
-        "order": None  # Sort by ID if None
+        'sort': None,
+        'order': None  # Sort by ID if None
     }
     return args
 
@@ -277,10 +266,7 @@ def _has_filter(filters: dict) -> bool:
 
     :return: True if target has filters, otherwise False.
     """
-    for key in filters:
-        if len(filters[key]) > 0:
-            return True
-    return False
+    return any(filters.values())
 
 
 def _is_number(string: str) -> bool:

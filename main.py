@@ -15,9 +15,9 @@ def main():
     logger = setup_logging(start_time, log_path)
     loop = get_event_loop()
     session_manager = loop.run_until_complete(get_session_manager(logger))
-    db = DatabaseController()
     with config_path.joinpath('config.json').open() as f:
         config = load(f)
+    db = DatabaseController() if config.get('mongo', True) else None
     bot = HahaNoUR(config['default_prefix'], start_time, logger,
                    session_manager, db, config['error_log'])
     bot.remove_command('help')
