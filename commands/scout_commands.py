@@ -1,4 +1,5 @@
-from os import remove
+from logging import INFO
+from pathlib import Path
 
 from discord.ext import commands
 
@@ -14,7 +15,7 @@ class ScoutCommands:
     def __init__(self, bot: HahaNoUR):
         self.bot = bot
 
-    async def __handle_result(self, ctx, results, image_path, delete=True):
+    async def __handle_result(self, ctx, results, image_path: Path, delete):
         """
         Handle a scout result.
         :param ctx: the context.
@@ -34,9 +35,10 @@ class ScoutCommands:
         if not self.bot.db.find_user(ctx.message.author):
             self.bot.db.insert_user(ctx.message.author)
         self.bot.db.add_to_user_album(ctx.message.author, results)
-
-        if delete:
-            remove(image_path)
+        with Path(image_path) as f:
+            if delete and f.is_file():
+                self.bot.logger.log(INFO, 'Deleting {}'.format(image_path))
+                f.unlink()
 
     @commands.command(pass_context=True)
     @commands.cooldown(rate=5, per=2.5, type=commands.BucketType.user)
@@ -80,7 +82,7 @@ class ScoutCommands:
             ctx.message.author, "honour", 11, True, args
         )
         await scout.do_scout()
-        await self.__handle_result(ctx, scout.results, scout.image_path)
+        await self.__handle_result(ctx, scout.results, scout.image_path, True)
 
     @commands.command(pass_context=True, aliases=['scoutregular', 'scoutr'])
     @commands.cooldown(rate=5, per=2.5, type=commands.BucketType.user)
@@ -98,14 +100,14 @@ class ScoutCommands:
             ctx.message.author, "regular", 1, False, args
         )
         await scout.do_scout()
-        await self.__handle_result(ctx, scout.results, scout.image_path)
+        await self.__handle_result(ctx, scout.results, scout.image_path, False)
 
     @commands.command(pass_context=True, aliases=['scoutregular10', 'scoutr10'])
     @commands.cooldown(rate=3, per=2.5, type=commands.BucketType.user)
     async def __scoutr10(self, ctx, *args: str):
         """
         general: |
-            10 card regular scouting.
+            10 card regular scouting.True
 
             **Rates:** N: 90%, R: 5%
         optional arguments: |
@@ -116,7 +118,7 @@ class ScoutCommands:
             ctx.message.author, "regular", 10, False, args
         )
         await scout.do_scout()
-        await self.__handle_result(ctx, scout.results, scout.image_path)
+        await self.__handle_result(ctx, scout.results, scout.image_path, True)
 
     @commands.command(pass_context=True, aliases=['scoutcoupon', 'scoutc'])
     @commands.cooldown(rate=5, per=2.5, type=commands.BucketType.user)
@@ -138,4 +140,4 @@ class ScoutCommands:
             ctx.message.author, "coupon", 1, False, args
         )
         await scout.do_scout()
-        await self.__handle_result(ctx, scout.results, scout.image_path)
+        await self.__handle_result(ctx, scout.results, scout.image_path, False)
