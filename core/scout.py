@@ -1,15 +1,16 @@
 import urllib.parse
+from collections import namedtuple
 from posixpath import basename
 from random import randint, shuffle, uniform
-from time import clock
-from pathlib import Path
+from time import time
+
 from discord import User
 
 from bot import SessionManager
 from core.argument_parser import parse_arguments
 from core.get_names import get_idol_names
-from core.image_generator import idol_img_path, create_image, \
-    download_image_from_url
+from core.image_generator import create_image, get_one_img, \
+    idol_img_path
 
 API_URL = 'http://schoolido.lu/api/'
 
@@ -25,10 +26,16 @@ RATES = {
 IDOL_NAMES = get_idol_names()
 
 
+class ScoutImage(namedtuple('ScoutImage', ('bytes', 'name'))):
+    __slots__ = ()
+
+
 class Scout:
     """
     Provides scouting functionality for bot.
     """
+    __slots__ = ('results', 'session_manager', '_user', '_box', '_count',
+                 '_guaranteed_sr', '_args')
 
     def __init__(self, session_manager: SessionManager, user: User,
                  box: str = "honour", count: int = 1,
@@ -43,7 +50,6 @@ class Scout:
         :param args: Scout command arguments
         """
         self.results = []
-        self.image_path = None
         self.session_manager = session_manager
         self._user = user
         self._box = box
@@ -53,11 +59,11 @@ class Scout:
 
     async def do_scout(self):
         if self._count > 1:
-            await self._handle_multiple_scout()
+            img = await self._handle_multiple_scout()
         else:
-            await self._handle_solo_scout()
-
+            img = await self._handle_solo_scout()
         self.results = _shrink_results(self.results)
+        return img
 
     async def _handle_multiple_scout(self):
         """
@@ -80,13 +86,9 @@ class Scout:
         if len(circle_image_urls) != self._count:
             self.results = []
             return None
-
-        self.image_path = await create_image(
-            self.session_manager,
-            circle_image_urls,
-            2,
-            str(clock()) + str(randint(0, 100)) + ".png"
-        )
+        fname = f'{int(time())}{randint(0, 100)}.png'
+        _bytes = await create_image(self.session_manager, circle_image_urls, 2)
+        return ScoutImage(_bytes, fname)
 
     async def _handle_solo_scout(self):
         """
@@ -108,11 +110,11 @@ class Scout:
         else:
             url = "http:" + card["card_image"]
 
-        self.image_path = idol_img_path.joinpath(
-            basename(urllib.parse.urlsplit(url).path))
-
-        await download_image_from_url(url, Path(self.image_path),
-                                      self.session_manager)
+        fname = basename(urllib.parse.urlsplit(url).path)
+        image_path = idol_img_path.joinpath(fname)
+        bytes_ = await get_one_img(
+            url, image_path, self.session_manager)
+        return ScoutImage(bytes_, fname)
 
     async def _scout_cards(self) -> list:
         """
