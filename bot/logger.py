@@ -20,14 +20,10 @@ def command_formatter(message: Message, command_name=None) -> str:
     :param command_name: optional identifier for request
     :return: the formatted log message.
     """
-    content = ''
-    if command_name:
-        content += command_name + ' '
-
-    content += 'from ' + message.author.name + '(' + message.author.id + ') '
-    if message.server:
-        content += 'in ' + message.server.name + ' #' + message.channel.name
-    return content
+    command = command_name or ''
+    server = f'in {message.server} #{message.channel}' \
+        if message.server else None
+    return f'{command} from {message.author} ({message.author.id}) {server}'
 
 
 def timestamp(*args):
@@ -36,7 +32,7 @@ def timestamp(*args):
 
     :return: timestamp string with format yyyy-MM-dd hh:mm:ss AP/PM
     """
-    return datetime.now(timezone('US/Eastern')).timetuple()
+    return datetime.now(timezone('Canada/Eastern')).timetuple()
 
 
 def setup_logging(start_time, path: Path):
@@ -62,7 +58,7 @@ def get_file_handler(path: Path, start_time):
     :return: the file handler
     """
     handler = logging.FileHandler(
-        filename=path.joinpath('{}.log'.format(int(start_time))),
+        filename=path.joinpath(f'{int(start_time)}.log'),
         encoding='utf-8',
         mode='w+'
     )

@@ -1,10 +1,8 @@
 from http import HTTPStatus
 from json import loads
-from logging import WARN
 
 from aiohttp import ClientResponse, ClientSession
 from discord.ext.commands import CommandError
-from requests import get
 
 
 class HTTPStatusError(CommandError):
@@ -14,8 +12,8 @@ class HTTPStatusError(CommandError):
         self.url = url
 
     def __str__(self):
-        return 'HTTPStatusError:\nUrl: {}\nCode: {}\nMessage: {}'.format(
-            self.url, self.code, self.msg)
+        return (f'HTTPStatusError:'
+                f'\nUrl: {self.url}\nCode: {self.code}\nMessage: {self.msg}')
 
 
 async def get_session_manager(logger):
@@ -74,50 +72,6 @@ class SessionManager:
             return res
         raise HTTPStatusError(code, self.get_msg(code), url)
 
-    def __json_sync(self, url, params):
-        """
-        Return the json content from an HTTP request using requests.
-        :param url: the url.
-        :param params: the request params.
-        :return: the json content in a python dict.
-        :raises HTTPStatusError: if the status code isn't in the 200s
-        """
-        try:
-            res = self.sync_get(url, params)
-        except HTTPStatusError as e:
-            raise e
-        else:
-            with res:
-                try:
-                    js = res.json()
-                except Exception as e:
-                    self.logger.log(WARN, str(e))
-                    text = res.text
-                    js = loads(text) if text else None
-                return js
-
-    async def __json_async(self, url, params):
-        """
-        Return the json content from an HTTP request using Aiohttp.
-        :param url: the url.
-        :param params: the request params.
-        :return: the json content in a python dict.
-        :raises HTTPStatusError: if the status code isn't in the 200s
-        """
-        try:
-            res = await self.get(url, params=params)
-        except HTTPStatusError as e:
-            raise e
-        else:
-            async with res:
-                try:
-                    js = await res.json()
-                except Exception as e:
-                    self.logger.log(WARN, str(e))
-                    text = await res.text()
-                    js = loads(text) if text else None
-                return js
-
     async def get_json(self, url: str, params: dict = None):
         """
         Get the json content from an HTTP request.
@@ -126,28 +80,10 @@ class SessionManager:
         :return: the json content in a dict if success, else the error message.
         :raises HTTPStatusError: if the status code isn't in the 200s
         """
-        try:
-            return await self.__json_async(url, params)
-        except Exception as e:
-            if isinstance(e, HTTPStatusError):
-                raise e
-            else:
-                self.logger.log(WARN, str(e))
-                return self.__json_sync(url, params)
-
-    def sync_get(self, url, params, **kwargs):
-        """
-        A fall back get method using requests.get
-        :param url: URL for the new :class:`Request` object.
-        :param params: (optional) Dictionary or bytes to be sent in the query
-        string for the :class:`Request`.
-        :param kwargs: Optional arguments that ``request`` takes.
-        :return: :class:`Response <Response>` object
-        :rtype: requests.Response
-        :raises: HTTPStatusError if status code isn't 200
-        """
-        res = get(url, params=params, **kwargs)
-        return self.return_response(res, res.status_code, url)
+        res = await self.get(url, params=params)
+        async with res:
+            text = await res.read()
+            return loads(text) if text else None
 
     async def get(
             self, url, *, allow_redirects=True, **kwargs) -> ClientResponse:

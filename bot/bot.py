@@ -58,7 +58,7 @@ class HahaNoUR(Bot):
         """
         try:
             await self.wait_until_ready()
-            await self.change_presence(game=Game(name="!album"))
+            await self.change_presence(game=Game(name='!album'))
         except ConnectionClosed:
             await self.logout()
             await self.login()
@@ -78,9 +78,8 @@ class HahaNoUR(Bot):
         """
         Event for when the bot is ready.
         """
-        self.logger.log(logging.INFO, "Logged in")
-        self.logger.log(
-            logging.INFO, str(len(self.servers)) + " servers detected")
+        self.logger.log(logging.INFO, 'Logged in')
+        self.logger.log(logging.INFO, f'{len(self.servers)} servers detected')
         await self.__change_presence()
 
     async def process_commands(self, message):
@@ -103,10 +102,10 @@ class HahaNoUR(Bot):
         """
         Runtime error handling
         """
-        ig = 'Ignoring exception in {}\n'.format(event_method)
+        ig = f'Ignoring exception in {event_method}\n'
         tb = format_exc()
-        log_msg = '\n{}\n{}'.format(ig, tb)
-        header = '**CRITICAL**\n{}'.format(ig)
+        log_msg = f'\n{ig}\n{tb}'
+        header = f'**CRITICAL**\n{ig}'
         lvl = logging.CRITICAL
         base = (':x: I ran into a critical error, '
                 'it has been reported to my developers.')
@@ -118,7 +117,7 @@ class HahaNoUR(Bot):
         except (IndexError, AssertionError, AttributeError):
             pass
         else:
-            header = '**ERROR**\n{}'.format(ig)
+            header = f'**ERROR**\n{ig}'
             lvl = logging.ERROR
             await self.send_message(channel, base)
         finally:
@@ -140,11 +139,11 @@ class HahaNoUR(Bot):
         except Exception as e:
             tb = format_exc()
             msg, triggered = format_command_error(e, context)
-            self.logger.log(logging.WARN, '\n{}\n\n{}'.format(msg, tb))
-            warn = (':warning: I ran into an error while executing this '
-                    'command. It has been reported to my developers.\n{}')
-            await self.send_message(channel, warn.format(msg))
+            self.logger.log(logging.WARN, f'\n{msg}\n\n{tb}')
+            warn = (f':warning: I ran into an error while executing this '
+                    f'command. It has been reported to my developers.\n{msg}')
+            await self.send_message(channel, warn)
             await self.send_traceback(
-                tb, '**WARNING** Triggered message:\n{}'.format(triggered))
+                tb, f'**WARNING** Triggered message:\n{triggered}')
         else:
             await self.send_message(channel, res)

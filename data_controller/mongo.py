@@ -1,6 +1,7 @@
+import time
+
 import pymongo
 from discord import User
-import time
 
 PORT = 27017
 DATABASE_NAME = "haha-no-ur"
@@ -67,11 +68,9 @@ class DatabaseController:
         """
         # Query cards in user's album.
         user_doc = self.find_user(user)
-        if user_doc == None:
+        if not user_doc:
             return []
-
-        cards = user_doc["album"]
-        return cards
+        return user_doc['album']
 
     def add_to_user_album(self, user: User, new_cards: list,
                           idolized: bool = False):
