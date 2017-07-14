@@ -1,7 +1,7 @@
 import logging
 from traceback import format_exc
 
-from discord import Channel, Game, Object
+from discord import Channel, Forbidden, Game, Object
 from discord.ext.commands import Bot, CommandNotFound, Context
 from websockets.exceptions import ConnectionClosed
 
@@ -118,10 +118,19 @@ class HahaNoUR(Bot):
         else:
             header = f'**ERROR**\n{ig}'
             lvl = logging.ERROR
-            await self.send_message(channel, base)
+            try:
+                await self.send_message(channel, base)
+            except Forbidden:
+                pass
         finally:
             self.logger.log(lvl, log_msg)
             await self.send_traceback(tb, header)
+
+    async def __try_send_msg(self, channel, author, msg):
+        try:
+            await self.send_message(channel, msg)
+        except Forbidden:
+            await self.send_message(author, msg)
 
     async def on_command_error(self, exception, context):
         """
@@ -141,8 +150,9 @@ class HahaNoUR(Bot):
             self.logger.log(logging.WARN, f'\n{msg}\n\n{tb}')
             warn = (f':warning: I ran into an error while executing this '
                     f'command. It has been reported to my developers.\n{msg}')
-            await self.send_message(channel, warn)
+
+            await self.__try_send_msg(channel, context.message.author, warn)
             await self.send_traceback(
                 tb, f'**WARNING** Triggered message:\n{triggered}')
         else:
-            await self.send_message(channel, res)
+            await self.__try_send_msg(channel, context.message.author, res)
