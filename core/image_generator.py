@@ -1,65 +1,64 @@
-import urllib.parse
 from collections import deque
+from io import BytesIO
 from logging import INFO
 from pathlib import Path
 from typing import List, Sequence, Tuple
+from urllib.parse import urlsplit
 
 from PIL import Image
 
 from bot import SessionManager
 from idol_images import idol_img_path
-from scout_output import scout_output_path
 
 CIRCLE_DISTANCE = 10
 
 
 async def create_image(session_manager: SessionManager,
-                       idol_circle_urls: list, num_rows: int,
-                       output_filename: str,
-                       align: bool = False) -> str:
+                       urls: list, num_rows: int,
+                       align: bool = False) -> BytesIO:
     """
     Creates a stitched together image of idol circles.
     :param session_manager: the SessionManager
-    :param idol_circle_urls: urls of idol circle images to be stitched together.
+    :param urls: urls of single images to be stitched together.
     :param num_rows: Number of rows to use in the image
-    :param output_filename: name of output image file
     :param align: to align middle the image or not.
     :return: path pointing to created image
     """
-    num_rows = min((num_rows, len(idol_circle_urls)))
-    image_filepaths = []  # list of image filepaths
+    num_rows = min((num_rows, len(urls)))
     # Save images that do not exists
-    for image_url in idol_circle_urls:
-        url_path = urllib.parse.urlsplit(image_url).path
-        file_path = idol_img_path.joinpath(Path(url_path).name)
-        image_filepaths.append(file_path)
-        await download_image_from_url(image_url, file_path, session_manager)
+    imgs = []
+    for url in urls:
+        url_path = Path(urlsplit(url).path)
+        file_path = idol_img_path.joinpath(url_path.name)
+        imgs.append(Image.open(
+            await get_one_img(url, file_path, session_manager)))
+
+    res = BytesIO()
     # Load images
-    circle_images = [Image.open(str(i)) for i in image_filepaths]
-    image = _build_image(circle_images, num_rows, 10, 10, align)
-    output_path = scout_output_path.joinpath(output_filename)
-    image.save(str(output_path), 'PNG')
-    return str(output_path)
+    image = _build_image(imgs, num_rows, 10, 10, align)
+    image.save(res, 'PNG')
+    return BytesIO(res.getvalue())
 
 
-async def download_image_from_url(
-        url: str, path: Path, session_manager: SessionManager) -> Path:
+async def get_one_img(url: str, path: Path,
+                      session_manager: SessionManager) -> BytesIO:
     """
-    Downloads an image from a url and saves it to a specified location.
+    Get a single image. If image is not found in local storge, download it.
 
     :param url: url of image
     :param path: path where image will be saved to
     :param session_manager: the SessionManager
-    :return: path of saved image
+    :return: a BytesIO of the image.
     """
-    response = await session_manager.get(url)
-    async with response:
-        if not path.is_file():
-            session_manager.logger.log(
-                INFO, 'Saving ' + url + ' to ' + str(path))
-            image = await response.read()
-            path.write_bytes(image)
-    return path
+    if path.is_file():
+        return BytesIO(path.read_bytes())
+    resp = await session_manager.get(url)
+    async with resp:
+        session_manager.logger.log(
+            INFO, 'Saving ' + url + ' to ' + str(path))
+        image = await resp.read()
+        path.write_bytes(image)
+        return BytesIO(image)
 
 
 def _build_image(circle_images: list, num_rows: int,
