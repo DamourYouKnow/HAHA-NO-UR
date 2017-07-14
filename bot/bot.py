@@ -9,29 +9,31 @@ from bot.error_handler import command_error_handler, format_command_error, \
     format_traceback
 from bot.logger import command_formatter
 from bot.session_manager import SessionManager
-from core.helpers import detailed_help, general_help_embed, \
-    get_command_collections, get_valid_commands
+from core.help import get_help
 from data_controller.mongo import DatabaseController
 
 
 class HahaNoUR(Bot):
-    def __init__(self, prefix: str, start_time: int, logger,
+    def __init__(self, prefix: str, start_time: int, colour: int, logger,
                  session_manager: SessionManager, db: DatabaseController,
                  error_log: int):
         """
-        Initialize an instance of the bot.
-        :param session_manager: the session manager used for HTTP requests.
+        Init the instance of HahaNoUR.
         :param prefix: the bot prefix.
-        :param start_time: the start time.
+        :param start_time: the bot start time.
+        :param colour: the colour used for embeds.
         :param logger: the logger.
-        :param error_log: the error log channel id.
+        :param session_manager: the SessionManager instance.
+        :param db: the MongoDB data controller.
+        :param error_log: the channel id for error log.
         """
         super().__init__(prefix)
         self.prefix = prefix
+        self.colour = colour
         self.start_time = start_time
         self.logger = logger
         self.help_general = None
-        self.help_detailed = {}
+        self.all_help = None
         self.db = db
         self.all_commands = []
         self.session_manager = session_manager
@@ -46,10 +48,6 @@ class HahaNoUR(Bot):
         """
         for cog in cogs:
             self.add_cog(cog)
-        command_list, command_dict = get_command_collections(self)
-        self.help_general = general_help_embed(self, command_dict)
-        self.help_detailed = detailed_help(command_list, self.logger)
-        self.all_commands = get_valid_commands(self)
         self.run(token)
 
     async def __change_presence(self):
@@ -80,6 +78,7 @@ class HahaNoUR(Bot):
         """
         self.logger.log(logging.INFO, 'Logged in')
         self.logger.log(logging.INFO, f'{len(self.servers)} servers detected')
+        self.help_general, self.all_help = get_help(self)
         await self.__change_presence()
 
     async def process_commands(self, message):

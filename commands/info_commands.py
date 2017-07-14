@@ -1,10 +1,12 @@
+from time import time
+
 from discord.ext import commands
 
 from bot import HahaNoUR
 from data import data_path
 
 
-class InfoCommands:
+class Info:
     def __init__(self, bot: HahaNoUR):
         self.bot = bot
         with data_path.joinpath('info.txt').open() as f:
@@ -13,20 +15,31 @@ class InfoCommands:
     @commands.command()
     async def info(self):
         """
-        Display a info message.
+        Description: Displays information about the bot.
         """
         await self.bot.say(self.info_msg)
 
     @commands.command()
-    async def help(self, command=None):
+    async def help(self, *, command=''):
         """
-        Display this message.
+        Description: Help command.
+        Usage: "`{prefix}help` for a list of all commands,
+        `{prefix}help command name` for help for the specific command."
         """
-        if command is None:
-            await self.bot.say(embed=self.bot.help_general)
-            return
-        for key, val in self.bot.help_detailed.items():
-            if command in key:
-                await self.bot.say(embed=val)
-                return
-        await self.bot.say(embed=self.bot.help_general)
+        await self.bot.say(
+            embed=self.bot.all_help.get(command, self.bot.help_general)
+        )
+
+    @commands.command()
+    async def ping(self):
+        """
+        Description: Command to check network ping.
+        Usage: "`{prefix}ping`"
+        """
+        start = time()
+        msg = await self.bot.say('Loading... :hourglass:')
+        end = time()
+        diff = end - start
+        await self.bot.edit_message(
+            msg, new_content=f':ping_pong: Pong! | {round(diff*1000)}ms'
+        )

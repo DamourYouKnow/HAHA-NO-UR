@@ -1,12 +1,12 @@
 from discord.ext import commands
 
 from bot import HahaNoUR
-from core.scout import Scout, ScoutImage
+from core.scout_handler import ScoutHandler, ScoutImage
 
 
-class ScoutCommands:
+class Scout:
     """
-    A class to hold all bot commands.
+    A class to hold all Scout commands.
     """
 
     def __init__(self, bot: HahaNoUR):
@@ -40,18 +40,18 @@ class ScoutCommands:
     @commands.cooldown(rate=5, per=2.5, type=commands.BucketType.user)
     async def scout(self, ctx, *args: str):
         """
-        general: |
+        Description: |
             Solo honour scouting.
 
-            "**Rates:** R: 80%, SR: 15%, SSR: 4%, UR: 1%"
-        optional arguments: |
+            **Rates:** R: 80%, SR: 15%, SSR: 4%, UR: 1%
+        Optional Arguments: |
             Main unit name (Aqours, Muse, Saint Snow, A-RISE)
             Sub unit name (Lily White, CYaRon, ...)
             Idol first name (Honoka, Chika, ...)
             Attribute (smile, pure, cool)
             Year (first, second, third)
         """
-        scout = Scout(
+        scout = ScoutHandler(
             self.bot.session_manager,
             ctx.message.author, 'honour', 1, False, args
         )
@@ -62,76 +62,76 @@ class ScoutCommands:
     @commands.cooldown(rate=3, per=2.5, type=commands.BucketType.user)
     async def scout11(self, ctx, *args: str):
         """
-        general: |
+        Description: |
             10+1 honour scouting.
 
-            "**Rates:** R: 80%, SR: 15%, SSR: 4%, UR: 1%"
-        optional arguments: |
+            **Rates:** R: 80%, SR: 15%, SSR: 4%, UR: 1%
+        Optional Arguments: |
             Main unit name (Aqours, Muse, Saint Snow, A-RISE)
             Sub unit name (Lily White, CYaRon, ...)
             Idol first name (Honoka, Chika, ...)
             Attribute (smile, pure, cool)
             Year (first, second, third)
         """
-        scout = Scout(
+        scout = ScoutHandler(
             self.bot.session_manager,
             ctx.message.author, 'honour', 11, True, args
         )
         image = await scout.do_scout()
         await self.__handle_result(ctx, scout.results, image)
 
-    @commands.command(pass_context=True, aliases=['scoutregular', 'scoutr'])
+    @commands.command(pass_context=True, aliases=['scoutr'])
     @commands.cooldown(rate=5, per=2.5, type=commands.BucketType.user)
-    async def __scoutregular(self, ctx, *args: str):
+    async def scoutregular(self, ctx, *args: str):
         """
-        general: |
+        Description: |
             Solo regular scouting.
 
-            "**Rates:** N: 90%, R: 5%"
-        optional arguments: |
+            **Rates:** N: 90%, R: 5%
+        Optional Arguments: |
             Attribute (smile, pure, cool)
         """
-        scout = Scout(
+        scout = ScoutHandler(
             self.bot.session_manager,
             ctx.message.author, 'regular', 1, False, args
         )
         image = await scout.do_scout()
         await self.__handle_result(ctx, scout.results, image)
 
-    @commands.command(pass_context=True, aliases=['scoutregular10', 'scoutr10'])
+    @commands.command(pass_context=True, aliases=['scoutr10'])
     @commands.cooldown(rate=3, per=2.5, type=commands.BucketType.user)
-    async def __scoutr10(self, ctx, *args: str):
+    async def scoutregular10(self, ctx, *args: str):
         """
-        general: |
-            10 card regular scouting.True
+        Description: |
+            10 card regular scouting.
 
             **Rates:** N: 90%, R: 5%
-        optional arguments: |
+        Optional Arguments: |
             Attribute (smile, pure, cool)
         """
-        scout = Scout(
+        scout = ScoutHandler(
             self.bot.session_manager,
             ctx.message.author, 'regular', 10, False, args
         )
         image = await scout.do_scout()
         await self.__handle_result(ctx, scout.results, image)
 
-    @commands.command(pass_context=True, aliases=['scoutcoupon', 'scoutc'])
+    @commands.command(pass_context=True, aliases=['scoutc'])
     @commands.cooldown(rate=5, per=2.5, type=commands.BucketType.user)
-    async def __scoutc(self, ctx, *args: str):
+    async def scoutcoupon(self, ctx, *args: str):
         """
-        general: |
+        Description: |
             Blue scouting coupon scouting.
 
-            "**Rates:** SR: 80%, UR: 20%"
-        optional arguments: |
+            **Rates:** SR: 80%, UR: 20%
+        Optional Arguments: |
             Main unit name (Aqours, Muse, Saint Snow, A-RISE)
             Sub unit name (Lily White, CYaRon, ...)
             Idol first name (Honoka, Chika, ...)
             Attribute (smile, pure, cool)
             Year (first, second, third)
         """
-        scout = Scout(
+        scout = ScoutHandler(
             self.bot.session_manager,
             ctx.message.author, 'coupon', 1, False, args
         )

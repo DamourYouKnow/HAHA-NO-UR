@@ -29,7 +29,7 @@ SORTS = [
 _last_user_args = {}
 
 
-class AlbumCommands:
+class Album:
     """
     A class to hold all album commands.
     """
@@ -54,18 +54,18 @@ class AlbumCommands:
                    f'`!help album` for more info.')
             await self.bot.upload(image, filename='a.png', content=msg)
 
-    @commands.command(pass_context=True, aliases=['album', 'a'])
+    @commands.command(pass_context=True, aliases=['a'])
     @commands.cooldown(rate=3, per=2.5, type=commands.BucketType.user)
     @commands.check(check_mongo)
-    async def __album(self, ctx, *args: str):
+    async def album(self, ctx, *args: str):
         """
-        general: |
+        Description: |
             View your album.
 
             Your selected filters and sort will be remembered.
             To clear filters, provide the argument <all>
 
-        optional arguments: |
+        Optional Arguments: |
             Page (1, 2, 3, ...)
             Sort (id, rarity, newest, attribute, year, unit, subunit, date)
             Main unit name (Aqours, Muse, Saint Snow, A-RISE)

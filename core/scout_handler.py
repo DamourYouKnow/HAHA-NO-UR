@@ -1,18 +1,15 @@
-import urllib.parse
 from collections import namedtuple
 from posixpath import basename
 from random import randint, shuffle, uniform
 from time import time
+from urllib.parse import urlsplit
 
 from discord import User
 
 from bot import SessionManager
 from core.argument_parser import parse_arguments
-from core.get_names import get_idol_names
 from core.image_generator import create_image, get_one_img, \
     idol_img_path
-
-API_URL = 'http://schoolido.lu/api/'
 
 RATES = {
     "regular": {"N": 0.95, "R": 0.05, "SR": 0.00, "SSR": 0.00,
@@ -23,14 +20,12 @@ RATES = {
                "UR": 0.20}
 }
 
-IDOL_NAMES = get_idol_names()
-
 
 class ScoutImage(namedtuple('ScoutImage', ('bytes', 'name'))):
     __slots__ = ()
 
 
-class Scout:
+class ScoutHandler:
     """
     Provides scouting functionality for bot.
     """
@@ -110,7 +105,7 @@ class Scout:
         else:
             url = "http:" + card["card_image"]
 
-        fname = basename(urllib.parse.urlsplit(url).path)
+        fname = basename(urlsplit(url).path)
         image_path = idol_img_path.joinpath(fname)
         bytes_ = await get_one_img(
             url, image_path, self.session_manager)
@@ -176,8 +171,7 @@ class Scout:
             'is_special': 'False',
             'page_size': str(count)
         }
-        # Build request url
-        request_url = API_URL + 'cards/?'
+        url = 'http://schoolido.lu/api/cards/?'
 
         for arg_type, arg_values in self._args.items():
             if not arg_values:
@@ -192,7 +186,7 @@ class Scout:
             elif arg_type == "sub_unit":
                 params['idol_sub_unit'] = values_str
             elif arg_type == "name":
-                request_url += "&name=" + values_str
+                url += "&name=" + values_str
             # FIXME Why the heck does this not work.
             # elif arg_type == "name":
             #     params['name'] = values_str
@@ -202,7 +196,7 @@ class Scout:
                 params['attribute'] = values_str
 
         # Get and return response
-        return await self.session_manager.get_json(request_url, params)
+        return await self.session_manager.get_json(url, params)
 
     def _roll_rarity(self, guaranteed_sr: bool = False) -> str:
         """
