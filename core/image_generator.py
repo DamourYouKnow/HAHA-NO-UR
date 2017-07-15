@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import List, Sequence, Tuple
 from urllib.parse import urlsplit
 
-from PIL import Image, ImageDraw, ImageColor
+from PIL import Image, ImageDraw, ImageFont
 
 from bot import SessionManager
 from idol_images import idol_img_path
@@ -71,7 +71,7 @@ def _add_label(img: Image):
 
     :param img: Image to add label to.
     """
-    label = _create_label(100, 25, [], '#ff0000', '#ffffff')
+    label = _create_label(100, 25, ["9999", "99+"], "#ffa500", '#000000')
     img = img.convert('RGBA')
     temp_canvas = Image.new('RGBA', img.size)
 
@@ -91,13 +91,54 @@ def _create_label(width: int, height: int, texts: List,
     """
     label_img = Image.new('RGBA', (width, height))
     label_draw = ImageDraw.Draw(label_img)
+
     bounds = [(0, 0), (width, height)]
     label_draw.rectangle(bounds, background_colour, outline_colour)
-    label_draw.text((0, 0), "test", outline_colour)
 
     # TODO D'Amour: add texts
+    font_size = _compute_label_font_size(label_img, texts, 'arial.ttf')
+    font = ImageFont.truetype('arial.ttf', font_size)
+
+    # This made sense when I wrote it.
+    container_x, container_y = 0, 0
+    container_w, container_h = width / len(texts), height
+    container_mid_x, container_y_mid = container_w / 2, container_h / 2
+    for text in texts:
+        text_w, text_h = font.getsize(text)
+        text_x = (container_x + (0.5 * container_w)) - (0.5 * text_w)
+        text_w = (container_y + (0.5 * container_h)) - (0.5 * text_h)
+        label_draw.text((text_x, text_w), text, outline_colour, font)
+        container_x += container_w
+
     del label_draw
     return label_img
+
+def _compute_label_font_size(label: Image, texts: List, font_type: str) -> int:
+    """
+    Computes the largest possible font size that a label can support for its
+        given text.
+
+    :param label: Target label image.
+    :param texts: List of text to put on the label.
+
+    :return: Largest possible font size.
+    """
+    label_width, label_height = label.size
+
+    text_max_width = label_width / len(texts)
+    text_max_height = label_height
+    max_str = max(texts, key=len)
+
+    font_size = 1
+    font = ImageFont.truetype(font_type, font_size)
+    font_width, font_height = font.getsize(max_str)
+    while font_width < text_max_width and font_height < text_max_height:
+        font_size += 1
+        font = ImageFont.truetype(font_type, font_size)
+        font_width, font_height = font.getsize(max_str)
+
+    return font_size - 1
+
 
 
 def _build_image(circle_images: list, num_rows: int,
