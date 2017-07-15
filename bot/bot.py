@@ -130,8 +130,8 @@ class HahaNoUR(Bot):
         try:
             await self.send_message(channel, msg)
         except Forbidden:
-            msg = "It appears I don't have permission to post messages and "
-            msg += "send files. Please make sure I can do this!"
+            msg = ("It appears I don't have permission to post messages and "
+                   "send files. Please make sure I can do this!")
             await self.send_message(author, msg)
 
     async def on_command_error(self, exception, context):
