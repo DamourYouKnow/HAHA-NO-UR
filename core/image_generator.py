@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import List, Sequence, Tuple
 from urllib.parse import urlsplit
 
-from PIL import Image
+from PIL import Image, ImageDraw, ImageColor
 
 from bot import SessionManager
 from idol_images import idol_img_path
@@ -30,8 +30,13 @@ async def create_image(session_manager: SessionManager,
     for url in urls:
         url_path = Path(urlsplit(url).path)
         file_path = idol_img_path.joinpath(url_path.name)
-        imgs.append(Image.open(
-            await get_one_img(url, file_path, session_manager)))
+
+        next_img = Image.open(
+                await get_one_img(url, file_path, session_manager))
+        # TODO D'Amour add labels only if album, pass in add_labels as boolean.
+        next_img = _add_label(next_img)
+
+        imgs.append(next_img)
 
     res = BytesIO()
     # Load images
@@ -59,6 +64,40 @@ async def get_one_img(url: str, path: Path,
         image = await resp.read()
         path.write_bytes(image)
         return BytesIO(image)
+
+def _add_label(img: Image):
+    """
+    Adds a label with text to an image.
+
+    :param img: Image to add label to.
+    """
+    label = _create_label(100, 25, [], '#ff0000', '#ffffff')
+    img = img.convert('RGBA')
+    temp_canvas = Image.new('RGBA', img.size)
+
+    # TODO D'Amour: make this not (0, 0)
+    temp_canvas.paste(label, (0, 0))
+    return Image.alpha_composite(img, temp_canvas)
+
+def _create_label(width: int, height: int, texts: List,
+                 background_colour: str, outline_colour: str) -> Image:
+    """
+    :param size: Tuple of (width, height) representing label size.
+    :param texts: List of text to add to the label, each text string will be
+        seperated by a dividing line.
+    :param colour: Colour of image.
+
+    :return: Label image.
+    """
+    label_img = Image.new('RGBA', (width, height))
+    label_draw = ImageDraw.Draw(label_img)
+    bounds = [(0, 0), (width, height)]
+    label_draw.rectangle(bounds, background_colour, outline_colour)
+    label_draw.text((0, 0), "test", outline_colour)
+
+    # TODO D'Amour: add texts
+    del label_draw
+    return label_img
 
 
 def _build_image(circle_images: list, num_rows: int,
