@@ -77,9 +77,9 @@ class Album:
         """
         user = ctx.message.author
         album = self.bot.db.get_user_album(user)
-        album_size = len(album)
         _parse_album_arguments(args, user)
         album = _apply_filter(album, user)
+        filtered_album_size = len(album)
         album = _apply_sort(album, user)
         album = _splice_page(album, user)
 
@@ -94,7 +94,7 @@ class Album:
         image = await create_image(
             self.bot.session_manager, urls, ROWS, True
         ) if urls else None
-        await self.__handle_result(ctx, album_size, image)
+        await self.__handle_result(ctx, filtered_album_size, image)
 
 
 def _apply_filter(album: list, user: User):
