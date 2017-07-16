@@ -83,17 +83,9 @@ class Album:
         album = _apply_sort(album, user)
         album = _splice_page(album, user)
 
-        urls = []
-        for card in album:
-            if not card['round_card_image']:
-                urls.append('http:' + card['round_card_idolized_image'])
-            else:
-                urls.append('http:' + card['round_card_image'])
-
-        # TODO change this to call newer version of function that makes labels.
         image = await create_image(
-            self.bot.session_manager, urls, ROWS, True
-        ) if urls else None
+            self.bot.session_manager, album, ROWS, True, True
+        ) if len(album) > 0 else None
         await self.__handle_result(ctx, filtered_album_size, image)
 
 

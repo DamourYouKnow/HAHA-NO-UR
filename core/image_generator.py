@@ -12,29 +12,34 @@ from idol_images import idol_img_path
 
 CIRCLE_DISTANCE = 10
 
-
-async def create_image(session_manager: SessionManager,
-                       urls: list, num_rows: int,
-                       align: bool = False) -> BytesIO:
+# TODO seperate function that album_command calls.
+async def create_image(session_manager: SessionManager, cards: list,
+                       num_rows: int, align: bool = False,
+                       add_labels: bool = False) -> BytesIO:
     """
     Creates a stitched together image of idol circles.
     :param session_manager: the SessionManager
-    :param urls: urls of single images to be stitched together.
+    :param cards: cards to be stitched together.
     :param num_rows: Number of rows to use in the image
     :param align: to align middle the image or not.
+    :param add_labels: to add labels or not.
     :return: path pointing to created image
     """
-    num_rows = min((num_rows, len(urls)))
+    num_rows = min((num_rows, len(cards)))
     # Save images that do not exists
+
     imgs = []
-    for url in urls:
+    for card in cards:
+        url = "http:" + card['round_card_image']
+
         url_path = Path(urlsplit(url).path)
         file_path = idol_img_path.joinpath(url_path.name)
 
         next_img = Image.open(
                 await get_one_img(url, file_path, session_manager))
-        # TODO D'Amour add labels only if album, pass in add_labels as boolean.
-        next_img = _add_label(next_img)
+
+        if add_labels:
+            next_img = _add_label(next_img, [str(card['id']), "99+"], "#ffa500")
 
         imgs.append(next_img)
 
@@ -65,18 +70,22 @@ async def get_one_img(url: str, path: Path,
         path.write_bytes(image)
         return BytesIO(image)
 
-def _add_label(img: Image):
+def _add_label(img: Image, texts: list, colour: str):
     """
     Adds a label with text to an image.
 
     :param img: Image to add label to.
     """
-    label = _create_label(100, 25, ["9999", "99+"], "#ffa500", '#000000')
+    label = _create_label(100, 25, texts, colour, '#000000')
     img = img.convert('RGBA')
     temp_canvas = Image.new('RGBA', img.size)
 
     # TODO D'Amour: make this not (0, 0)
-    temp_canvas.paste(label, (0, 0))
+    img_width, img_height = img.size
+    label_width, label_height = label.size
+    label_x = int((0.5 * img_width) - (0.5 * label_width)) # Center vertically
+    label_y = img_height - label_height
+    temp_canvas.paste(label, (label_x, label_y))
     return Image.alpha_composite(img, temp_canvas)
 
 def _create_label(width: int, height: int, texts: List,
@@ -92,10 +101,9 @@ def _create_label(width: int, height: int, texts: List,
     label_img = Image.new('RGBA', (width, height))
     label_draw = ImageDraw.Draw(label_img)
 
-    bounds = [(0, 0), (width, height)]
+    bounds = [(0, 0), (width-1, height-1)]
     label_draw.rectangle(bounds, background_colour, outline_colour)
 
-    # TODO D'Amour: add texts
     font_size = _compute_label_font_size(label_img, texts, 'arial.ttf')
     font = ImageFont.truetype('arial.ttf', font_size)
 
@@ -104,10 +112,19 @@ def _create_label(width: int, height: int, texts: List,
     container_w, container_h = width / len(texts), height
     container_mid_x, container_y_mid = container_w / 2, container_h / 2
     for text in texts:
+        # Get size of next text
         text_w, text_h = font.getsize(text)
+
+        # Compute position of next text, centered in current container
         text_x = (container_x + (0.5 * container_w)) - (0.5 * text_w)
         text_w = (container_y + (0.5 * container_h)) - (0.5 * text_h)
+
+        # Draw text and dividing line
         label_draw.text((text_x, text_w), text, outline_colour, font)
+        line_pos = [(container_x, 0), (container_x, container_h)]
+        label_draw.line(line_pos, outline_colour)
+
+        # Get next container position
         container_x += container_w
 
     del label_draw
