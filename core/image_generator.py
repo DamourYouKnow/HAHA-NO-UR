@@ -14,10 +14,10 @@ CIRCLE_DISTANCE = 10
 
 # TODO seperate function that album_command calls.
 async def create_image(session_manager: SessionManager, cards: list,
-                       num_rows: int, align: bool = False,
-                       add_labels: bool = False) -> BytesIO:
+                       num_rows: int, align: bool=False,
+                       add_labels: bool=False) -> BytesIO:
     """
-    Creates a stitched together image of idol circles.
+    Creates a stitched together scout image of idol circles.
     :param session_manager: the SessionManager
     :param cards: cards to be stitched together.
     :param num_rows: Number of rows to use in the image
@@ -25,21 +25,21 @@ async def create_image(session_manager: SessionManager, cards: list,
     :param add_labels: to add labels or not.
     :return: path pointing to created image
     """
+    # TODO, cards in album_cards dictionary will need an extra property.
     num_rows = min((num_rows, len(cards)))
-    # Save images that do not exists
 
     imgs = []
     for card in cards:
         url = "http:" + card['round_card_image']
-
         url_path = Path(urlsplit(url).path)
         file_path = idol_img_path.joinpath(url_path.name)
-
         next_img = Image.open(
                 await get_one_img(url, file_path, session_manager))
 
         if add_labels:
-            next_img = _add_label(next_img, [str(card['id']), "99+"], "#ffa500")
+            print(card)
+            texts = [str(card['id']), str(card['unidolized_count'])] # TODO
+            next_img = _add_label(next_img, texts, "#ffa500")
 
         imgs.append(next_img)
 
