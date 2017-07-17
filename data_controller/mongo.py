@@ -84,7 +84,7 @@ class DatabaseController:
         for card in new_cards:
             # User does not have this card, push to album
             if not self._user_has_card(user, card["id"]):
-                card["unidolized_count"] = 0
+                card["unidolized_count"] = 1
                 card["idolized_count"] = 0
 
                 card["time_aquired"] = int(round(time.time() * 1000))
