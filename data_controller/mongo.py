@@ -48,6 +48,14 @@ class DatabaseController:
         """
         self._db["users"].delete_one({"_id": user.id})
 
+    def get_all_user_ids(self) -> list:
+        """
+        Gets a list of all user ids from the database.
+
+        :return: List of all user ids.
+        """
+        return self._db["users"].find().distinct("_id")
+
     def find_user(self, user: User) -> dict:
         """
         Finds a user in the database.
