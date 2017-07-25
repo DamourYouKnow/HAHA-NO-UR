@@ -11,6 +11,7 @@ from bot import SessionManager
 from idol_images import idol_img_path
 
 CIRCLE_DISTANCE = 10
+LABEL_COLOURS = {"Smile": "#FF6698", "Pure": "#77EE87", "Cool": "#66CCEE"}
 
 # TODO seperate function that album_command calls.
 async def create_image(session_manager: SessionManager, cards: list,
@@ -37,9 +38,9 @@ async def create_image(session_manager: SessionManager, cards: list,
                 await get_one_img(url, file_path, session_manager))
 
         if add_labels:
-            print(card)
-            texts = [str(card['id']), str(card['unidolized_count'])] # TODO
-            next_img = _add_label(next_img, texts, "#ffa500")
+            texts = [str(card['unidolized_count'])] # TODO: Card ID later on.
+            next_img = _add_label(
+                    next_img, texts, LABEL_COLOURS[card['attribute']])
 
         imgs.append(next_img)
 
@@ -80,7 +81,6 @@ def _add_label(img: Image, texts: list, colour: str):
     img = img.convert('RGBA')
     temp_canvas = Image.new('RGBA', img.size)
 
-    # TODO D'Amour: make this not (0, 0)
     img_width, img_height = img.size
     label_width, label_height = label.size
     label_x = int((0.5 * img_width) - (0.5 * label_width)) # Center vertically
@@ -110,17 +110,19 @@ def _create_label(width: int, height: int, texts: List,
     # This made sense when I wrote it.
     container_x, container_y = 0, 0
     container_w, container_h = width / len(texts), height
-    container_mid_x, container_y_mid = container_w / 2, container_h / 2
     for text in texts:
+        # Get container x,y midpoints.
+        container_mid_x, container_mid_y = container_w / 2, container_h / 2
+
         # Get size of next text
         text_w, text_h = font.getsize(text)
 
         # Compute position of next text, centered in current container
-        text_x = (container_x + (0.5 * container_w)) - (0.5 * text_w)
-        text_w = (container_y + (0.5 * container_h)) - (0.5 * text_h)
+        text_x = (container_x + container_mid_x) - (0.5 * text_w)
+        text_y = (container_y - container_mid_y) + (0.5 * text_h)
 
         # Draw text and dividing line
-        label_draw.text((text_x, text_w), text, outline_colour, font)
+        label_draw.text((text_x, text_y), text, outline_colour, font)
         line_pos = [(container_x, 0), (container_x, container_h)]
         label_draw.line(line_pos, outline_colour)
 
