@@ -2,6 +2,7 @@ from collections import namedtuple
 from posixpath import basename
 from random import randint, shuffle, uniform
 from time import time
+from copy import deepcopy
 from urllib.parse import urlsplit
 
 from discord import User
@@ -68,7 +69,7 @@ class ScoutHandler:
         if len(cards) != self._count:
             self.results = []
             return None
-            
+
         fname = f'{int(time())}{randint(0, 100)}.png'
         _bytes = await create_image(self.session_manager, cards, 2)
         return ScoutImage(_bytes, fname)
@@ -267,12 +268,10 @@ def _shrink_results(results: list):
     if not results:
         return
 
-    # Remove dupes
-    dupeless = []
-    for card in results:
-        if card not in dupeless:
-            dupeless.append(card)
-    results = dupeless
+    results_copy = []
+    for res in results:
+        results_copy.append(deepcopy(res))
+    results = results_copy
 
     keep_fields = {
         "id",
