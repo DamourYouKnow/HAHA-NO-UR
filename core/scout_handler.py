@@ -12,12 +12,9 @@ from core.image_generator import create_image, get_one_img, \
     idol_img_path
 
 RATES = {
-    "regular": {"N": 0.95, "R": 0.05, "SR": 0.00, "SSR": 0.00,
-                "UR": 0.00},
-    "honour": {"N": 0.00, "R": 0.80, "SR": 0.15, "SSR": 0.04,
-               "UR": 0.01},
-    "coupon": {"N": 0.00, "R": 0.00, "SR": 0.80, "SSR": 0.00,
-               "UR": 0.20}
+    "regular": {"N": 0.95, "R": 0.05, "SR": 0.00, "SSR": 0.00, "UR": 0.00},
+    "honour": {"N": 0.00, "R": 0.80, "SR": 0.15, "SSR": 0.04, "UR": 0.01},
+    "coupon": {"N": 0.00, "R": 0.00, "SR": 0.80, "SSR": 0.00, "UR": 0.20}
 }
 
 
@@ -68,21 +65,12 @@ class ScoutHandler:
         """
         cards = await self._scout_cards()
 
-        circle_image_urls = []
-
-        for card in cards:
-            if card["round_card_image"] is None:
-                circle_image_urls.append(
-                    "http:" + card["round_card_idolized_image"]
-                )
-            else:
-                circle_image_urls.append("http:" + card["round_card_image"])
-
-        if len(circle_image_urls) != self._count:
+        if len(cards) != self._count:
             self.results = []
             return None
+            
         fname = f'{int(time())}{randint(0, 100)}.png'
-        _bytes = await create_image(self.session_manager, circle_image_urls, 2)
+        _bytes = await create_image(self.session_manager, cards, 2)
         return ScoutImage(_bytes, fname)
 
     async def _handle_solo_scout(self):

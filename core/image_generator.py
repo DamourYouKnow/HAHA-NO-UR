@@ -5,33 +5,43 @@ from pathlib import Path
 from typing import List, Sequence, Tuple
 from urllib.parse import urlsplit
 
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFont
 
 from bot import SessionManager
 from idol_images import idol_img_path
 
 CIRCLE_DISTANCE = 10
 
-
-async def create_image(session_manager: SessionManager,
-                       urls: list, num_rows: int,
-                       align: bool = False) -> BytesIO:
+# TODO seperate function that album_command calls.
+async def create_image(session_manager: SessionManager, cards: list,
+                       num_rows: int, align: bool=False,
+                       add_labels: bool=False) -> BytesIO:
     """
-    Creates a stitched together image of idol circles.
+    Creates a stitched together scout image of idol circles.
     :param session_manager: the SessionManager
-    :param urls: urls of single images to be stitched together.
+    :param cards: cards to be stitched together.
     :param num_rows: Number of rows to use in the image
     :param align: to align middle the image or not.
+    :param add_labels: to add labels or not.
     :return: path pointing to created image
     """
-    num_rows = min((num_rows, len(urls)))
-    # Save images that do not exists
+    # TODO, cards in album_cards dictionary will need an extra property.
+    num_rows = min((num_rows, len(cards)))
+
     imgs = []
-    for url in urls:
+    for card in cards:
+        url = "http:" + card['round_card_image']
         url_path = Path(urlsplit(url).path)
         file_path = idol_img_path.joinpath(url_path.name)
-        imgs.append(Image.open(
-            await get_one_img(url, file_path, session_manager)))
+        next_img = Image.open(
+                await get_one_img(url, file_path, session_manager))
+
+        if add_labels:
+            print(card)
+            texts = [str(card['id']), str(card['unidolized_count'])] # TODO
+            next_img = _add_label(next_img, texts, "#ffa500")
+
+        imgs.append(next_img)
 
     res = BytesIO()
     # Load images
@@ -59,6 +69,93 @@ async def get_one_img(url: str, path: Path,
         image = await resp.read()
         path.write_bytes(image)
         return BytesIO(image)
+
+def _add_label(img: Image, texts: list, colour: str):
+    """
+    Adds a label with text to an image.
+
+    :param img: Image to add label to.
+    """
+    label = _create_label(100, 25, texts, colour, '#000000')
+    img = img.convert('RGBA')
+    temp_canvas = Image.new('RGBA', img.size)
+
+    # TODO D'Amour: make this not (0, 0)
+    img_width, img_height = img.size
+    label_width, label_height = label.size
+    label_x = int((0.5 * img_width) - (0.5 * label_width)) # Center vertically
+    label_y = img_height - label_height
+    temp_canvas.paste(label, (label_x, label_y))
+    return Image.alpha_composite(img, temp_canvas)
+
+def _create_label(width: int, height: int, texts: List,
+                 background_colour: str, outline_colour: str) -> Image:
+    """
+    :param size: Tuple of (width, height) representing label size.
+    :param texts: List of text to add to the label, each text string will be
+        seperated by a dividing line.
+    :param colour: Colour of image.
+
+    :return: Label image.
+    """
+    label_img = Image.new('RGBA', (width, height))
+    label_draw = ImageDraw.Draw(label_img)
+
+    bounds = [(0, 0), (width-1, height-1)]
+    label_draw.rectangle(bounds, background_colour, outline_colour)
+
+    font_size = _compute_label_font_size(label_img, texts, 'arial.ttf')
+    font = ImageFont.truetype('arial.ttf', font_size)
+
+    # This made sense when I wrote it.
+    container_x, container_y = 0, 0
+    container_w, container_h = width / len(texts), height
+    container_mid_x, container_y_mid = container_w / 2, container_h / 2
+    for text in texts:
+        # Get size of next text
+        text_w, text_h = font.getsize(text)
+
+        # Compute position of next text, centered in current container
+        text_x = (container_x + (0.5 * container_w)) - (0.5 * text_w)
+        text_w = (container_y + (0.5 * container_h)) - (0.5 * text_h)
+
+        # Draw text and dividing line
+        label_draw.text((text_x, text_w), text, outline_colour, font)
+        line_pos = [(container_x, 0), (container_x, container_h)]
+        label_draw.line(line_pos, outline_colour)
+
+        # Get next container position
+        container_x += container_w
+
+    del label_draw
+    return label_img
+
+def _compute_label_font_size(label: Image, texts: List, font_type: str) -> int:
+    """
+    Computes the largest possible font size that a label can support for its
+        given text.
+
+    :param label: Target label image.
+    :param texts: List of text to put on the label.
+
+    :return: Largest possible font size.
+    """
+    label_width, label_height = label.size
+
+    text_max_width = label_width / len(texts)
+    text_max_height = label_height
+    max_str = max(texts, key=len)
+
+    font_size = 1
+    font = ImageFont.truetype(font_type, font_size)
+    font_width, font_height = font.getsize(max_str)
+    while font_width < text_max_width and font_height < text_max_height:
+        font_size += 1
+        font = ImageFont.truetype(font_type, font_size)
+        font_width, font_height = font.getsize(max_str)
+
+    return font_size - 1
+
 
 
 def _build_image(circle_images: list, num_rows: int,
