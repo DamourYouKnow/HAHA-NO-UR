@@ -132,10 +132,7 @@ class HahaNoUR(Bot):
 
         content = message.content
         command_name = content.split(' ')[0][len(self.prefix):]
-        print(command_name)
-        print(self.all_commands)
         if command_name in self.all_commands:
-            print("hello")
             log_entry = command_formatter(message, self.prefix + command_name)
             self.logger.log(logging.INFO, log_entry)
 
