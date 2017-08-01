@@ -92,6 +92,27 @@ class Album:
     @commands.cooldown(rate=3, per=2.5, type=commands.BucketType.user)
     @commands.check(check_mongo)
     async def view(self, ctx, *args: str):
+        """
+        Description: |
+            View a card from your album.
+
+        Arguments: |
+            Card ID (This is the left number of a card in your album)
+            Idolized (Shows the idolized copy if it exist in your album)
+        """
+        print("todo")
+
+    @commands.command(pass_context=True, aliases=['i'])
+    @commands.cooldown(rate=3, per=2.5, type=commands.BucketType.user)
+    @commands.check(check_mongo)
+    async def idolize(self, ctx, *args: str):
+        """
+        Description: |
+            Idolizes a card in your album. You must have two copies of the card.
+
+        Arguments: |
+            Card ID (This is the left number of a card in your album)
+        """
         print("todo")
 
 

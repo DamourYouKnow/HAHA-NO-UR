@@ -38,7 +38,7 @@ async def create_image(session_manager: SessionManager, cards: list,
                 await get_one_img(url, file_path, session_manager))
 
         if add_labels:
-            texts = [str(card['unidolized_count'])] # TODO: Card ID later on.
+            texts = [str(card['id']), str(card['unidolized_count'])]
             next_img = _add_label(
                     next_img, texts, LABEL_COLOURS[card['attribute']])
 
@@ -88,7 +88,7 @@ def _add_label(img: Image, texts: list, colour: str):
     temp_canvas.paste(label, (label_x, label_y))
     return Image.alpha_composite(img, temp_canvas)
 
-def _create_label(width: int, height: int, texts: List,
+def _create_label(width: int, height: int, texts: list,
                  background_colour: str, outline_colour: str) -> Image:
     """
     :param size: Tuple of (width, height) representing label size.
@@ -112,14 +112,15 @@ def _create_label(width: int, height: int, texts: List,
     container_w, container_h = width / len(texts), height
     for text in texts:
         # Get container x,y midpoints.
-        container_mid_x, container_mid_y = container_w / 2, container_h / 2
+        container_mid_x = container_w / 2
+        container_mid_y = container_h / 2
 
         # Get size of next text
         text_w, text_h = font.getsize(text)
 
         # Compute position of next text, centered in current container
         text_x = (container_x + container_mid_x) - (0.5 * text_w)
-        text_y = (container_y - container_mid_y) + (0.5 * text_h)
+        text_y = (container_y + container_mid_y) - (0.5 * text_h)
 
         # Draw text and dividing line
         label_draw.text((text_x, text_y), text, outline_colour, font)
@@ -156,7 +157,8 @@ def _compute_label_font_size(label: Image, texts: List, font_type: str) -> int:
         font = ImageFont.truetype(font_type, font_size)
         font_width, font_height = font.getsize(max_str)
 
-    return font_size - 1
+    #return font_size - 1
+    return 16 # FIXME I'm too tired for this shit right now.
 
 
 
