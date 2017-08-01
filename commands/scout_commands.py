@@ -32,9 +32,9 @@ class Scout:
         # Add to database
         if not self.bot.db:
             return
-        if not self.bot.db.find_user(ctx.message.author):
-            self.bot.db.insert_user(ctx.message.author)
-        self.bot.db.add_to_user_album(ctx.message.author, results)
+        if not self.bot.db.find_user(ctx.message.author.id):
+            self.bot.db.insert_user(ctx.message.author.id)
+        self.bot.db.add_to_user_album(ctx.message.author.id, results)
 
     @commands.command(pass_context=True)
     @commands.cooldown(rate=5, per=2.5, type=commands.BucketType.user)

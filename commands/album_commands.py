@@ -76,7 +76,7 @@ class Album:
             Rarity (UR, SSR, SR, R, N)
         """
         user = ctx.message.author
-        album = self.bot.db.get_user_album(user)
+        album = self.bot.db.get_user_album(user.id)
         _parse_album_arguments(args, user)
         album = _apply_filter(album, user)
         filtered_album_size = len(album)
@@ -87,6 +87,12 @@ class Album:
             self.bot.session_manager, album, ROWS, True, True
         ) if len(album) > 0 else None
         await self.__handle_result(ctx, filtered_album_size, image)
+
+    @commands.command(pass_context=True, aliases=['v'])
+    @commands.cooldown(rate=3, per=2.5, type=commands.BucketType.user)
+    @commands.check(check_mongo)
+    async def view(self, ctx, *args: str):
+        print("todo")
 
 
 def _apply_filter(album: list, user: User):
