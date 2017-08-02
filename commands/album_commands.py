@@ -2,6 +2,7 @@ import math
 from operator import itemgetter
 from posixpath import basename
 from urllib.parse import urlsplit
+from copy import deepcopy
 
 from discord import User
 from discord.ext import commands
@@ -63,6 +64,13 @@ class Album:
             msg = f'<@{ctx.message.author.id}>'
             await self.bot.upload(image, filename='c.png', content=msg)
 
+    async def __handle_idolize_result(self, ctx, image):
+        if not image:
+            await self.__send_error_msg(ctx, 'Could not idolize card.')
+        else:
+            msg = f'<@{ctx.message.author.id}>'
+            await self.bot.upload(image, filename='c.png', content=msg)
+
     @commands.command(pass_context=True, aliases=['a'])
     @commands.cooldown(rate=3, per=2.5, type=commands.BucketType.user)
     @commands.check(check_mongo)
@@ -88,8 +96,9 @@ class Album:
         album = self.bot.db.get_user_album(user.id)
         _parse_album_arguments(args, user)
         album = _apply_filter(album, user)
-        filtered_album_size = len(album)
         album = _apply_sort(album, user)
+        album = _seperate_idolized(album)
+        filtered_album_size = len(album)
         album = _splice_page(album, user)
 
         image = await create_image(
@@ -153,7 +162,31 @@ class Album:
         Arguments: |
             Card ID (This is the left number of a card in your album)
         """
-        print("todo")
+        user = ctx.message.author
+        card_id = 0
+
+        # Parse args for card id and idolized.
+        for arg in args:
+            if _is_number(arg):
+                card_id = int(arg)
+
+        image = None
+        card = self.bot.db.get_card_from_album(user.id, card_id)
+        valid = False
+        if card and card['unidolized_count'] >= 2:
+            url = 'http://schoolido.lu/api/cards/' + str(card_id)
+            res = await self.bot.session_manager.get_json(url, {'id': card_id})
+
+            self.bot.db.remove_from_user_album(user.id, card_id, count=2)
+            self.bot.db.add_to_user_album(user.id, [card], idolized=True)
+
+            img_url = 'http:' + res['card_idolized_image']
+            fname = basename(urlsplit(img_url).path)
+            image_path = idol_img_path.joinpath(fname)
+            image = await get_one_img(
+                    img_url, image_path, self.bot.session_manager)
+
+        await self.__handle_idolize_result(ctx, image)
 
 
 def _apply_filter(album: list, user: User):
@@ -182,6 +215,23 @@ def _apply_filter(album: list, user: User):
 
     return album
 
+def _seperate_idolized(album: list) -> list:
+    # Looping backwards since we are adding elements
+    for i in range(len(album) - 1, -1, -1):
+        album[i]['idolized'] = False
+        cp = deepcopy(album[i])
+        cp['idolized'] = True
+        album.insert(i + 1, cp)
+
+    # Looping backwards since we are removing elements
+    for i in range(len(album) - 1, -1, -1):
+        # Filter out cards that should not be displayed.
+        if not album[i]['idolized'] and album[i]['unidolized_count'] <= 0:
+            album.pop(i)
+        if album[i]['idolized'] and album[i]['idolized_count'] <= 0:
+            album.pop(i)
+
+    return album
 
 def _apply_sort(album: list, user: User) -> list:
     """

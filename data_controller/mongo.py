@@ -137,7 +137,7 @@ class DatabaseController:
                         {"$inc": {"album.$.unidolized_count": 1}}
                     )
 
-    def delete_from_user_album(self, user_id: str, card_id: int,
+    def remove_from_user_album(self, user_id: str, card_id: int,
                                idolized: bool=False, count: int=1) -> bool:
         """
         Adds a list of cards to a user's card album.
@@ -148,7 +148,30 @@ class DatabaseController:
 
         :return: True if a card was deleted successfully, otherwise False.
         """
-        print("todo")
+        card = self.get_card_from_album(user_id, card_id)
+        if not card:
+            return False
+
+        # Get new counts.
+        new_unidolized_count = card['unidolized_count']
+        new_idolized_count = card['idolized_count']
+        if idolized:
+            new_idolized_count -= count
+        else:
+            new_unidolized_count -= count
+
+        # Update values
+        self._db['users'].update(
+            {'_id': user_id, 'album.id': card_id},
+            {
+                '$set': {
+                    'album.$.unidolized_count': new_unidolized_count,
+                    'album.$.idolized_count': new_idolized_count
+                }
+            }
+        )
+        return True
+
 
     def _user_has_card(self, user_id: str, card_id: int) -> bool:
         search_filter = {"$elemMatch": {"id": card_id}}

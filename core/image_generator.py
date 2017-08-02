@@ -31,14 +31,20 @@ async def create_image(session_manager: SessionManager, cards: list,
 
     imgs = []
     for card in cards:
-        url = "http:" + card['round_card_image']
+        image_field = 'round_card_image'
+        count_field = 'unidolized_count'
+        if 'idolized' in card and card['idolized']:
+            image_field = 'round_card_idolized_image'
+            count_field = 'idolized_count'
+
+        url = "http:" + card[image_field]
         url_path = Path(urlsplit(url).path)
         file_path = idol_img_path.joinpath(url_path.name)
         next_img = Image.open(
                 await get_one_img(url, file_path, session_manager))
 
         if add_labels:
-            texts = [str(card['id']), str(card['unidolized_count'])]
+            texts = [str(card['id']), str(card[count_field])]
             next_img = _add_label(
                     next_img, texts, LABEL_COLOURS[card['attribute']])
 
@@ -161,7 +167,7 @@ def _compute_label_font_size(label: Image, texts: List, font_type: str) -> int:
         font_width, font_height = font.getsize(max_str)
 
     #return font_size - 1
-    return 16 # FIXME I'm too tired for this shit right now.
+    return 18 # FIXME I'm too tired for this shit right now.
 
 
 def _build_image(circle_images: list, num_rows: int,
