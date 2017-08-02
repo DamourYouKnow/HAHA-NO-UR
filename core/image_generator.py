@@ -71,6 +71,7 @@ async def get_one_img(url: str, path: Path,
         path.write_bytes(image)
         return BytesIO(image)
 
+
 def _add_label(img: Image, texts: list, colour: str):
     """
     Adds a label with text to an image.
@@ -87,6 +88,7 @@ def _add_label(img: Image, texts: list, colour: str):
     label_y = img_height - label_height
     temp_canvas.paste(label, (label_x, label_y))
     return Image.alpha_composite(img, temp_canvas)
+
 
 def _create_label(width: int, height: int, texts: list,
                  background_colour: str, outline_colour: str) -> Image:
@@ -133,6 +135,7 @@ def _create_label(width: int, height: int, texts: list,
     del label_draw
     return label_img
 
+
 def _compute_label_font_size(label: Image, texts: List, font_type: str) -> int:
     """
     Computes the largest possible font size that a label can support for its
@@ -159,7 +162,6 @@ def _compute_label_font_size(label: Image, texts: List, font_type: str) -> int:
 
     #return font_size - 1
     return 16 # FIXME I'm too tired for this shit right now.
-
 
 
 def _build_image(circle_images: list, num_rows: int,

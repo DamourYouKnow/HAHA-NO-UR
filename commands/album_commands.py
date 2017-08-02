@@ -1,5 +1,7 @@
 import math
 from operator import itemgetter
+from posixpath import basename
+from urllib.parse import urlsplit
 
 from discord import User
 from discord.ext import commands
@@ -8,7 +10,7 @@ from bot import HahaNoUR
 from core.argument_parser import parse_arguments
 from core.checks import check_mongo
 from core.get_names import get_idol_names
-from core.image_generator import create_image
+from core.image_generator import create_image, get_one_img, idol_img_path
 
 PAGE_SIZE = 16
 ROWS = 4
@@ -37,15 +39,15 @@ class Album:
     def __init__(self, bot: HahaNoUR):
         self.bot = bot
 
-    async def __send_error_msg(self, ctx):
+    async def __send_error_msg(self, ctx, content):
         await self.bot.send_message(
             ctx.message.channel,
-            f'<@{ctx.message.author.id }> No matching cards found.'
+            f'<@{ctx.message.author.id }> ' + content
         )
 
-    async def __handle_result(self, ctx, album_size, image):
+    async def __handle_album_result(self, ctx, album_size, image):
         if not image:
-            await self.__send_error_msg(ctx)
+            await self.__send_error_msg(ctx, 'No matching cards found.')
             _last_user_args[ctx.message.author.id] = _get_new_user_args()
         else:
             page = _last_user_args[ctx.message.author.id]["page"]
@@ -53,6 +55,13 @@ class Album:
             msg = (f'<@{ctx.message.author.id}> Page {page+1} of {max_page}. '
                    f'`!help album` for more info.')
             await self.bot.upload(image, filename='a.png', content=msg)
+
+    async def __handle_view_result(self, ctx, image):
+        if not image:
+            await self.__send_error_msg(ctx, 'Card not found in your album.')
+        else:
+            msg = f'<@{ctx.message.author.id}>'
+            await self.bot.upload(image, filename='c.png', content=msg)
 
     @commands.command(pass_context=True, aliases=['a'])
     @commands.cooldown(rate=3, per=2.5, type=commands.BucketType.user)
@@ -86,7 +95,7 @@ class Album:
         image = await create_image(
             self.bot.session_manager, album, ROWS, True, True
         ) if len(album) > 0 else None
-        await self.__handle_result(ctx, filtered_album_size, image)
+        await self.__handle_album_result(ctx, filtered_album_size, image)
 
     @commands.command(pass_context=True, aliases=['v'])
     @commands.cooldown(rate=3, per=2.5, type=commands.BucketType.user)
@@ -100,7 +109,38 @@ class Album:
             Card ID (This is the left number of a card in your album)
             Idolized (Shows the idolized copy if it exist in your album)
         """
-        print("todo")
+        user = ctx.message.author
+        idolized = False
+        card_id = 0
+
+        # Parse args for card id and idolized.
+        for arg in args:
+            if _is_number(arg):
+                card_id = int(arg)
+            if arg in ['idolized', 'i']:
+                idolized = True
+
+        image = None
+        card = self.bot.db.get_card_from_album(user.id, card_id)
+        valid = False
+        if card:
+            valid = (not idolized and card['unidolized_count'] > 0)
+            valid = valid or (idolized and card['idolized_count'] > 0)
+
+        if valid:
+            url = 'http://schoolido.lu/api/cards/' + str(card_id)
+            res = await self.bot.session_manager.get_json(url, {'id': card_id})
+
+            img_url = 'http:' + res['card_image']
+            if idolized and card:
+                img_url = 'http:' + res['card_idolized_image']
+
+            fname = basename(urlsplit(img_url).path)
+            image_path = idol_img_path.joinpath(fname)
+            image = await get_one_img(
+                    img_url, image_path, self.bot.session_manager)
+
+        await self.__handle_view_result(ctx, image)
 
     @commands.command(pass_context=True, aliases=['i'])
     @commands.cooldown(rate=3, per=2.5, type=commands.BucketType.user)

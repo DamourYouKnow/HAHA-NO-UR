@@ -80,12 +80,31 @@ class DatabaseController:
             return []
         return user_doc['album']
 
+    def get_card_from_album(self, user_id: str, card_id: int) -> dict:
+        """
+        Gets a card from a user's album.
+
+        :param user_id: User ID of the user to query the card from.
+
+        :return: Card dictionary or None if card does not exist.
+        """
+        search_filter = {"$elemMatch": {"id": card_id}}
+        search = self._db["users"].find(
+            {"_id": user_id},
+            {"album": search_filter}
+        )
+        search = list(search)
+
+        if len(search) > 0 and 'album' in search[0]:
+            return search[0]['album'][0]
+        return None
+
     def add_to_user_album(self, user_id: str, new_cards: list,
                           idolized: bool = False):
         """
         Adds a list of cards to a user's card album.
 
-        :param user: User ID of the user who's album will be added to.
+        :param user_id: User ID of the user who's album will be added to.
         :param new_cards: List of dictionaries of new cards to add.
         :param idolized: Whether the new cards being added are idolized.
         """
@@ -117,6 +136,19 @@ class DatabaseController:
                         {"_id": user_id, "album.id": card["id"]},
                         {"$inc": {"album.$.unidolized_count": 1}}
                     )
+
+    def delete_from_user_album(self, user_id: str, card_id: int,
+                               idolized: bool=False, count: int=1) -> bool:
+        """
+        Adds a list of cards to a user's card album.
+
+        :param user: User ID of the user who's album will be added to.
+        :param new_cards: List of dictionaries of new cards to add.
+        :param idolized: Whether the new cards being added are idolized.
+
+        :return: True if a card was deleted successfully, otherwise False.
+        """
+        print("todo")
 
     def _user_has_card(self, user_id: str, card_id: int) -> bool:
         search_filter = {"$elemMatch": {"id": card_id}}
