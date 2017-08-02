@@ -10,6 +10,8 @@ https://discordapp.com/oauth2/authorize?client_id=311284054333063168&scope=bot&p
 
 - !help [command name] - Get more detailed information on how to use a command  
 - !album [args] - View your album  
+- !view [card id] [idolized] - View a card in your album  
+- !idolize [card id] - Idolize a card in your album  
 - !scout [args] - Solo pull  
 - !scout11 [args] - 10+1 pull (guaranteed SR)  
 - !scoutregular/!scoutr [args]  

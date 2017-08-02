@@ -59,14 +59,18 @@ class Album:
 
     async def __handle_view_result(self, ctx, image):
         if not image:
-            await self.__send_error_msg(ctx, 'Card not found in your album.')
+            msg = (f'<@{ctx.message.author.id}> Could not find card in album. '
+                   f'`!help idolize` for more info.')
+            await self.__send_error_msg(ctx, msg)
         else:
             msg = f'<@{ctx.message.author.id}>'
             await self.bot.upload(image, filename='c.png', content=msg)
 
     async def __handle_idolize_result(self, ctx, image):
         if not image:
-            await self.__send_error_msg(ctx, 'Could not idolize card.')
+            msg = (f'<@{ctx.message.author.id}> Could not idolize card. '
+                   f'`!help idolize` for more info.')
+            await self.__send_error_msg(ctx, msg)
         else:
             msg = f'<@{ctx.message.author.id}>'
             await self.bot.upload(image, filename='c.png', content=msg)
@@ -80,7 +84,8 @@ class Album:
             View your album.
 
             Your selected filters and sort will be remembered.
-            To clear filters, provide the argument <all>
+            To clear filters, provide the argument <all>.
+            For example, !album bibi third year ur or !album all
 
         Optional Arguments: |
             Page (1, 2, 3, ...)
@@ -113,8 +118,9 @@ class Album:
         """
         Description: |
             View a card from your album.
+            For example, !view 1200 or !view 1200 idolized.
 
-        Arguments: |
+        Optional Arguments: |
             Card ID (This is the left number of a card in your album)
             Idolized (Shows the idolized copy if it exist in your album)
         """
@@ -158,6 +164,7 @@ class Album:
         """
         Description: |
             Idolizes a card in your album. You must have two copies of the card.
+            For example, !idolize 1200.
 
         Arguments: |
             Card ID (This is the left number of a card in your album)
