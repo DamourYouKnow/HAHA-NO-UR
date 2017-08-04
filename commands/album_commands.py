@@ -60,7 +60,7 @@ class Album:
     async def __handle_view_result(self, ctx, image):
         if not image:
             msg = ('Could not find card in album. '
-                   f'`!help idolize` for more info.')
+                   f'`!help view` for more info.')
             await self.__send_error_msg(ctx, msg)
         else:
             msg = f'<@{ctx.message.author.id}>'
