@@ -167,7 +167,6 @@ class ScoutHandler:
                 continue
 
             values_str = ",".join(arg_values)
-            values_str = values_str.replace(" ", "%20")
 
             if arg_type == "main_unit":
                 values_str = values_str.replace("Muse", "µ's")
@@ -175,10 +174,7 @@ class ScoutHandler:
             elif arg_type == "sub_unit":
                 params['idol_sub_unit'] = values_str
             elif arg_type == "name":
-                url += "&name=" + values_str
-            # FIXME Why the heck does this not work.
-            # elif arg_type == "name":
-            #     params['name'] = values_str
+                params['name'] = values_str
             elif arg_type == "year":
                 params['idol_year'] = values_str
             elif arg_type == "attribute":

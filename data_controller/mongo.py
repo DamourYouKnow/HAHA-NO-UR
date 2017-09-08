@@ -171,7 +171,6 @@ class DatabaseController:
         )
         return True
 
-
     async def _user_has_card(self, user_id: str, card_id: int) -> bool:
         search_filter = {"$elemMatch": {"id": card_id}}
 
