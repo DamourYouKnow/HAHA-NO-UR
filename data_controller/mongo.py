@@ -60,6 +60,15 @@ class CardController(DatabaseController):
 
         await self._collection.update(doc, setCard, upsert=True)
 
+    async def get_card_ids(self) -> list:
+        """
+        Gets a list of all card IDs in the datase.
+
+        :return: List of card IDs.
+        """
+        return await self._collection.distinct('_id')
+
+
 class UserController(DatabaseController):
     def __init__(self, mongo_client: MongoClient):
         """

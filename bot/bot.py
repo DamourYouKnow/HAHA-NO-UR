@@ -11,6 +11,7 @@ from bot.logger import command_formatter
 from bot.session_manager import SessionManager
 from core.help import get_help
 from data_controller.mongo import DatabaseController
+from data_controller.card_updater import update_task
 
 
 class HahaNoUR(Bot):
@@ -47,6 +48,7 @@ class HahaNoUR(Bot):
         """
         for cog in cogs:
             self.add_cog(cog)
+        self.loop.create_task(update_task(self))
         self.run(token)
 
     async def __change_presence(self):
