@@ -20,6 +20,11 @@ async def update_task(bot):
                     {'ids': ','.join(str(i) for i in new_card_ids)})
 
             for card in res['results']:
-                await bot.db.cards.upsert_card(card)
+                if validate_card(card):
+                    await bot.db.cards.upsert_card(card)
 
         await asyncio.sleep(60)
+
+
+def validate_card(card: dict) -> bool:
+    return card['card_image'] and card['round_card_image']

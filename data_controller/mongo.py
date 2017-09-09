@@ -60,6 +60,21 @@ class CardController(DatabaseController):
 
         await self._collection.update(doc, setCard, upsert=True)
 
+    async def get_random_cards(filters: dict, count: int) -> list:
+        """
+        Gets a random list of cards.
+
+        :param filters: Dicitonary of filters to use.
+        :param count: Number of results to return.
+
+        :return: Random list of cards.
+        """
+        match = {'$match': filters}}
+        sample = {'$sample': {'size': count}}
+        res = self._collection.aggregate([match, sample])
+        print(res)
+        return res
+
     async def get_card_ids(self) -> list:
         """
         Gets a list of all card IDs in the datase.
