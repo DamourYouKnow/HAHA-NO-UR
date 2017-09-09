@@ -98,7 +98,7 @@ class Album:
             Rarity (UR, SSR, SR, R, N)
         """
         user = ctx.message.author
-        album = await self.bot.db.get_user_album(user.id)
+        album = await self.bot.db.users.get_user_album(user.id)
         _parse_album_arguments(args, user)
         album = _apply_filter(album, user)
         album = _apply_sort(album, user)
@@ -136,7 +136,7 @@ class Album:
                 idolized = True
 
         image = None
-        card = await self.bot.db.get_card_from_album(user.id, card_id)
+        card = await self.bot.db.users.get_card_from_album(user.id, card_id)
         valid = False
         if card:
             valid = (not idolized and card['unidolized_count'] > 0)
@@ -178,14 +178,16 @@ class Album:
                 card_id = int(arg)
 
         image = None
-        card = await self.bot.db.get_card_from_album(user.id, card_id)
+        card = await self.bot.db.users.get_card_from_album(user.id, card_id)
         valid = False
         if card and card['unidolized_count'] >= 2:
             url = 'http://schoolido.lu/api/cards/' + str(card_id)
             res = await self.bot.session_manager.get_json(url, {'id': card_id})
 
-            await self.bot.db.remove_from_user_album(user.id, card_id, count=2)
-            await self.bot.db.add_to_user_album(user.id, [card], idolized=True)
+            await self.bot.db.users.remove_from_user_album(
+                    user.id, card_id, count=2)
+            await self.bot.db.users.add_to_user_album(
+                    user.id, [card], idolized=True)
 
             img_url = 'http:' + res['card_idolized_image']
             fname = basename(urlsplit(img_url).path)

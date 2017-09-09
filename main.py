@@ -6,7 +6,7 @@ from bot import HahaNoUR, get_session_manager
 from bot.logger import setup_logging
 from commands import *
 from config import config_path
-from data_controller.mongo import DatabaseController
+from data_controller.mongo import MongoClient
 from logs import log_path
 
 
@@ -21,7 +21,7 @@ def main():
     with config_path.joinpath('auth.json').open() as f:
         auth = load(f)
 
-    db = DatabaseController() if config.get('mongo', True) else None
+    db = MongoClient() if config.get('mongo', True) else None
 
     bot = HahaNoUR(
         config['default_prefix'], start_time, int(config['colour'], base=16),

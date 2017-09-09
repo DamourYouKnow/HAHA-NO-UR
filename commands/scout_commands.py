@@ -29,12 +29,10 @@ class Scout:
             content=f'<@{ctx.message.author.id}>'
         )
 
-        # Add to database
-        if not self.bot.db:
-            return
-        if not await self.bot.db.find_user(ctx.message.author.id):
-            await self.bot.db.insert_user(ctx.message.author.id)
-        await self.bot.db.add_to_user_album(ctx.message.author.id, results)
+        if not await self.bot.db.users.find_user(ctx.message.author.id):
+            await self.bot.db.users.insert_user(ctx.message.author.id)
+        await self.bot.db.users.add_to_user_album(
+                ctx.message.author.id, results)
 
     @commands.command(pass_context=True)
     @commands.cooldown(rate=5, per=2.5, type=commands.BucketType.user)

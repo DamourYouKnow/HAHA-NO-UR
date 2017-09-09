@@ -58,7 +58,7 @@ class ScoutHandler:
 
         # TEMP: Add cards to db
         for card in self.results:
-            await bot.db.upsert_card(card)
+            await bot.db.cards.upsert_card(card)
 
         self.results = _shrink_results(self.results)
         return img
