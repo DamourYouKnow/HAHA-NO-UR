@@ -1,5 +1,6 @@
 import time
 import motor.motor_asyncio
+import copy
 
 PORT = 27017
 DATABASE_NAME = "haha-no-ur"
@@ -170,6 +171,21 @@ class DatabaseController:
             }
         )
         return True
+
+    async def upsert_card(self, card: dict):
+        """
+        Inserts a card into the card collection if it does not exist.
+
+        :param card: Card dictionary to insert.
+        """
+        card = copy.deepcopy(card)
+        card['_id'] = card['id']
+        del card['id']
+
+        doc = {'_id': card['_id']}
+        setCard = {'$set': card}
+
+        await self._db['cards'].update(doc, setCard, upsert=True)
 
     async def _user_has_card(self, user_id: str, card_id: int) -> bool:
         search_filter = {"$elemMatch": {"id": card_id}}

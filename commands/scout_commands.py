@@ -55,7 +55,7 @@ class Scout:
             self.bot.session_manager,
             ctx.message.author, 'honour', 1, False, args
         )
-        image = await scout.do_scout()
+        image = await scout.do_scout(self.bot)
         await self.__handle_result(ctx, scout.results, image)
 
     @commands.command(pass_context=True)
@@ -77,7 +77,7 @@ class Scout:
             self.bot.session_manager,
             ctx.message.author, 'honour', 11, True, args
         )
-        image = await scout.do_scout()
+        image = await scout.do_scout(self.bot)
         await self.__handle_result(ctx, scout.results, image)
 
     @commands.command(pass_context=True, aliases=['scoutr'])
@@ -95,7 +95,7 @@ class Scout:
             self.bot.session_manager,
             ctx.message.author, 'regular', 1, False, args
         )
-        image = await scout.do_scout()
+        image = await scout.do_scout(self.bot)
         await self.__handle_result(ctx, scout.results, image)
 
     @commands.command(pass_context=True, aliases=['scoutr10'])
@@ -113,7 +113,7 @@ class Scout:
             self.bot.session_manager,
             ctx.message.author, 'regular', 10, False, args
         )
-        image = await scout.do_scout()
+        image = await scout.do_scout(self.bot)
         await self.__handle_result(ctx, scout.results, image)
 
     @commands.command(pass_context=True, aliases=['scoutc'])
@@ -135,5 +135,5 @@ class Scout:
             self.bot.session_manager,
             ctx.message.author, 'coupon', 1, False, args
         )
-        image = await scout.do_scout()
+        image = await scout.do_scout(self.bot)
         await self.__handle_result(ctx, scout.results, image)

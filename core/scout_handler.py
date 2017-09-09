@@ -50,11 +50,16 @@ class ScoutHandler:
         self._guaranteed_sr = guaranteed_sr
         self._args = parse_arguments(args)
 
-    async def do_scout(self):
+    async def do_scout(self, bot): # TEMP: Pass bot for db access
         if self._count > 1:
             img = await self._handle_multiple_scout()
         else:
             img = await self._handle_solo_scout()
+
+        # TEMP: Add cards to db
+        for card in self.results:
+            await bot.db.upsert_card(card)
+
         self.results = _shrink_results(self.results)
         return img
 
