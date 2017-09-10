@@ -99,6 +99,9 @@ class Album:
         """
         user = ctx.message.author
         album = await self.bot.db.users.get_user_album(user.id)
+        card_ids = [card['id'] for card in album]
+        card_infos = await self.bot.db.cards.get_cards(card_ids)
+        album = _merge_card_info(album, card_infos)
         _parse_album_arguments(args, user)
         album = _apply_filter(album, user)
         album = _apply_sort(album, user)
@@ -196,6 +199,29 @@ class Album:
                     img_url, image_path, self.bot.session_manager)
 
         await self.__handle_idolize_result(ctx, image)
+
+
+def _merge_card_info(album: list, card_infos: list) -> list:
+    """
+    Merges card information to an album.
+
+    :param album: Album list.
+    :param card_infos: Card information to join.
+
+    :return: New list of card dictionaries with merged information.
+    """
+    if len(album) != len(card_infos):
+        return []
+
+    for i in range(0, len(album)):
+        for key in card_infos[i]:
+            if ('.' in key):
+                spl = key.split('.')
+                album[i][key] = card_infos[i][spl[0]][spl[1]]
+            else:
+                album[i][key] = card_infos[i][key]
+
+    return album
 
 
 def _apply_filter(album: list, user: User):

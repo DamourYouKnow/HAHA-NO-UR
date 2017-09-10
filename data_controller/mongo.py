@@ -60,6 +60,30 @@ class CardController(DatabaseController):
 
         await self._collection.update(doc, setCard, upsert=True)
 
+    async def get_cards(self, card_ids: list) -> list:
+        """
+        Gets a list of cards from the database.
+
+        :param card_ids: List of card IDs to get.
+
+        :return: Matching cards.
+        """
+        search = {'_id': {'$in': card_ids}}
+        show = {
+            'idol.name': 1,
+            'idol.year': 1,
+            'idol.main_unit': 1,
+            'idol.sub_unit': 1,
+            'rarity': 1,
+            'attribute': 1,
+            'card_image': 1,
+            'card_idolized_image': 1,
+            'round_card_image': 1,
+            'round_card_idolized_image': 1
+        }
+        cursor = self._collection.find(search, show)
+        return await cursor.to_list(length=10000)
+
     async def get_random_cards(self, filters: dict, count: int) -> list:
         """
         Gets a random list of cards.
