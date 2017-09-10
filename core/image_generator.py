@@ -44,7 +44,7 @@ async def create_image(session_manager: SessionManager, cards: list,
                 await get_one_img(url, file_path, session_manager))
 
         if add_labels:
-            texts = [str(card['id']), str(card[count_field])]
+            texts = [str(card['_id']), str(card[count_field])]
             next_img = _add_label(
                     next_img, texts, LABEL_COLOURS[card['attribute']])
 

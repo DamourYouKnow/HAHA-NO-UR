@@ -7,7 +7,7 @@ from urllib.parse import urlsplit
 
 from discord import User
 
-from bot import SessionManager
+from bot import HahaNoUR
 from core.argument_parser import parse_arguments
 from core.image_generator import create_image, get_one_img, \
     idol_img_path
@@ -27,10 +27,10 @@ class ScoutHandler:
     """
     Provides scouting functionality for bot.
     """
-    __slots__ = ('results', 'session_manager', '_user', '_box', '_count',
+    __slots__ = ('results', '_bot', '_user', '_box', '_count',
                  '_guaranteed_sr', '_args')
 
-    def __init__(self, session_manager: SessionManager, user: User,
+    def __init__(self, bot: HahaNoUR, user: User,
                  box: str = "honour", count: int = 1,
                  guaranteed_sr: bool = False, args: tuple = ()):
         """
@@ -43,25 +43,18 @@ class ScoutHandler:
         :param args: Scout command arguments
         """
         self.results = []
-        self.session_manager = session_manager
+        self._bot = bot
         self._user = user
         self._box = box
         self._count = count
         self._guaranteed_sr = guaranteed_sr
         self._args = parse_arguments(args)
 
-    async def do_scout(self, bot): # TEMP: Pass bot for db access
+    async def do_scout(self):
         if self._count > 1:
-            img = await self._handle_multiple_scout()
+            return await self._handle_multiple_scout()
         else:
-            img = await self._handle_solo_scout()
-
-        # TEMP: Add cards to db
-        for card in self.results:
-            await bot.db.cards.upsert_card(card)
-
-        self.results = _shrink_results(self.results)
-        return img
+            return await self._handle_solo_scout()
 
     async def _handle_multiple_scout(self):
         """
@@ -76,7 +69,7 @@ class ScoutHandler:
             return None
 
         fname = f'{int(time())}{randint(0, 100)}.png'
-        _bytes = await create_image(self.session_manager, cards, 2)
+        _bytes = await create_image(self._bot.session_manager, cards, 2)
         return ScoutImage(_bytes, fname)
 
     async def _handle_solo_scout(self):
@@ -102,7 +95,7 @@ class ScoutHandler:
         fname = basename(urlsplit(url).path)
         image_path = idol_img_path.joinpath(fname)
         bytes_ = await get_one_img(
-            url, image_path, self.session_manager)
+            url, image_path, self._bot.session_manager)
         return ScoutImage(bytes_, fname)
 
     async def _scout_cards(self) -> list:
@@ -157,36 +150,38 @@ class ScoutHandler:
         :return: Cards scouted
         """
         if count == 0:
-            return {}
+            return []
         params = {
             'rarity': rarity,
-            'ordering': 'random',
-            'is_promo': 'False',
-            'is_special': 'False',
-            'page_size': str(count)
+            'is_promo': False,
+            'is_special': False
         }
-        url = 'http://schoolido.lu/api/cards/?'
 
         for arg_type, arg_values in self._args.items():
             if not arg_values:
                 continue
 
+            # FIXME: Comma seperated strings need to use $in.
             values_str = ",".join(arg_values)
 
             if arg_type == "main_unit":
                 values_str = values_str.replace("Muse", "µ's")
-                params['idol_main_unit'] = values_str
+                params['idol.main_unit'] = values_str
             elif arg_type == "sub_unit":
-                params['idol_sub_unit'] = values_str
+                params['idol.sub_unit'] = values_str
             elif arg_type == "name":
-                params['name'] = values_str
+                params['idol.name'] = values_str
             elif arg_type == "year":
-                params['idol_year'] = values_str
+                params['idol.year'] = values_str
             elif arg_type == "attribute":
                 params['attribute'] = values_str
 
+        print(params)
+        print(count)
+        # FIXME: Comma seperated strings need to use $in.
+
         # Get and return response
-        return await self.session_manager.get_json(url, params)
+        return await self._bot.db.cards.get_random_cards(params, count)
 
     def _roll_rarity(self, guaranteed_sr: bool = False) -> str:
         """
@@ -222,13 +217,13 @@ class ScoutHandler:
             return 'N'
 
 
-def _get_adjusted_scout(scout: dict, required_count: int) -> list:
+def _get_adjusted_scout(scout: list, required_count: int) -> list:
     """
     Adjusts a pull of a single rarity by checking if a card should flip to
     a similar one and by duplicating random cards in the scout if there were
     not enough scouted.
 
-    :param scout: Dictionary representing the scout.
+    :param scout: List representing the scout.
         All these cards will have the same rarity.
 
     :param required_count: The number of cards that need to be scouted.
@@ -236,73 +231,25 @@ def _get_adjusted_scout(scout: dict, required_count: int) -> list:
     :return: Adjusted list of cards scouted
     """
     # Add missing cards to scout by duplicating random cards already present
-    current_count = len(scout['results'])
+    current_count = len(scout)
 
     # Something bad happened, return an empty list
     if current_count == 0:
         return []
 
     while current_count < required_count:
-        scout['results'].append(
-            scout['results'][randint(0, current_count - 1)]
+        scout.append(
+            scout[randint(0, current_count - 1)]
         )
         current_count += 1
 
     # Traverse scout and roll for flips
-    for card_index in range(len(scout['results']) - 1):
+    for card_index in range(len(scout) - 1):
         # for each card there is a (1 / total cards)
         # chance that we should dupe
         # the previous card
         roll = uniform(0, 1)
-        if roll < 1 / scout['count']:
-            scout['results'][card_index] = scout['results'][card_index + 1]
+        if roll < 1 / len(scout):
+            scout[card_index] = scout[card_index + 1]
 
-    return scout['results']
-
-
-def _shrink_results(results: list):
-    """
-    Removed uneeded information from scout results.
-
-    :param results: Scout results being shrunk.
-    """
-    if not results:
-        return
-
-    results_copy = []
-    for res in results:
-        results_copy.append(deepcopy(res))
-    results = results_copy
-
-    keep_fields = {
-        "id",
-        "name",
-        "year",
-        "main_unit",
-        "sub_unit",
-        "rarity",
-        "attribute",
-        "release_date",
-        "round_card_image",
-        "round_card_idolized_image"
-    }
-    res = []
-    for result in results:
-        # Copy needed fields under idol
-        result["name"] = result["idol"]["name"]
-        result["year"] = result["idol"]["year"]
-        result["main_unit"] = result["idol"]["main_unit"]
-        result["sub_unit"] = result["idol"]["sub_unit"]
-
-        # Delete uneeded fields
-        delete_fields = []
-        for field in result:
-            if field not in keep_fields:
-                delete_fields.append(field)
-        for field in delete_fields:
-            result.pop(field, None)
-
-        # Replace None with empty string for sorting purposes.
-        replaced = {key: (val or '') for key, val in result.items()}
-        res.append(replaced)
-    return res
+    return scout

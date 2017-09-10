@@ -3,7 +3,7 @@ import motor.motor_asyncio
 import copy
 
 PORT = 27017
-DATABASE_NAME = "haha-no-ur"
+DATABASE_NAME = "haha-no-ur-test"
 
 class MongoClient:
     def __init__(self):
@@ -60,7 +60,7 @@ class CardController(DatabaseController):
 
         await self._collection.update(doc, setCard, upsert=True)
 
-    async def get_random_cards(filters: dict, count: int) -> list:
+    async def get_random_cards(self, filters: dict, count: int) -> list:
         """
         Gets a random list of cards.
 
@@ -69,11 +69,11 @@ class CardController(DatabaseController):
 
         :return: Random list of cards.
         """
-        match = {'$match': filters}}
+        match = {'$match': filters}
         sample = {'$sample': {'size': count}}
-        res = self._collection.aggregate([match, sample])
-        print(res)
-        return res
+        cursor = self._collection.aggregate([match, sample])
+        # TODO: DatabaseController coroutine for reading entire cursor.
+        return await cursor.to_list(length=100)
 
     async def get_card_ids(self) -> list:
         """
@@ -171,14 +171,16 @@ class UserController(DatabaseController):
         """
         for card in new_cards:
             # User does not have this card, push to album
-            if not await self._user_has_card(user_id, card["id"]):
-                card['unidolized_count'] = 1
-                card['idolized_count'] = 0
-
-                card['time_aquired'] = int(round(time.time() * 1000))
+            if not await self._user_has_card(user_id, card['_id']):
+                new_card = {
+                    'id': card['_id'],
+                    'unidolized_count': 1,
+                    'idolized_count': 0,
+                    'time_aquired': int(round(time.time() * 1000))
+                }
 
                 sort = {'id': 1}
-                insert_card = {'$each': [card], '$sort': sort}
+                insert_card = {'$each': [new_card], '$sort': sort}
 
                 await self._collection.update_one(
                     {'_id': user_id},
@@ -189,12 +191,12 @@ class UserController(DatabaseController):
             else:
                 if idolized:
                     await self._collection.update(
-                        {'_id': user_id, 'album.id': card['id']},
+                        {'_id': user_id, 'album.id': card['_id']},
                         {'$inc': {'album.$.idolized_count': 1}}
                     )
                 else:
                     await self._collection.update(
-                        {'_id': user_id, 'album.id': card['id']},
+                        {'_id': user_id, 'album.id': card['_id']},
                         {'$inc': {'album.$.unidolized_count': 1}}
                     )
 

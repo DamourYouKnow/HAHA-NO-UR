@@ -50,10 +50,8 @@ class Scout:
             Year (first, second, third)
         """
         scout = ScoutHandler(
-            self.bot.session_manager,
-            ctx.message.author, 'honour', 1, False, args
-        )
-        image = await scout.do_scout(self.bot)
+            self.bot, ctx.message.author, 'honour', 1, False, args)
+        image = await scout.do_scout()
         await self.__handle_result(ctx, scout.results, image)
 
     @commands.command(pass_context=True)
@@ -72,10 +70,8 @@ class Scout:
             Year (first, second, third)
         """
         scout = ScoutHandler(
-            self.bot.session_manager,
-            ctx.message.author, 'honour', 11, True, args
-        )
-        image = await scout.do_scout(self.bot)
+            self.bot, ctx.message.author, 'honour', 11, True, args)
+        image = await scout.do_scout()
         await self.__handle_result(ctx, scout.results, image)
 
     @commands.command(pass_context=True, aliases=['scoutr'])
@@ -90,10 +86,8 @@ class Scout:
             Attribute (smile, pure, cool)
         """
         scout = ScoutHandler(
-            self.bot.session_manager,
-            ctx.message.author, 'regular', 1, False, args
-        )
-        image = await scout.do_scout(self.bot)
+            self.bot, ctx.message.author, 'regular', 1, False, args)
+        image = await scout.do_scout()
         await self.__handle_result(ctx, scout.results, image)
 
     @commands.command(pass_context=True, aliases=['scoutr10'])
@@ -108,10 +102,8 @@ class Scout:
             Attribute (smile, pure, cool)
         """
         scout = ScoutHandler(
-            self.bot.session_manager,
-            ctx.message.author, 'regular', 10, False, args
-        )
-        image = await scout.do_scout(self.bot)
+            self.bot, ctx.message.author, 'regular', 10, False, args)
+        image = await scout.do_scout()
         await self.__handle_result(ctx, scout.results, image)
 
     @commands.command(pass_context=True, aliases=['scoutc'])
@@ -130,8 +122,6 @@ class Scout:
             Year (first, second, third)
         """
         scout = ScoutHandler(
-            self.bot.session_manager,
-            ctx.message.author, 'coupon', 1, False, args
-        )
-        image = await scout.do_scout(self.bot)
+            self.bot, ctx.message.author, 'coupon', 1, False, args)
+        image = await scout.do_scout()
         await self.__handle_result(ctx, scout.results, image)
