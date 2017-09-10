@@ -161,20 +161,24 @@ class ScoutHandler:
             if not arg_values:
                 continue
 
-            # FIXME: Comma seperated strings need to use $in.
-            values_str = ",".join(arg_values)
+            val = arg_values
+
+            # Comma seperated strings need to use $in.
+            if len(arg_values) > 0:
+                val = {'$in': arg_values}
+
 
             if arg_type == "main_unit":
                 values_str = values_str.replace("Muse", "µ's")
-                params['idol.main_unit'] = values_str
+                params['idol.main_unit'] = val
             elif arg_type == "sub_unit":
-                params['idol.sub_unit'] = values_str
+                params['idol.sub_unit'] = val
             elif arg_type == "name":
-                params['idol.name'] = values_str
+                params['idol.name'] = val
             elif arg_type == "year":
-                params['idol.year'] = values_str
+                params['idol.year'] = val
             elif arg_type == "attribute":
-                params['attribute'] = values_str
+                params['attribute'] = val
 
         print(params)
         print(count)

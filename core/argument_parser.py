@@ -5,6 +5,8 @@ IDOL_NAMES = get_idol_names()
 ALIASES = {
     'name': {
         'honk': 'Kousaka Honoka',
+        'bird': 'Minami Kotori',
+        'birb': 'Minami Kotori',
         'eri': 'Ayase Eli',
         'yohane': 'Tsushima Yoshiko',
         'hana': 'Koizumi Hanayo',

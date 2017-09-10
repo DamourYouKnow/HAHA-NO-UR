@@ -27,4 +27,8 @@ async def update_task(bot):
 
 
 def validate_card(card: dict) -> bool:
-    return card['card_image'] and card['round_card_image']
+    if not card['card_image'] and not card['card_idolized_image']:
+        return False
+    if not card['round_card_image'] and not card['round_card_idolized_image']:
+        return False
+    return True
