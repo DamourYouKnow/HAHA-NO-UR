@@ -187,6 +187,7 @@ class Album:
             url = 'http://schoolido.lu/api/cards/' + str(card_id)
             res = await self.bot.session_manager.get_json(url, {'id': card_id})
 
+            card['_id'] = card['id']
             await self.bot.db.users.remove_from_user_album(
                     user.id, card_id, count=2)
             await self.bot.db.users.add_to_user_album(

@@ -48,7 +48,7 @@ class ScoutHandler:
         self._box = box
         self._count = count
         self._guaranteed_sr = guaranteed_sr
-        self._args = parse_arguments(args)
+        self._args = parse_arguments(args, True)
 
     async def do_scout(self):
         if self._count > 1:
@@ -166,7 +166,6 @@ class ScoutHandler:
             # Comma seperated strings need to use $in.
             if len(arg_values) > 0:
                 val = {'$in': arg_values}
-
 
             if arg_type == "main_unit":
                 values_str = values_str.replace("Muse", "µ's")

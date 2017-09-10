@@ -3,7 +3,7 @@ import motor.motor_asyncio
 import copy
 
 PORT = 27017
-DATABASE_NAME = "haha-no-ur-test"
+DATABASE_NAME = "haha-no-ur"
 
 class MongoClient:
     def __init__(self):
