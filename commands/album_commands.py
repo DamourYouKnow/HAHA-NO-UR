@@ -215,9 +215,9 @@ def _merge_card_info(album: list, card_infos: list) -> list:
 
     for i in range(0, len(album)):
         for key in card_infos[i]:
-            if ('.' in key):
-                spl = key.split('.')
-                album[i][key] = card_infos[i][spl[0]][spl[1]]
+            if key == 'idol':
+                for idol_key in card_infos[i][key]:
+                    album[i][idol_key] = card_infos[i][key][idol_key]
             else:
                 album[i][key] = card_infos[i][key]
 

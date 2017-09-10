@@ -180,10 +180,6 @@ class ScoutHandler:
             elif arg_type == "attribute":
                 params['attribute'] = val
 
-        print(params)
-        print(count)
-        # FIXME: Comma seperated strings need to use $in.
-
         # Get and return response
         return await self._bot.db.cards.get_random_cards(params, count)
 
