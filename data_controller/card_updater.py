@@ -23,7 +23,7 @@ async def update_task(bot):
                 if validate_card(card):
                     await bot.db.cards.upsert_card(card)
 
-        await asyncio.sleep(60)
+        await asyncio.sleep(10)
 
 
 def validate_card(card: dict) -> bool:
