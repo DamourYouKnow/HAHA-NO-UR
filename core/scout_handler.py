@@ -168,7 +168,6 @@ class ScoutHandler:
                 val = {'$in': arg_values}
 
             if arg_type == "main_unit":
-                values_str = values_str.replace("Muse", "µ's")
                 params['idol.main_unit'] = val
             elif arg_type == "sub_unit":
                 params['idol.sub_unit'] = val
