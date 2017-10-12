@@ -16,3 +16,5 @@ config/auth\.json
 *.log
 
 *.png
+
+.vscode/launch.json
