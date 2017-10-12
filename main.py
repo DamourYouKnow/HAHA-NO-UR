@@ -9,7 +9,7 @@ from config import config_path
 from data_controller.mongo import MongoClient
 from logs import log_path
 
-
+#test
 def main():
     start_time = int(time())
     logger = setup_logging(start_time, log_path)
