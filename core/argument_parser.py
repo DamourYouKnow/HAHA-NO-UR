@@ -37,7 +37,7 @@ ALIASES = {
         'printemps': 'Printemps',
         'guilty': 'Guilty Kiss',
         'kiss': 'Guilty Kiss',
-        'azalea': 'Azalea',
+        'azalea': 'AZALEA',
         'cyaron': 'CYaRon!',
         'cyaron!': 'CYaRon!',
         'crayon': 'CYaRon!',
