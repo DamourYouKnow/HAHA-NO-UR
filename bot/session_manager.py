@@ -3,6 +3,7 @@ from json import loads
 
 from aiohttp import ClientResponse, ClientSession
 from discord.ext.commands import CommandError
+import logging
 
 
 class HTTPStatusError(CommandError):
@@ -97,6 +98,7 @@ class SessionManager:
         :return: a client response object.
         :raises: HTTPStatusError if status code isn't 200
         """
+        self.logger.log(logging.INFO, 'Sending GET request to ' + url)
         r = await self.session.get(
             url, allow_redirects=allow_redirects, **kwargs)
         return self.return_response(r, r.status, url)

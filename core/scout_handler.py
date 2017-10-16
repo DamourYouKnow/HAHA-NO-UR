@@ -2,7 +2,6 @@ from collections import namedtuple
 from posixpath import basename
 from random import randint, shuffle, uniform
 from time import time
-from copy import deepcopy
 from urllib.parse import urlsplit
 
 from discord import User
