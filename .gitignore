@@ -17,4 +17,4 @@ config/auth\.json
 
 *.png
 
-.vscode/launch.json
+.vscode/

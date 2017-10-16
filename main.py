@@ -1,13 +1,17 @@
+'''
+A discord bot for scouting in Love Live: School Idol Festival.
+'''
 from asyncio import get_event_loop
 from json import load
 from time import time
 
+from commands import *
 from bot import HahaNoUR, get_session_manager
 from bot.logger import setup_logging
-from commands import *
 from config import config_path
 from data_controller.mongo import MongoClient
 from logs import log_path
+
 
 def main():
     start_time = int(time())

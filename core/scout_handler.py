@@ -220,12 +220,9 @@ def _get_adjusted_scout(scout: list, required_count: int) -> list:
     Adjusts a pull of a single rarity by checking if a card should flip to
     a similar one and by duplicating random cards in the scout if there were
     not enough scouted.
-
     :param scout: List representing the scout.
         All these cards will have the same rarity.
-
     :param required_count: The number of cards that need to be scouted.
-
     :return: Adjusted list of cards scouted
     """
     # Add missing cards to scout by duplicating random cards already present
