@@ -98,7 +98,24 @@ class SessionManager:
         :return: a client response object.
         :raises: HTTPStatusError if status code isn't 200
         """
-        self.logger.log(logging.INFO, 'Sending GET request to ' + url)
+        query_url = url
+        if 'params' in kwargs:
+            query_url += get_query_string(kwargs['params'])
+
+        self.logger.log(logging.INFO, 'Sending GET request to ' + query_url)
+
         r = await self.session.get(
             url, allow_redirects=allow_redirects, **kwargs)
         return self.return_response(r, r.status, url)
+
+
+def get_query_string(params) -> str:
+    """
+    Gets the query string of a URL parameter dictionary.abs
+    :param params: URL params.
+    :return: Query string.
+    """
+    if not params:
+        return ''
+
+    return '?' + '&'.join([str(k) + '=' + str(v) for k, v in params.items()])
