@@ -146,12 +146,10 @@ class Album:
             valid = valid or (idolized and card['idolized_count'] > 0)
 
         if valid:
-            url = 'http://schoolido.lu/api/cards/' + str(card_id)
-            res = await self.bot.session_manager.get_json(url, {'id': card_id})
-
-            img_url = 'http:' + res['card_image']
+            card_info = await self.bot.db.cards.get_card(card_id)
+            img_url = 'http:' + card_info['card_image']
             if idolized and card:
-                img_url = 'http:' + res['card_idolized_image']
+                img_url = 'http:' + card_info['card_idolized_image']
 
             fname = basename(urlsplit(img_url).path)
             image_path = idol_img_path.joinpath(fname)
@@ -182,18 +180,15 @@ class Album:
 
         image = None
         card = await self.bot.db.users.get_card_from_album(user.id, card_id)
-        valid = False
         if card and card['unidolized_count'] >= 2:
-            url = 'http://schoolido.lu/api/cards/' + str(card_id)
-            res = await self.bot.session_manager.get_json(url, {'id': card_id})
-
             card['_id'] = card['id']
             await self.bot.db.users.remove_from_user_album(
                     user.id, card_id, count=2)
             await self.bot.db.users.add_to_user_album(
                     user.id, [card], idolized=True)
 
-            img_url = 'http:' + res['card_idolized_image']
+            card_info = await self.bot.db.cards.get_card(card_id)
+            img_url = 'http:' + card_info['card_idolized_image']
             fname = basename(urlsplit(img_url).path)
             image_path = idol_img_path.joinpath(fname)
             image = await get_one_img(

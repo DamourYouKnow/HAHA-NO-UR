@@ -60,6 +60,19 @@ class CardController(DatabaseController):
 
         await self._collection.update(doc, setCard, upsert=True)
 
+    async def get_card(self, card_id: int) -> dict:
+        """
+        Gets a single card from the database.
+
+        :param card_id: ID of card to get.
+
+        :return: Matching card.
+        """
+        cards = await self.get_cards([card_id])
+        if cards:
+            return cards[0]
+        return None
+
     async def get_cards(self, card_ids: list) -> list:
         """
         Gets a list of cards from the database.
