@@ -17,7 +17,7 @@ from data_controller.card_updater import update_task
 class HahaNoUR(Bot):
     def __init__(self, prefix: str, start_time: int, colour: int, logger,
                  session_manager: SessionManager, db: DatabaseController,
-                 error_log: int):
+                 error_log: int, feedback_log: int):
         """
         Init the instance of HahaNoUR.
         :param prefix: the bot prefix.
@@ -39,6 +39,7 @@ class HahaNoUR(Bot):
         self.session_manager = session_manager
         # FIXME remove type casting after library rewrite
         self.error_log = Object(str(error_log))
+        self.feedbag_log = Object(str(feedback_log))
 
     def start_bot(self, cogs: list, token: str):
         """

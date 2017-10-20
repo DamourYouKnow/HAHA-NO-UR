@@ -28,7 +28,7 @@ def main():
 
     bot = HahaNoUR(
         config['default_prefix'], start_time, int(config['colour'], base=16),
-        logger, session_manager, db, auth['error_log']
+        logger, session_manager, db, auth['error_log'], auth['feedback_log']
     )
 
     bot.remove_command('help')
