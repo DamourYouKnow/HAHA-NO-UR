@@ -1,7 +1,6 @@
 from time import time
-
 from discord.ext import commands
-
+from core.checks import check_mongo
 from bot import HahaNoUR
 from data import data_path
 
@@ -42,4 +41,25 @@ class Info:
         diff = end - start
         await self.bot.edit_message(
             msg, new_content=f':ping_pong: Pong! | {round(diff*1000)}ms'
+        )
+
+    @commands.command(pass_context=True)
+    @commands.cooldown(rate=3, per=30, type=commands.BucketType.user)
+    @commands.check(check_mongo)
+    async def feedback(self, ctx, *args: str):
+        """
+        Description: |
+            Provide feedback and suggestions.
+        """
+        print('test')
+        user_id = ctx.message.author.id
+        username = ctx.message.author.name
+        message = ctx.message.content[len('!feedback'):].strip()
+        if message == '':
+            return
+
+        await self.bot.db.feedback.add_feedback(user_id, username, message)
+        await self.bot.send_message(
+            ctx.message.channel,
+            f'<@{ctx.message.author.id }> Thank you for your feedback!'
         )

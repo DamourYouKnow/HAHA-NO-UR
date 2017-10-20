@@ -1,4 +1,5 @@
 import time
+from datetime import datetime
 import motor.motor_asyncio
 import copy
 
@@ -14,6 +15,7 @@ class MongoClient:
         self.db = self.client[DATABASE_NAME]
         self.users = UserController(self)
         self.cards = CardController(self)
+        self.feedback = FeedbackController(self)
 
     def __del__(self):
         """
@@ -282,3 +284,26 @@ class UserController(DatabaseController):
         )
 
         return len(search.keys()) > 1
+
+
+class FeedbackController(DatabaseController):
+    def __init__(self, mongo_client: MongoClient):
+        """
+        Constructor for a FeebackController.
+
+        :param mongo_client: Mongo client used by this controller.
+        """
+        super().__init__(mongo_client, 'feedback')
+
+    async def add_feedback(self, user_id, username, message):
+        """
+        Insert a new feedback into the database.
+        """
+        print('hrlo')
+        feedback = {
+            'user_id': user_id,
+            'username': username,
+            'date': datetime.now(),
+            'message': message
+        }
+        await self._collection.insert_one(feedback)
