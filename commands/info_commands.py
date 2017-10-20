@@ -51,7 +51,6 @@ class Info:
         Description: |
             Provide feedback and suggestions.
         """
-        print('test')
         user_id = ctx.message.author.id
         username = ctx.message.author.name
         message = ctx.message.content[len('!feedback'):].strip()
