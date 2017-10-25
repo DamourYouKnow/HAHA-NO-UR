@@ -81,9 +81,11 @@ class Scout:
         Description: |
             Solo regular scouting.
 
-            **Rates:** N: 90%, R: 5%
+            **Rates:** N: 95%, R: 5%
         Optional Arguments: |
             Attribute (smile, pure, cool)
+            Idol first name (Honoka, Chika, ...)
+            Year (first, second, third)
         """
         scout = ScoutHandler(
             self.bot, ctx.message.author, 'regular', 1, False, args)
@@ -97,9 +99,11 @@ class Scout:
         Description: |
             10 card regular scouting.
 
-            **Rates:** N: 90%, R: 5%
+            **Rates:** N: 95%, R: 5%
         Optional Arguments: |
             Attribute (smile, pure, cool)
+            Idol first name (Honoka, Chika, ...)
+            Year (first, second, third)
         """
         scout = ScoutHandler(
             self.bot, ctx.message.author, 'regular', 10, False, args)
