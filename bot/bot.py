@@ -10,13 +10,13 @@ from bot.error_handler import command_error_handler, format_command_error, \
 from bot.logger import command_formatter
 from bot.session_manager import SessionManager
 from core.help import get_help
-from data_controller.mongo import DatabaseController
+from data_controller.mongo import MongoClient
 from data_controller.card_updater import update_task
 
 
 class HahaNoUR(Bot):
     def __init__(self, prefix: str, start_time: int, colour: int, logger,
-                 session_manager: SessionManager, db: DatabaseController,
+                 session_manager: SessionManager, db: MongoClient,
                  error_log: int, feedback_log: int):
         """
         Init the instance of HahaNoUR.
