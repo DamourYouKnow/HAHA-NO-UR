@@ -59,8 +59,8 @@ class Info:
 
         await self.bot.db.feedback.add_feedback(user_id, username, message)
         await self.bot.send_message(
+                self.bot.feedbag_log, '**' + username + '**: ' + message)
+        await self.bot.send_message(
             ctx.message.channel,
             f'<@{ctx.message.author.id }> Thank you for your feedback!'
         )
-        await self.bot.send_message(
-                self.bot.feedbag_log, '**' + username + '**: ' + message)
