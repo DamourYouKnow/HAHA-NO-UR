@@ -16,7 +16,8 @@ ALIASES = {
         'technology': 'Kunikida Hanamaru',
         'woah': 'Kunikida Hanamaru',
         'mike': 'Kurosawa Ruby',  # Memes
-        'nell': "Yazawa Nico"
+        'nell': "Yazawa Nico",
+        'monika': 'Monika',
     },
     'main_unit': {
         'muse': "μ's",
@@ -28,7 +29,8 @@ ALIASES = {
         'a-rise': 'A-RISE',
         'arise': 'A-RISE',
         'saint': 'Saint Snow',
-        'snow': 'Saint Snow'
+        'snow': 'Saint Snow',
+        'literature': 'Literature Club'
     },
     'sub_unit': {
         'lily': 'Lily White',
