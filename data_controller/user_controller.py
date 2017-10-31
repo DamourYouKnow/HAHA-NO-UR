@@ -1,4 +1,6 @@
+import time
 from data_controller.database_controller import DatabaseController
+import pprint
 
 class UserController(DatabaseController):
     def __init__(self, mongo_client):
@@ -70,11 +72,48 @@ class UserController(DatabaseController):
             {"_id": user_id},
             {"album": search_filter}
         )
-        search = await cursor.to_list(length=10000)
+        search = await cursor.to_list(None)
 
         if len(search) > 0 and 'album' in search[0]:
             return search[0]['album'][0]
         return None
+
+    async def get_cards(self, user_id: str, 
+                        filters: dict = None, 
+                        sorts: dict = None,
+                        page: int = None) -> list:
+        """
+        Searchs for matching cards in a user's album.abs
+
+        :param user_id: User ID of album owner.
+        :param filters: Search filters to use.
+        :param sorts: Sorts to use.
+        """
+        match = {'$match': {'_id': user_id}}
+        unwind_source = {'$unwind': '$album'}
+        lookup = {
+            '$lookup': {
+                'from': 'cards',
+                'localField': 'album.id',
+                'foreignField': '_id',
+                'as': 'cardObjects'
+            }
+        }
+        unwind_results = {'$unwind': '$cardObjects'}
+        group = {
+            '$group': {
+                '_id': '$_id',
+                'cards': {'$push': '$cards'},
+                'cardObjects': {'$push': '$cardObjects'}
+            } 
+        }
+
+        pipeline = [match, unwind_source, lookup, unwind_results, group]
+        cursor = self._collection.aggregate(pipeline)
+        results = await cursor.to_list(None)
+        pp = pprint.PrettyPrinter(indent=4)
+        pp.pprint(results)
+        raise NotImplementedError
 
     async def add_to_user_album(self, user_id: str, new_cards: list,
                                 idolized: bool = False):

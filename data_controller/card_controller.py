@@ -60,7 +60,7 @@ class CardController(DatabaseController):
             'round_card_idolized_image': 1
         }
         cursor = self._collection.find(search, show)
-        return await cursor.to_list(length=10000)
+        return await cursor.to_list(None)
 
     async def get_random_cards(self, filters: dict, count: int) -> list:
         """
@@ -74,8 +74,7 @@ class CardController(DatabaseController):
         match = {'$match': filters}
         sample = {'$sample': {'size': count}}
         cursor = self._collection.aggregate([match, sample])
-        # TODO: DatabaseController coroutine for reading entire cursor.
-        return await cursor.to_list(length=100)
+        return await cursor.to_list(None)
 
     async def get_card_ids(self) -> list:
         """
