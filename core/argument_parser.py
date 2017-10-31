@@ -29,8 +29,7 @@ ALIASES = {
         'a-rise': 'A-RISE',
         'arise': 'A-RISE',
         'saint': 'Saint Snow',
-        'snow': 'Saint Snow',
-        'literature': 'Literature Club'
+        'snow': 'Saint Snow'
     },
     'sub_unit': {
         'lily': 'Lily White',
@@ -43,7 +42,8 @@ ALIASES = {
         'cyaron': 'CYaRon!',
         'cyaron!': 'CYaRon!',
         'crayon': 'CYaRon!',
-        'crayon!': 'CYaRon!'
+        'crayon!': 'CYaRon!',
+        'literature': 'Literature Club'
     }
 }
 
