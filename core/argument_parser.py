@@ -17,7 +17,6 @@ ALIASES = {
         'woah': 'Kunikida Hanamaru',
         'mike': 'Kurosawa Ruby',  # Memes
         'nell': "Yazawa Nico",
-        'monika': 'Monika',
     },
     'main_unit': {
         'muse': "μ's",
@@ -42,8 +41,7 @@ ALIASES = {
         'cyaron': 'CYaRon!',
         'cyaron!': 'CYaRon!',
         'crayon': 'CYaRon!',
-        'crayon!': 'CYaRon!',
-        'literature': 'Literature Club'
+        'crayon!': 'CYaRon!'
     }
 }
 
