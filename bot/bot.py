@@ -49,7 +49,6 @@ class HahaNoUR(Bot):
         """
         for cog in cogs:
             self.add_cog(cog)
-        self.loop.create_task(update_task(self))
         self.run(token)
 
     async def __change_presence(self):
