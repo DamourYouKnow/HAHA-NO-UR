@@ -11,7 +11,6 @@ from bot.logger import command_formatter
 from bot.session_manager import SessionManager
 from core.help import get_help
 from data_controller.mongo import MongoClient
-from data_controller.card_updater import update_task
 
 
 class HahaNoUR(Bot):
@@ -131,9 +130,7 @@ class HahaNoUR(Bot):
         try:
             await self.send_message(channel, msg)
         except Forbidden:
-            msg = ("It appears I don't have permission to post messages and "
-                   "send files. Please make sure I can do this!")
-            await self.send_message(author, msg)
+            pass
 
     async def on_command_error(self, exception, context):
         """
@@ -141,6 +138,9 @@ class HahaNoUR(Bot):
         :param exception: the expection raised
         :param context: the context of the command
         """
+        if isinstance(exception, Forbidden):
+            # Ignore this case
+            return
         if isinstance(exception, CommandNotFound):
             # Ignore this case
             return
