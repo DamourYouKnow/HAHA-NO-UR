@@ -56,7 +56,7 @@ class HahaNoUR(Bot):
         """
         try:
             await self.wait_until_ready()
-            await self.change_presence(game=Game(name='!help'))
+            await self.change_presence(game=Game(name='!help xd'))
         except ConnectionClosed:
             await self.logout()
             await self.login()
