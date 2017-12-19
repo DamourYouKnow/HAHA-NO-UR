@@ -231,9 +231,10 @@ def _get_adjusted_scout(scout: list, required_count: int) -> list:
     if current_count == 0:
         return []
 
+    pool_size = current_count
     while current_count < required_count:
         scout.append(
-            scout[randint(0, current_count - 1)]
+            scout[randint(0, pool_size - 1)]
         )
         current_count += 1
 
