@@ -17,6 +17,7 @@ ALIASES = {
         'woah': 'Kunikida Hanamaru',
         'mike': 'Kurosawa Ruby',  # Memes
         'nell': "Yazawa Nico",
+        'nya': 'Hoshizora Rin'
     },
     'main_unit': {
         'muse': "μ's",
