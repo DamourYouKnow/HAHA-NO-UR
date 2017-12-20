@@ -1,5 +1,5 @@
 **2017-12-19:**:
-:wave:, so I know I've been inactive lately, but I have done a bit of work behind the scenes. Here is an updated changelog <https://github.com/DamourYouKnow/HAHA-NO-UR/blob/master/CHANGELOG.md>
+:wave: Hello, so I know I've been inactive lately, but I have done a bit of work behind the scenes. Here is an updated changelog <https://github.com/DamourYouKnow/HAHA-NO-UR/blob/master/CHANGELOG.md>
 
 !stats and !botstats is a new work in progress command.
 
