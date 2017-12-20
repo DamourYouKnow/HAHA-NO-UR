@@ -55,6 +55,7 @@ class CardController(DatabaseController):
             'rarity': 1,
             'attribute': 1,
             'card_image': 1,
+            'release_date': 1,
             'card_idolized_image': 1,
             'round_card_image': 1,
             'round_card_idolized_image': 1

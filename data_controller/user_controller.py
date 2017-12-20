@@ -45,7 +45,7 @@ class UserController(DatabaseController):
         """
         return await self._collection.find_one({'_id': user_id})
 
-    async def get_user_album(self, user_id: str) -> list:
+    async def get_user_album(self, user_id: str, expand_info: bool=False) -> list:
         """
         Gets the cards album of a user.
 
@@ -57,7 +57,12 @@ class UserController(DatabaseController):
         user_doc = await self.find_user(user_id)
         if not user_doc:
             return []
-        return user_doc['album']
+
+        album = user_doc['album']
+        if expand_info:
+            album = await self._merge_card_info(album)
+  
+        return album
 
     async def get_card_from_album(self, user_id: str, card_id: int) -> dict:
         """
@@ -200,3 +205,28 @@ class UserController(DatabaseController):
         )
 
         return len(search.keys()) > 1
+
+    async def _merge_card_info(self, album: list) -> list:
+        """
+        Merges card information to an album.
+
+        :param album: Album list.
+        :param card_infos: Card information to join.
+
+        :return: New list of card dictionaries with merged information.
+        """
+        card_ids = [card['id'] for card in album]
+        card_infos = await self.mongo_client.cards.get_cards(card_ids)
+
+        if len(album) != len(card_infos):
+            return []
+
+        for i in range(0, len(album)):
+            for key in card_infos[i]:
+                if key == 'idol':
+                    for idol_key in card_infos[i][key]:
+                        album[i][idol_key] = card_infos[i][key][idol_key]
+                else:
+                    album[i][key] = card_infos[i][key]
+
+        return album

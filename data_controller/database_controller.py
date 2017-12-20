@@ -10,4 +10,5 @@ class DatabaseController:
 
         :param mongo_client: Mongo client used by this controller.
         """
+        self.mongo_client = mongo_client
         self._collection = mongo_client.db[collection]
