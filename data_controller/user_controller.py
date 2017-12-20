@@ -11,6 +11,9 @@ class UserController(DatabaseController):
         """
         super().__init__(mongo_client, 'users')
 
+    async def get_user_count(self) -> int:
+        return await self._collection.find().count()
+
     async def insert_user(self, user_id: str):
         """
         Insert a new user into the database.

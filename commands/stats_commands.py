@@ -15,19 +15,24 @@ class Stats:
         Description: |
             Provides stats about you.
         """
+        user_id = ctx.message.author.id
+
         stats = []
-        album = await self.bot.db.users.get_user_album(ctx.message.author.id)
+        album = await self.bot.db.users.get_user_album(user_id, True)
         counter = AlbumCounter(album)
         counter.run_count()
         stats.append(('Unique cards collected', counter.distinct_count))
         stats.append(('Total cards', counter.total_count))
         stats.append(('Unidolized cards', counter.unidolized_count))
         stats.append(('Idolized cards', counter.idolized_count))
+
         for rarity, count in counter.rarity_counts.items():
             stats.append((rarity + ' cards', count))
 
-        
-        emb = _create_embed('Your stats', stats)
+        for attribute, count in counter.attribute_counts.items():
+            stats.append((attribute + ' cards', count))
+
+        emb = _create_embed('Stats for ' + ctx.message.author.name, stats)
         await self.bot.send_message(ctx.message.channel, embed=emb)
 
     @commands.command(pass_context=True)
@@ -38,20 +43,33 @@ class Stats:
         Description: |
             Provides stats about the bot.
         """
-        raise NotImplementedError
+        stats = []
+        stats.append(('Servers', len(self.bot.servers)))
+        stats.append(('Users', await self.bot.db.users.get_user_count()))
+
+        emb = _create_embed('My stats', stats)
+        await self.bot.send_message(ctx.message.channel, embed=emb)
 
 
 class AlbumCounter:
     def __init__(self, album):
         self.album = album
         self.rarity_counts = {'N': 0, 'R': 0, 'SR': 0, 'SSR': 0, 'UR': 0}
+        self.attribute_counts = {'Smile': 0, 'Pure': 0, 'Cool': 0}
         self.total_count = 0
         self.unidolized_count = 0
         self.idolized_count = 0
         self.distinct_count = 0
 
     def run_count(self):
-        # TODO: Refactor out _merge_card_info from album commands.
+        for card in self.album:
+            curr_total = card['unidolized_count'] + card['idolized_count']
+
+            self.rarity_counts[card['rarity']] += curr_total
+            self.attribute_counts[card['attribute']] += curr_total
+            self.unidolized_count += card['unidolized_count']
+            self.idolized_count += card['idolized_count']
+
         self.total_count = self.idolized_count + self.unidolized_count
         self.distinct_count = len(self.album)
 
