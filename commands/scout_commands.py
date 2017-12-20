@@ -2,6 +2,7 @@ from discord.ext import commands
 
 from bot import HahaNoUR
 from core.scout_handler import ScoutHandler, ScoutImage
+from core.checks import check_mongo
 
 
 class Scout:
@@ -36,6 +37,7 @@ class Scout:
 
     @commands.command(pass_context=True)
     @commands.cooldown(rate=5, per=2.5, type=commands.BucketType.user)
+    @commands.check(check_mongo)
     async def scout(self, ctx, *args: str):
         """
         Description: |
@@ -56,6 +58,7 @@ class Scout:
 
     @commands.command(pass_context=True)
     @commands.cooldown(rate=3, per=2.5, type=commands.BucketType.user)
+    @commands.check(check_mongo)
     async def scout11(self, ctx, *args: str):
         """
         Description: |
@@ -77,6 +80,7 @@ class Scout:
 
     @commands.command(pass_context=True, aliases=['scoutr'])
     @commands.cooldown(rate=5, per=2.5, type=commands.BucketType.user)
+    @commands.check(check_mongo)
     async def scoutregular(self, ctx, *args: str):
         """
         Description: |
@@ -95,6 +99,7 @@ class Scout:
 
     @commands.command(pass_context=True, aliases=['scoutr10'])
     @commands.cooldown(rate=3, per=2.5, type=commands.BucketType.user)
+    @commands.check(check_mongo)
     async def scoutregular10(self, ctx, *args: str):
         """
         Description: |
@@ -113,6 +118,7 @@ class Scout:
 
     @commands.command(pass_context=True, aliases=['scoutc'])
     @commands.cooldown(rate=5, per=2.5, type=commands.BucketType.user)
+    @commands.check(check_mongo)
     async def scoutcoupon(self, ctx, *args: str):
         """
         Description: |

@@ -7,6 +7,8 @@ class NoMongo(CommandError):
 
 
 def check_mongo(ctx):
+    print('check')
+    print(ctx.bot.db)
     if ctx.bot.db:
         return True
     raise NoMongo
