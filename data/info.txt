@@ -1,4 +1,8 @@
-**2017-10-19:** Significantly improved performance and added feedback.
+**2017-12-19:**:
+:wave:, so I know I've been inactive lately, but I have done a bit of work behind the scenes. Here is an updated changelog <https://github.com/DamourYouKnow/HAHA-NO-UR/blob/master/CHANGELOG.md>
+
+!stats and !botstats is a new work in progress command.
+
 
 Invite me to your server here: <https://discordapp.com/oauth2/authorize?client_id=311284054333063168&scope=bot&permissions=0>
 
