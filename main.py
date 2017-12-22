@@ -34,7 +34,7 @@ def main():
     )
 
     bot.remove_command('help')
-    cogs = [Scout(bot), Album(bot), Info(bot), Stats(bot)]
+    cogs = [Scout(bot), Album(bot), Info(bot), Stats(bot), Trivia(bot)]
 
     card_update_thread = Thread(target=update_task)
     card_update_thread.setDaemon(True)

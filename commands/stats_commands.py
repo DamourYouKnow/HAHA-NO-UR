@@ -8,7 +8,7 @@ class Stats:
         self.bot = bot
 
     @commands.command(pass_context=True, aliases=['stats'])
-    @commands.cooldown(rate=3, per=30, type=commands.BucketType.user)
+    @commands.cooldown(rate=3, per=10, type=commands.BucketType.user)
     @commands.check(check_mongo)
     async def mystats(self, ctx, *args: str):
         """
@@ -36,7 +36,7 @@ class Stats:
         await self.bot.send_message(ctx.message.channel, embed=emb)
 
     @commands.command(pass_context=True)
-    @commands.cooldown(rate=3, per=30, type=commands.BucketType.user)
+    @commands.cooldown(rate=3, per=10, type=commands.BucketType.user)
     @commands.check(check_mongo)
     async def botstats(self, ctx, *args: str):
         """
