@@ -29,8 +29,7 @@ ALIASES = {
         'a-rise': 'A-RISE',
         'arise': 'A-RISE',
         'saint': 'Saint Snow',
-        'snow': 'Saint Snow',
-        'kazuno': 'Saint Snow'
+        'snow': 'Saint Snow'
     },
     'sub_unit': {
         'lily': 'Lily White',
@@ -68,8 +67,7 @@ def parse_arguments(args: tuple, allow_unsupported_lists: bool = False) -> dict:
     }
 
     for arg in args:
-        arg_type, arg_value = _parse_argument(arg)
-        if arg_type:
+        for arg_type, arg_value in _parse_argument(arg):
             parsed_args[arg_type].append(arg_value)
 
     # Covert all values to sets and back to lists to remove duplicates.
@@ -83,40 +81,42 @@ def parse_arguments(args: tuple, allow_unsupported_lists: bool = False) -> dict:
     return parsed_args
 
 
-def _parse_argument(arg: str) -> tuple:
+def _parse_argument(arg: str) -> list:
     """
     Parse user argument.
 
     :param arg: An argument.
 
-    :return: Tuple of (arg_type, arg_value)
+    :return: List of tuples of (arg_type, arg_value)
     """
     arg = arg.lower()
+    found_args = []
 
     # Check for unit and idol names by alias
     for key, val in ALIASES.items():
         search_result = val.get(arg, None)
         if search_result:
-            return key, search_result
+            return [(key, search_result)]
 
     # Check for names/surnames
     for full_name in IDOL_NAMES:
         name_split = full_name.split(' ')
-
-        # Check if name/surname is exact match
         if arg.title() in name_split:
-            return 'name', full_name
+            found_args.append(('name', full_name))
+
+    if found_args:
+        return found_args
 
     # Check for years
     if arg in ('first', 'second', 'third'):
-        return 'year', arg.title()
+        return [('year', arg.title())]
 
     # Check for attribute
     if arg in ('cool', 'smile', 'pure'):
-        return 'attribute', arg.title()
+        return [('attribute', arg.title())]
 
     # Check for rarity
     if arg.upper() in ('N', 'R', 'SR', 'SSR', 'UR'):
-        return 'rarity', arg.upper()
+        return [('rarity', arg.upper())]
 
-    return None, None
+    return []
