@@ -1,4 +1,5 @@
 # Changelog
+- You can now filter by last name. Holy whiskers you go Kurosawa sisters.
 - The bot is no longer dependent on School Idol Tomodachi being online
 - !stats and !botstats are new commands (work in progress)
 - You can now view idolized cards in unidolized mode even if you don't have any unidolized copies
