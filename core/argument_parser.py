@@ -8,6 +8,7 @@ ALIASES = {
         'bird': 'Minami Kotori',
         'birb': 'Minami Kotori',
         'eri': 'Ayase Eli',
+        'harasho': 'Ayase Eli',
         'yohane': 'Tsushima Yoshiko',
         'hana': 'Koizumi Hanayo',
         'pana': 'Koizumi Hanayo',
