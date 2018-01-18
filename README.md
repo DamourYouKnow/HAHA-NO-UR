@@ -17,6 +17,11 @@ https://discordapp.com/oauth2/authorize?client_id=311284054333063168&scope=bot&p
 - !scoutregular/!scoutr [args]  
 - !scoutregular10/!scoutr10 [args]  
 - !scoutcoupon/!scoutc [args]  
+- !feedback - Submit feedback to the developers  
+- !mystats - Some fun stats about your album  
+- !botstats - Some fun stats about the bot  
+- !prefix - Change the prefix on a per server basis  
+- !resetprefix - In case of emergency, please use this command  
 
 # Acknowledgements
 This bot would not have been possible without the following projects:  
