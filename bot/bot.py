@@ -97,7 +97,7 @@ class HahaNoUR(Bot):
             custom_prefix = await self.db.servers.get_prefix(message.server.id)
             if content.startswith(custom_prefix):
                 content = self.prefix + content[len(custom_prefix):]
-            elif content.startswith(custom_prefix) and self.prefix != custom_prefix:
+            elif content.startswith(self.prefix) and self.prefix != custom_prefix:
                 content = content[1:]
 
         # Pull alarm in case of emergency.
@@ -109,7 +109,7 @@ class HahaNoUR(Bot):
         if is_cmd and command_name in list(self.commands.keys()):
             log_entry = command_formatter(message, self.prefix + command_name)
             self.logger.log(logging.INFO, log_entry)
-
+            
         message.content = content
         await super().process_commands(message)
 
