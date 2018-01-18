@@ -38,7 +38,8 @@ class Config:
         else:
             # Validated, let's do this!
             await self.bot.db.servers.set_prefix(server_id, msg_spl[1])
-            reply += 'Prefix updated!'
+            reply += 'Prefix updated! If you would like to revert you can use '
+            reply += '`!resetprefix`'
 
         await self.bot.send_message(channel, reply)
 
@@ -67,7 +68,6 @@ class Config:
         else:
             # Validated, let's do this!
             await self.bot.db.servers.set_prefix(server_id, self.bot.prefix)
-            reply += 'Prefix updated! If you would to revert yoy can use '
             reply += '`!resetprefix` with any command prefix.'
 
         await self.bot.send_message(channel, reply)
