@@ -18,3 +18,8 @@ config/auth\.json
 *.png
 
 .vscode/
+
+*.sln
+*.pyproj
+*.suo
+.vs/
