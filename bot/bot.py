@@ -56,7 +56,7 @@ class HahaNoUR(Bot):
         """
         try:
             await self.wait_until_ready()
-            await self.change_presence(game=Game(name='!trivia'))
+            await self.change_presence(game=Game(name='NEW !info'))
 
         except ConnectionClosed:
             await self.logout()
@@ -87,15 +87,30 @@ class HahaNoUR(Bot):
         Overwrites the process_commands method to ignore bot users and
         log commands.
         """
-        if message.author.bot:
+        if message.author.bot or len(message.content) < 1:
             return
-
+        
         content = message.content
+    
+        # Look up any custom prefixes and replace them with the bot prefix.
+        if message.server:
+            custom_prefix = await self.db.servers.get_prefix(message.server.id)
+            if content.startswith(custom_prefix):
+                content = self.prefix + content[len(custom_prefix):]
+            elif content.startswith(custom_prefix) and self.prefix != custom_prefix:
+                content = content[1:]
+
+        # Pull alarm in case of emergency.
+        if content.split(' ')[0][1:] == 'resetprefix':
+            content = self.prefix + 'resetprefix'
+
+        is_cmd = (content[0] == self.prefix)
         command_name = content.split(' ')[0][len(self.prefix):]
-        if command_name in list(self.commands.keys()):
+        if is_cmd and command_name in list(self.commands.keys()):
             log_entry = command_formatter(message, self.prefix + command_name)
             self.logger.log(logging.INFO, log_entry)
 
+        message.content = content
         await super().process_commands(message)
 
     async def on_error(self, event_method, *args, **kwargs):

@@ -11,7 +11,7 @@ class ServerController(DatabaseController):
 
     async def set_prefix(self, server_id: str, prefix: str):
         doc = {'_id': server_id}
-        set_prefix = {'$set': prefix}
+        set_prefix = {'$set': {'command_prefix': prefix}}
         await self._collection.update(doc, set_prefix, upsert=True)
 
     async def get_prefix(self, server_id: str) -> str:

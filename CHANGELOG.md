@@ -1,4 +1,5 @@
 # Changelog
+- You can now change the command prefix. I can work alongside other bots.
 - You can now filter by last name. Holy whiskers you go Kurosawa sisters.
 - The bot is no longer dependent on School Idol Tomodachi being online
 - !stats and !botstats are new commands (work in progress)
