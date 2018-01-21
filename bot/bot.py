@@ -101,7 +101,7 @@ class HahaNoUR(Bot):
                 content = content[1:]
 
         # Pull alarm in case of emergency.
-        if content.split(' ')[0][1:] == 'resetprefix':
+        if content.split(' ')[0].startswith('resetprefix'):
             content = self.prefix + 'resetprefix'
 
         is_cmd = (content[0] == self.prefix)
