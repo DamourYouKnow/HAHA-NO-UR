@@ -8,7 +8,7 @@ Instructions for how to use the bot can be found here:
 <https://github.com/DamourYouKnow/HAHA-NO-UR/blob/master/README.md>
 
 
-If you have any suggestions for new features or improvements contact D'Amour#2601 on discord or submit a request on our dev channel or on github:
+If you have any suggestions for new features or improvements contact D'Amour#0001 on discord or submit a request on our dev channel or on github:
 https://discord.gg/aEkzE59
 <https://github.com/DamourYouKnow/HAHA-NO-UR/issues>
 
