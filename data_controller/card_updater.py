@@ -24,7 +24,7 @@ def update_task():
                 new_card_ids = new_card_ids[:MAX_UPDATE_SIZE]
                 print('Getting cards ' + str(new_card_ids))
                 req = requests.get(
-                        url='http://schoolido.lu/api/cards',
+                        url='https://schoolido.lu/api/cards',
                         params={'ids': ','.join(str(i) for i in new_card_ids)})
                 res = json.loads(req.text)
 

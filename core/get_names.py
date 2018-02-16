@@ -22,7 +22,7 @@ def get_idol_names() -> list:
     :return: List of names
     """
     path = data_path.joinpath('names.json')
-    url = 'http://schoolido.lu/api/idols'
+    url = 'https://schoolido.lu/api/idols'
     size_resp = get(url)
     if size_resp.status_code != 200:
         return __local_names(path)

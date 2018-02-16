@@ -87,9 +87,9 @@ class ScoutHandler:
         card = card[0]
 
         if card["card_image"] is None:
-            url = "http:" + card["card_idolized_image"]
+            url = "https:" + card["card_idolized_image"]
         else:
-            url = "http:" + card["card_image"]
+            url = "https:" + card["card_image"]
 
         fname = basename(urlsplit(url).path)
         image_path = idol_img_path.joinpath(fname)
