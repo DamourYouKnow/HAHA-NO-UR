@@ -20,10 +20,9 @@ def update_task():
             api_card_ids = set(json.loads(
                     requests.get('http://schoolido.lu/api/cardids').text)) 
             new_card_ids = list(api_card_ids - db_card_ids)
-
             if len(new_card_ids) > 0:
                 new_card_ids = new_card_ids[:MAX_UPDATE_SIZE]
-
+                print('Getting cards ' + str(new_card_ids))
                 req = requests.get(
                         url='http://schoolido.lu/api/cards',
                         params={'ids': ','.join(str(i) for i in new_card_ids)})

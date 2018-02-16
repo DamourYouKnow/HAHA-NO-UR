@@ -72,7 +72,6 @@ class Scout:
             Attribute (smile, pure, cool)
             Year (first, second, third)
         """
-        print('helo')
         scout = ScoutHandler(
             self.bot, ctx.message.author, 'honour', 11, True, args)
         image = await scout.do_scout()
