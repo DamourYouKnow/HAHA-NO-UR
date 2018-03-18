@@ -1,7 +1,3 @@
-from core.get_names import get_idol_names
-
-IDOL_NAMES = get_idol_names()
-
 ALIASES = {
     'name': {
         'honk': 'Kousaka Honoka',
@@ -48,13 +44,14 @@ ALIASES = {
 }
 
 
-def parse_arguments(args: tuple, allow_unsupported_lists: bool = False) -> dict:
+def parse_arguments(bot, args: tuple, 
+                    allow_unsupported_lists: bool = False) -> dict:
     """
     Parse all user arguments
 
     :param args: Tuple of all arguments
     :param allow_unsupported_lists: Whether parameters that School Idol
-        Tomodachi does not allow multiple values off are reduced.
+        Tomodachi does not allow multiple values of are reduced.
 
     :return: A list of tuples of (arg_type, arg_value)
     """
@@ -68,7 +65,7 @@ def parse_arguments(args: tuple, allow_unsupported_lists: bool = False) -> dict:
     }
 
     for arg in args:
-        for arg_type, arg_value in _parse_argument(arg):
+        for arg_type, arg_value in _parse_argument(bot, arg):
             parsed_args[arg_type].append(arg_value)
 
     # Covert all values to sets and back to lists to remove duplicates.
@@ -82,7 +79,7 @@ def parse_arguments(args: tuple, allow_unsupported_lists: bool = False) -> dict:
     return parsed_args
 
 
-def _parse_argument(arg: str) -> list:
+def _parse_argument(bot, arg: str) -> list:
     """
     Parse user argument.
 
@@ -100,7 +97,7 @@ def _parse_argument(arg: str) -> list:
             return [(key, search_result)]
 
     # Check for names/surnames
-    for full_name in IDOL_NAMES:
+    for full_name in bot.idol_names:
         name_split = full_name.split(' ')
         if arg.title() in name_split:
             found_args.append(('name', full_name))

@@ -84,3 +84,6 @@ class CardController(DatabaseController):
         :return: List of card IDs.
         """
         return await self._collection.distinct('_id')
+
+    async def get_idol_names(self) -> list:
+        return await self._collection.distinct('idol.name')

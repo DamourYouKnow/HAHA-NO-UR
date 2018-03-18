@@ -47,7 +47,7 @@ class ScoutHandler:
         self._box = box
         self._count = count
         self._guaranteed_sr = guaranteed_sr
-        self._args = parse_arguments(args, True)
+        self._args = parse_arguments(self._bot, args, True)
 
     async def do_scout(self):
         if self._count > 1:

@@ -10,12 +10,10 @@ from discord.ext import commands
 from bot import HahaNoUR
 from core.argument_parser import parse_arguments
 from core.checks import check_mongo
-from core.get_names import get_idol_names
 from core.image_generator import create_image, get_one_img, idol_img_path
 
 PAGE_SIZE = 16
 ROWS = 4
-IDOL_NAMES = get_idol_names()
 SORTS = [
     'id',
     'name',
@@ -99,7 +97,7 @@ class Album:
         """
         user = ctx.message.author
         album = await self.bot.db.users.get_user_album(user.id, True)
-        _parse_album_arguments(args, user)
+        _parse_album_arguments(self.bot, args, user)
         album = _apply_filter(album, user)
         album = _apply_sort(album, user)
         album = _seperate_idolized(album)
@@ -301,7 +299,7 @@ def _splice_page(album: list, user: User) -> list:
     return album[start:end]
 
 
-def _parse_album_arguments(args: tuple, user: User):
+def _parse_album_arguments(bot, args: tuple, user: User):
     """
     Parse arguments to get how an album will be sorted and filtered. The parsed
         arguments are stored in the user's last used arguments dictionary.
@@ -321,7 +319,7 @@ def _parse_album_arguments(args: tuple, user: User):
     # FIXME This var doesn't seem to have any use.
     order = _last_user_args[user.id]['order']
 
-    new_filters = parse_arguments(args, True)
+    new_filters = parse_arguments(bot, args, True)
     if _has_filter(new_filters):
         filters = new_filters
 

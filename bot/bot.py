@@ -1,5 +1,3 @@
-#ayyy testing git hope it works
-
 import logging
 from traceback import format_exc
 
@@ -13,6 +11,7 @@ from bot.logger import command_formatter
 from bot.session_manager import SessionManager
 from core.help import get_help
 from data_controller.mongo import MongoClient
+from core import argument_parser
 
 
 class HahaNoUR(Bot):
@@ -37,6 +36,7 @@ class HahaNoUR(Bot):
         self.help_general = None
         self.all_help = None
         self.db = db
+        self.idol_names = []
         self.session_manager = session_manager
         # FIXME remove type casting after library rewrite
         self.error_log = Object(str(error_log))
@@ -82,6 +82,7 @@ class HahaNoUR(Bot):
         self.logger.log(logging.INFO, 'Logged in')
         self.logger.log(logging.INFO, f'{len(self.servers)} servers detected')
         self.help_general, self.all_help = get_help(self)
+        self.idol_names = await self.db.cards.get_idol_names()
         await self.__change_presence()
 
     async def process_commands(self, message):
