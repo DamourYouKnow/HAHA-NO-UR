@@ -11,7 +11,12 @@ from bot import SessionManager
 from idol_images import idol_img_path
 
 CIRCLE_DISTANCE = 10
-LABEL_COLOURS = {"Smile": "#FF6698", "Pure": "#77EE87", "Cool": "#66CCEE"}
+LABEL_COLOURS = {
+    "Smile": "#FF6698", 
+    "Pure": "#77EE87", 
+    "Cool": "#66CCEE",
+    "All": "#CC76E4"
+}
 
 # TODO seperate function that album_command calls.
 async def create_image(session_manager: SessionManager, cards: list,
