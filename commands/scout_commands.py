@@ -135,3 +135,23 @@ class Scout:
             self.bot, ctx.message.author, 'coupon', 1, False, args)
         image = await scout.do_scout()
         await self.__handle_result(ctx, scout.results, image)
+
+
+    @commands.command(pass_context=True, aliases=['scouts'])
+    @commands.cooldown(rate=5, per=2.5, type=commands.BucketType.user)
+    @commands.check(check_mongo)
+    async def scoutsupport(self, ctx, *args: str):
+        """
+        Description: |
+            Support scouting.
+
+            **Rates:** R: 60%, SR: 30%, UR: 10%
+        Optional Arguments: |
+            Attribute (smile, pure, cool)
+            Idol first name (Honoka, Chika, ...)
+            Year (first, second, third)
+        """
+        scout = ScoutHandler(
+            self.bot, ctx.message.author, 'support', 1, False, args)
+        image = await scout.do_scout()
+        await self.__handle_result(ctx, scout.results, image)

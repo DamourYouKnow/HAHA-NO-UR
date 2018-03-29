@@ -155,7 +155,7 @@ class ScoutHandler:
         params = {
             'rarity': rarity,
             'is_promo': False,
-            'is_special': False
+            'is_special': (self._box == 'support')
         }
 
         for arg_type, arg_values in self._args.items():
