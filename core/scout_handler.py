@@ -12,7 +12,7 @@ from core.image_generator import create_image, get_one_img, \
     idol_img_path
 
 RATES = {
-    "regular": {"N": 0.00, "R": 0.05, "SR": 0.00, "SSR": 0.00, "UR": 0.00},
+    "regular": {"N": 0.95, "R": 0.05, "SR": 0.00, "SSR": 0.00, "UR": 0.00},
     "honour": {"N": 0.00, "R": 0.80, "SR": 0.15, "SSR": 0.04, "UR": 0.01},
     "coupon": {"N": 0.00, "R": 0.00, "SR": 0.80, "SSR": 0.00, "UR": 0.20},
     "support": {"N": 0.00, "R": 0.60, "SR": 0.30, "SSR": 0.00, "UR": 0.10},
