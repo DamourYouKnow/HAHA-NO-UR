@@ -110,8 +110,10 @@ def _parse_argument(bot, arg: str) -> list:
         return [('year', arg.title())]
 
     # Check for attribute
-    if arg in ('cool', 'smile', 'pure', ':heart:'):
+    if arg in ('cool', 'smile', 'pure'):
         return [('attribute', arg.title())]
+    if arg in (':heart:', 'purple'):
+        return [('attribute', 'All')]
 
     # Check for rarity
     if arg.upper() in ('N', 'R', 'SR', 'SSR', 'UR'):
