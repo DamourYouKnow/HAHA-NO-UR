@@ -179,6 +179,12 @@ class Album:
 
         image = None
         card = await self.bot.db.users.get_card_from_album(user.id, card_id)
+
+        # Check to make sure the card can actually be idolized.
+        if card['card_idolized_image'] == None:
+            await self.__send_error_msg(ctx, 'This card cannot be idolized.')
+            return 
+
         if card and card['unidolized_count'] >= 2:
             card['_id'] = card['id']
             await self.bot.db.users.remove_from_user_album(
