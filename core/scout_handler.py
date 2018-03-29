@@ -46,7 +46,7 @@ class ScoutHandler:
         self.results = []
         self._bot = bot
         self._user = user
-        self._box = box
+        self._box = 'alpaca'
         self._count = count
         self._guaranteed_sr = guaranteed_sr
         self._args = parse_arguments(self._bot, args, True)
@@ -183,12 +183,10 @@ class ScoutHandler:
         # Just kidding I can't afford to pay anyone.
         # We apologize for the inconvinience and hope you have a happy 
         # April Fool's day.
-        '''
         params = {
             'rarity': rarity,
-            'idol.name': 'Alpaca'
+            'idol.name': {'$in': ['Alpaca', 'Uchicchi']}
         }
-        '''
 
         # Get and return response
         return await self._bot.db.cards.get_random_cards(params, count)
