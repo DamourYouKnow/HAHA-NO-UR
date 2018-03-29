@@ -183,10 +183,12 @@ class ScoutHandler:
         # Just kidding I can't afford to pay anyone.
         # We apologize for the inconvinience and hope you have a happy 
         # April Fool's day.
+        '''
         params = {
             'rarity': rarity,
             'idol.name': 'Alpaca'
         }
+        '''
 
         # Get and return response
         return await self._bot.db.cards.get_random_cards(params, count)

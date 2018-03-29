@@ -38,10 +38,11 @@ async def create_image(session_manager: SessionManager, cards: list,
     for card in cards:
         image_field = 'round_card_image'
         count_field = 'unidolized_count'
-        if 'idolized' in card and card['idolized']:
+        if 'idolized' in card or card['card_image'] == None:
             image_field = 'round_card_idolized_image'
             count_field = 'idolized_count'
 
+        print(image_field)
         url = "http:" + card[image_field]
         url_path = Path(urlsplit(url).path)
         file_path = idol_img_path.joinpath(url_path.name)
