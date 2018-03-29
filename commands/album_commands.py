@@ -144,11 +144,15 @@ class Album:
                 valid = (idolized_count > 0)
             else:
                 valid = (idolized_count > 0 or unidolized_count > 0)
+                if card['card_image'] == None:
+                    idolized = True
 
         if valid:
-            img_url = 'http:' + card['card_image']
-            if idolized and card:
+            img_url = ''
+            if idolized:
                 img_url = 'http:' + card['card_idolized_image']
+            elif card:
+                img_url = 'http:' + card['card_image']
 
             fname = basename(urlsplit(img_url).path)
             image_path = idol_img_path.joinpath(fname)

@@ -99,16 +99,19 @@ class UserController(DatabaseController):
         :param idolized: Whether the new cards being added are idolized.
         """
         for card in new_cards:
-            has_card = await self._user_has_card(user_id, card['_id'])
             if card['card_image'] == None:
                 idolized = True
 
             # User does not have this card, push to album
-            if not has_card and card['card_image'] != None:
+            if not await self._user_has_card(user_id, card['_id']):
+                uc, ic = 1, 0
+                if idolized:
+                    uc, ic = 0, 1
+
                 new_card = {
                     'id': card['_id'],
-                    'unidolized_count': 1,
-                    'idolized_count': 0,
+                    'unidolized_count': uc,
+                    'idolized_count': ic,
                     'time_aquired': int(round(time.time() * 1000))
                 }
 
