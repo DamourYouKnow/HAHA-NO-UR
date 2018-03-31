@@ -46,7 +46,7 @@ class ScoutHandler:
         self.results = []
         self._bot = bot
         self._user = user
-        self._box = 'alpaca'
+        self._box = 'alpaca' # hmmmmm.
         self._count = count
         self._guaranteed_sr = guaranteed_sr
         self._args = parse_arguments(self._bot, args, True)

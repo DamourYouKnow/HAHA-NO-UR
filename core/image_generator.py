@@ -39,9 +39,13 @@ async def create_image(session_manager: SessionManager, cards: list,
         image_field = 'round_card_image'
         count_field = 'unidolized_count'
         idolized = ('idolized' in card and card['idolized'])
+       
+        no_img = idolized
         no_img = (card['card_image'] == None or card['round_card_image'] == None)
-        if idolized or no_img:
+        if no_img:
             image_field = 'round_card_idolized_image'
+
+        if idolized:
             count_field = 'idolized_count'
 
         url = "http:" + card[image_field]

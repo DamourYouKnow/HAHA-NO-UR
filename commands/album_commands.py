@@ -185,7 +185,9 @@ class Album:
         card = await self.bot.db.users.get_card_from_album(user.id, card_id)
 
         # Check to make sure the card can actually be idolized.
-        if card['card_idolized_image'] == None:
+        round_img = card['round_card_image']
+        round_card_i_img = card['round_card_idolized_image']
+        if card['card_idolized_image'] == None or round_img == round_card_i_img:
             await self.__send_error_msg(ctx, 'This card cannot be idolized.')
             return 
 
