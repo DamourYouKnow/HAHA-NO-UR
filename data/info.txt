@@ -1,5 +1,5 @@
-**2018-01-17:**:
-Server managers can now change the command prefix with `!prefix`. Please be careful with this.
+**2018-04-01:**:
+Support ticket scouting is here `!scoutsuppport`.
 
 Invite me to your server here: <https://discordapp.com/oauth2/authorize?client_id=311284054333063168&scope=bot&permissions=0>
 

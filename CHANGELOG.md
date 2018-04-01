@@ -1,11 +1,12 @@
 # Changelog
+- Support ticket scouting allowing you to finally reach the highest tier of whaling.
 - You can now change the command prefix. I can work alongside other bots.
 - You can now filter by last name. Holy whiskers you go Kurosawa sisters.
-- The bot is no longer dependent on School Idol Tomodachi being online
-- !stats and !botstats are new commands (work in progress)
-- You can now view idolized cards in unidolized mode even if you don't have any unidolized copies
-- Fixed a bug where scouts with small search spaces would have a bias for certain cards
-- Fixed sorting by release date of cards
-- Stopped the bot from crashing whenever it fails to pull new card information from SIT
-- Greatly improved backend performance (No longer making a dozen API calls whenever you scout)
-- More async, that's a cool buzzword that means faster bot
+- The bot is no longer dependent on School Idol Tomodachi being online.
+- !stats and !botstats are new commands (work in progress).
+- You can now view idolized cards in unidolized mode even if you don't have any unidolized copies.
+- Fixed a bug where scouts with small search spaces would have a bias for certain cards.
+- Fixed sorting by release date of cards.
+- Stopped the bot from crashing whenever it fails to pull new card information from SIT.
+- Greatly improved backend performance (No longer making a dozen API calls whenever you scout).
+- More async, that's a cool buzzword that means faster bot.
