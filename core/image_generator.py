@@ -40,8 +40,7 @@ async def create_image(session_manager: SessionManager, cards: list,
         count_field = 'unidolized_count'
         idolized = ('idolized' in card and card['idolized'])
        
-        no_img = idolized
-        no_img = (card['card_image'] == None or card['round_card_image'] == None)
+        no_img = (idolized or card['card_image'] == None or card['round_card_image'] == None)
         if no_img:
             image_field = 'round_card_idolized_image'
 
