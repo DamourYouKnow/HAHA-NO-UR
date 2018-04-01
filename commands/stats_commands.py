@@ -55,7 +55,7 @@ class AlbumCounter:
     def __init__(self, album):
         self.album = album
         self.rarity_counts = {'N': 0, 'R': 0, 'SR': 0, 'SSR': 0, 'UR': 0}
-        self.attribute_counts = {'Smile': 0, 'Pure': 0, 'Cool': 0}
+        self.attribute_counts = {'Smile': 0, 'Pure': 0, 'Cool': 0, 'All': 0}
         self.total_count = 0
         self.unidolized_count = 0
         self.idolized_count = 0
