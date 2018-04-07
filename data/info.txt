@@ -1,5 +1,6 @@
-**2018-04-01:**:
-Support ticket scouting is here `!scoutsuppport`.
+**2018-04-07:**:
+You've heard of HAHA NO UR, now get ready for HAHA NO 4STAR! (Bang Dream)
+Beta access available here: <https://github.com/DamourYouKnow/HAHA-NO-4STAR/blob/master/README.md>
 
 Invite me to your server here: <https://discordapp.com/oauth2/authorize?client_id=311284054333063168&scope=bot&permissions=0>
 
