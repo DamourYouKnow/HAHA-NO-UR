@@ -17,7 +17,7 @@ ALIASES = {
         'nya': 'Hoshizora Rin',
         'shiny': 'Ohara Mari',
         'shiny~!': 'Ohara Mari',
-        'lily': 'Sakurachi Riko',
+        'lili': 'Sakurachi Riko',
         'its': 'Ohara Mari',
         'joke': 'Ohara Mari',
         'buu': 'Kurosawa Dia',
@@ -43,6 +43,7 @@ ALIASES = {
         'snow': 'Saint Snow'
     },
     'sub_unit': {
+        'lily': 'Lily White',
         'white': 'Lily White',
         'bibi': 'Bibi',
         'printemps': 'Printemps',
