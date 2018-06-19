@@ -30,7 +30,6 @@ ALIASES = {
         'я': 'Ayase Eli',
         'wooby': 'Kurosawa Ruby',
         'faito': 'Kousaka Honoka'
-        'boy': 'Hoshizora Rin'
     },
     'main_unit': {
         'muse': "μ's",
