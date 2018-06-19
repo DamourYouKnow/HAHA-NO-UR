@@ -27,7 +27,9 @@ ALIASES = {
         'mirai': 'Kunikida Hanamaru',
         'future': 'Kunikida Hanamaru',
         'mikan': 'Takami Chika',
-        'я': 'Ayase Eli'
+        'я': 'Ayase Eli',
+        'best': 'Nishikino Maki'
+        'girl': 'Nishikino Maki'
     },
     'main_unit': {
         'muse': "μ's",
