@@ -12,9 +12,22 @@ ALIASES = {
         'zura': 'Kunikida Hanamaru',
         'technology': 'Kunikida Hanamaru',
         'woah': 'Kunikida Hanamaru',
-        'mike': 'Kurosawa Ruby',  # Memes
+        'mike': 'Kurosawa Ruby',  # Memes     Who the fuck is Mike
         'nell': "Yazawa Nico",
-        'nya': 'Hoshizora Rin'
+        'nya': 'Hoshizora Rin',
+        'shiny': 'Ohara Mari',
+        'shiny~!': 'Ohara Mari',
+        'lili': 'Sakurachi Riko',
+        'its': 'Ohara Mari',
+        'joke': 'Ohara Mari',
+        'buu': 'Kurosawa Dia',
+        'kayo-chin': 'Koizumi Hanayo',
+        'yousoro': 'Watanabe You',
+        'rice': 'Koizumi Hanayo',
+        'mirai': 'Kunikida Hanamaru',
+        'future': 'Kunikida Hanamaru',
+        'mikan': 'Takami Chika',
+        'я': 'Ayase Eli'
     },
     'main_unit': {
         'muse': "μ's",
@@ -22,6 +35,7 @@ ALIASES = {
         "µ's": "μ's",
         'aqours': 'Aqours',
         'aquas': 'Aqours',
+        'aqua': 'Aqours',
         'aquors': 'Aqours',
         'a-rise': 'A-RISE',
         'arise': 'A-RISE',
