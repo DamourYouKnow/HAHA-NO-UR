@@ -12,7 +12,7 @@ ALIASES = {
         'zura': 'Kunikida Hanamaru',
         'technology': 'Kunikida Hanamaru',
         'woah': 'Kunikida Hanamaru',
-        'mike': 'Kurosawa Ruby',  # Memes     Who the fuck is Mike
+        'mike': 'Kurosawa Ruby',  # Memes
         'nell': "Yazawa Nico",
         'nya': 'Hoshizora Rin',
         'shiny': 'Ohara Mari',
@@ -27,7 +27,10 @@ ALIASES = {
         'mirai': 'Kunikida Hanamaru',
         'future': 'Kunikida Hanamaru',
         'mikan': 'Takami Chika',
-        'я': 'Ayase Eli'
+        'я': 'Ayase Eli',
+        'wooby': 'Kurosawa Ruby',
+        'faito': 'Kousaka Honoka'
+        'boy': 'Hoshizora Rin'
     },
     'main_unit': {
         'muse': "μ's",
