@@ -76,6 +76,27 @@ class Scout:
             self.bot, ctx.message.author, 'honour', 11, True, args)
         image = await scout.do_scout()
         await self.__handle_result(ctx, scout.results, image)
+        
+    @commands.command(pass_context=True)
+    @commands.cooldown(rate=3, per=2.5, type=commands.BucketType.user)
+    @commands.check(check_mongo)
+    async def scout111(self, ctx, *args: str):
+        """
+        Description: |
+            111 honour scouting.
+
+            **Rates:** R: 80%, SR: 15%, SSR: 4%, UR: 1%
+        Optional Arguments: |
+            Main unit name (Aqours, Muse, Saint Snow, A-RISE)
+            Sub unit name (Lily White, CYaRon, ...)
+            Idol first name (Honoka, Chika, ...)
+            Attribute (smile, pure, cool)
+            Year (first, second, third)
+        """
+        scout = ScoutHandler(
+            self.bot, ctx.message.author, 'honour', 111, True, args)
+        image = await scout.do_scout()
+        await self.__handle_result(ctx, scout.results, image)
 
     @commands.command(pass_context=True, aliases=['scoutr'])
     @commands.cooldown(rate=5, per=2.5, type=commands.BucketType.user)
