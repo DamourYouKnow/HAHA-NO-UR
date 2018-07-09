@@ -17,7 +17,8 @@ ALIASES = {
         'nya': 'Hoshizora Rin',
         'shiny': 'Ohara Mari',
         'shiny~!': 'Ohara Mari',
-        'lili': 'Sakurauchi Riko',
+        'lili': 'Sakurachi Riko',
+        'its': 'Ohara Mari',
         'joke': 'Ohara Mari',
         'buu': 'Kurosawa Dia',
         'kayo-chin': 'Koizumi Hanayo',
@@ -28,12 +29,7 @@ ALIASES = {
         'mikan': 'Takami Chika',
         'я': 'Ayase Eli',
         'wooby': 'Kurosawa Ruby',
-        'faito': 'Kousaka Honoka',
-        'maru': 'Kunikida Hanamaru',
-        'zuramaru': 'Kunikida Hanamaru'
-        'ganbaruby': 'Kurosawa Ruby',
-        'elichika': 'Ayase Eli',
-        'giran': 'Tsushima Yoshiko'
+        'faito': 'Kousaka Honoka'
     },
     'main_unit': {
         'muse': "μ's",
