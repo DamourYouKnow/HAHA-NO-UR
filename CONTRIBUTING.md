@@ -1,3 +1,7 @@
+## Contributing
+
+I highly recommend getting in contact with me on discord (https://discord.gg/aEkzE59) if you are interested in contributing as I will be able to help you with getting setup.
+
 ## Pull Request Process
 
 1. Create a fork.  
@@ -5,7 +9,4 @@
 3. Submit a pull request to merge your changes into this repository's dev branch. Don't PR into master please thanks.   
 4. If your code runs and passes review, I'll merge your pull request. If there are any problems I will addresss changes and work with you on addressing them.   
 
-## Code of Conduct
-
-1. Don't be a meatball.  
-2. Please label your commits so that changes can be easily identified.  
+Please label your commits so that changes can be easily identified.
