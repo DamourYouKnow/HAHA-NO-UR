@@ -1,12 +1,12 @@
-**2018-04-07:**:
-You've heard of HAHA NO UR, now get ready for HAHA NO 4STAR! (Bang Dream)
-Beta access available here: <https://github.com/DamourYouKnow/HAHA-NO-4STAR/blob/master/README.md>
-
 Invite me to your server here: <https://discordapp.com/oauth2/authorize?client_id=311284054333063168&scope=bot&permissions=0>
-
 
 Instructions for how to use the bot can be found here:
 <https://github.com/DamourYouKnow/HAHA-NO-UR/blob/master/README.md>
+
+
+**2018-04-07:**:
+You've heard of HAHA NO UR, now get ready for HAHA NO 4STAR! (Bang Dream)
+Available here: <https://github.com/DamourYouKnow/HAHA-NO-4STAR/blob/master/README.md>
 
 
 If you have any suggestions for new features or improvements contact D'Amour#0001 on discord or submit a request on our dev channel or on github:
