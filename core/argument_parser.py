@@ -17,7 +17,7 @@ ALIASES = {
         'nya': 'Hoshizora Rin',
         'shiny': 'Ohara Mari',
         'shiny~!': 'Ohara Mari',
-        'lili': 'Sakurachi Riko',
+        'lili': 'Sakurauchi Riko',
         'its': 'Ohara Mari',
         'joke': 'Ohara Mari',
         'buu': 'Kurosawa Dia',
