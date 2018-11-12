@@ -10,6 +10,7 @@ ALIASES = {
         'pana': 'Koizumi Hanayo',
         'tomato': "Nishikino Maki",
         'zura': 'Kunikida Hanamaru',
+        'maru': 'Kunikida Hanamaru',
         'technology': 'Kunikida Hanamaru',
         'woah': 'Kunikida Hanamaru',
         'mike': 'Kurosawa Ruby',  # Memes
