@@ -11,6 +11,7 @@ ALIASES = {
         'tomato': "Nishikino Maki",
         'zura': 'Kunikida Hanamaru',
         'maru': 'Kunikida Hanamaru',
+        'zuramaru': 'Kunikida Hanamaru',
         'technology': 'Kunikida Hanamaru',
         'woah': 'Kunikida Hanamaru',
         'mike': 'Kurosawa Ruby',  # Memes
@@ -19,6 +20,7 @@ ALIASES = {
         'shiny': 'Ohara Mari',
         'shiny~!': 'Ohara Mari',
         'lili': 'Sakurauchi Riko',
+        'riri': 'Sakurauchi Riko',
         'its': 'Ohara Mari',
         'joke': 'Ohara Mari',
         'buu': 'Kurosawa Dia',
