@@ -9,6 +9,7 @@ ALIASES = {
         'hana': 'Koizumi Hanayo',
         'pana': 'Koizumi Hanayo',
         'tomato': "Nishikino Maki",
+        'knuckles': "Nishikino Maki",
         'zura': 'Kunikida Hanamaru',
         'maru': 'Kunikida Hanamaru',
         'zuramaru': 'Kunikida Hanamaru',
