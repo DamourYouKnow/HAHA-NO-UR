@@ -73,7 +73,7 @@ class Scout:
             Year (first, second, third)
         """
         scout = ScoutHandler(
-            self.bot, ctx.message.author, 'honour', 11, True, args)
+            self.bot, ctx.message.author, 'honour', 69, True, args)
         image = await scout.do_scout()
         await self.__handle_result(ctx, scout.results, image)
 

@@ -6,6 +6,7 @@ ALIASES = {
         'eri': 'Ayase Eli',
         'harasho': 'Ayase Eli',
         'yohane': 'Tsushima Yoshiko',
+        'datenshi': 'Tsushima Yoshiko',
         'hana': 'Koizumi Hanayo',
         'pana': 'Koizumi Hanayo',
         'tomato': "Nishikino Maki",
@@ -33,6 +34,8 @@ ALIASES = {
         'mikan': 'Takami Chika',
         'я': 'Ayase Eli',
         'wooby': 'Kurosawa Ruby',
+        'ganba': 'Kurosawa Ruby',
+        'ganbaruby': 'Kurosawa Ruby',
         'faito': 'Kousaka Honoka'
     },
     'main_unit': {
