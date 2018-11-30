@@ -184,6 +184,11 @@ class Album:
         image = None
         card = await self.bot.db.users.get_card_from_album(user.id, card_id)
 
+        if not card:
+            await self.__send_error_msg(
+                    ctx, 'This card does not exist in your album.')
+            return 
+
         # Check to make sure the card can actually be idolized.
         round_img = card['round_card_image']
         round_card_i_img = card['round_card_idolized_image']

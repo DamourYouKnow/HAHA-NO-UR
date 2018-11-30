@@ -14,7 +14,6 @@ class FeedbackController(DatabaseController):
         """
         Insert a new feedback into the database.
         """
-        print('hrlo')
         feedback = {
             'user_id': user_id,
             'username': username,
