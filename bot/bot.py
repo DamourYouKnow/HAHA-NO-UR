@@ -94,6 +94,8 @@ class HahaNoUR(Bot):
             return
         
         content = message.content
+        if not content:
+            return
     
         # Look up any custom prefixes and replace them with the bot prefix.
         if message.server:
