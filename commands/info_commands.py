@@ -52,7 +52,7 @@ class Info:
             Provide feedback and suggestions.
         """
         user_id = ctx.message.author.id
-        username = ctx.message.author.name
+        username = str(ctx.message.author)
         message = ctx.message.content[len('!feedback'):].strip()
         if message == '':
             return
