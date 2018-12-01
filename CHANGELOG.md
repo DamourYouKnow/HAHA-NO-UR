@@ -9,7 +9,7 @@ with people for clarification purposes.
 
 ### Fixed
 - You no longer get a scary message if you try to idolize a card that isn't in 
-your album. You'll now get a less scary message telling you don't have the card.
+your album. You'll now get a less scary message saying you don't have the card.
 - The bot will no longer get confused when someone posts an attachment with no 
 message.
 
