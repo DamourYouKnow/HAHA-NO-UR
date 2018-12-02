@@ -290,7 +290,11 @@ def _apply_sort(album: list, user: User) -> list:
         'sub_unit'
     ]
 
-    return sorted(album, key=itemgetter(sort, 'id'), reverse=sort_descending)
+    sorted_list = sorted(
+            filter(lambda card: card[sort], album), 
+            key=itemgetter(sort, 'id'), 
+            reverse=sort_descending)
+    return sorted_list + [card for card in album if not card[sort]]
 
 
 def _splice_page(album: list, user: User) -> list:
