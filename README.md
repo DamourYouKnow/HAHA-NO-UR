@@ -3,7 +3,7 @@
 A discord bot that somewhat accurately depicts scouting in LLSIF
 
 To add the bot to your server:  
-https://discordapp.com/oauth2/authorize?client_id=311284054333063168&scope=bot&permissions=0
+https://discordapp.com/oauth2/authorize?client_id=311284054333063168&scope=bot&permissions=52224
 
 # Commands
 [args] represents optional arguments  

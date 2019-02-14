@@ -1,4 +1,4 @@
-Invite me to your server here: <https://discordapp.com/oauth2/authorize?client_id=311284054333063168&scope=bot&permissions=0>
+Invite me to your server here: <https://discordapp.com/oauth2/authorize?client_id=311284054333063168&scope=bot&permissions=52224>
 
 Instructions for how to use the bot can be found here:
 <https://github.com/DamourYouKnow/HAHA-NO-UR/blob/master/README.md>
