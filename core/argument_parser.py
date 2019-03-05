@@ -37,6 +37,8 @@ ALIASES = {
         'ganba': 'Kurosawa Ruby',
         'ganbaruby': 'Kurosawa Ruby',
         'faito': 'Kousaka Honoka'
+        'bread': 'Kousaka Honoka'
+        'minalinsky': 'Minami Kotori'
     },
     'main_unit': {
         'muse': "μ's",
