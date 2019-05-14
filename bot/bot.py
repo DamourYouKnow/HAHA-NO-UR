@@ -17,7 +17,7 @@ from core import argument_parser
 class HahaNoUR(Bot):
     def __init__(self, prefix: str, start_time: int, colour: int, logger,
                  session_manager: SessionManager, db: MongoClient,
-                 error_log: int, feedback_log: int):
+                 error_log: int, feedback_log: int, shard_id: int):
         """
         Init the instance of HahaNoUR.
         :param prefix: the bot prefix.
@@ -41,6 +41,7 @@ class HahaNoUR(Bot):
         # FIXME remove type casting after library rewrite
         self.error_log = Object(str(error_log))
         self.feedbag_log = Object(str(feedback_log))
+        self.shard_id = shard_id
 
     def start_bot(self, cogs: list, token: str):
         """
@@ -50,7 +51,7 @@ class HahaNoUR(Bot):
         """
         for cog in cogs:
             self.add_cog(cog)
-        self.run(token)
+        self.run(token, shard_id=self.shard_id)
 
     async def __change_presence(self):
         """

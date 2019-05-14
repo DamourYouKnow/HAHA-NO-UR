@@ -1,6 +1,7 @@
 '''
 A discord bot for scouting in Love Live: School Idol Festival.
 '''
+import sys
 from asyncio import get_event_loop
 from json import load
 from time import time
@@ -16,6 +17,10 @@ from data_controller.card_updater import update_task
 
 
 def main():
+    shard = 0
+    if len(sys.argv) > 1:
+        shard = int(sys.argv[1])
+
     start_time = int(time())
     logger = setup_logging(start_time, log_path)
     loop = get_event_loop()
@@ -30,7 +35,8 @@ def main():
 
     bot = HahaNoUR(
         config['default_prefix'], start_time, int(config['colour'], base=16),
-        logger, session_manager, db, auth['error_log'], auth['feedback_log']
+        logger, session_manager, db, auth['error_log'], auth['feedback_log'],
+        shard_id = shard
     )
 
     bot.remove_command('help')
