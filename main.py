@@ -49,9 +49,10 @@ def main():
         Config(bot)
     ]
 
-    card_update_thread = Thread(target=update_task)
-    card_update_thread.setDaemon(True)
-    card_update_thread.start()
+    if shard == 0:
+        card_update_thread = Thread(target=update_task)
+        card_update_thread.setDaemon(True)
+        card_update_thread.start()
 
     bot.start_bot(cogs, auth['token'])
 

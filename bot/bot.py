@@ -28,7 +28,7 @@ class HahaNoUR(Bot):
         :param db: the MongoDB data controller.
         :param error_log: the channel id for error log.
         """
-        super().__init__(prefix)
+        super().__init__(prefix, shard_id=shard_id)
         self.prefix = prefix
         self.colour = colour
         self.start_time = start_time
@@ -41,7 +41,6 @@ class HahaNoUR(Bot):
         # FIXME remove type casting after library rewrite
         self.error_log = Object(str(error_log))
         self.feedbag_log = Object(str(feedback_log))
-        self.shard_id = shard_id
 
     def start_bot(self, cogs: list, token: str):
         """
@@ -51,7 +50,7 @@ class HahaNoUR(Bot):
         """
         for cog in cogs:
             self.add_cog(cog)
-        self.run(token, shard_id=self.shard_id)
+        self.run(token)
 
     async def __change_presence(self):
         """
