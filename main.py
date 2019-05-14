@@ -20,6 +20,7 @@ def main():
     shard = 0
     if len(sys.argv) > 1:
         shard = int(sys.argv[1])
+        print(shard)
 
     start_time = int(time())
     logger = setup_logging(start_time, log_path)
