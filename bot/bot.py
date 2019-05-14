@@ -17,7 +17,8 @@ from core import argument_parser
 class HahaNoUR(Bot):
     def __init__(self, prefix: str, start_time: int, colour: int, logger,
                  session_manager: SessionManager, db: MongoClient,
-                 error_log: int, feedback_log: int, shard_id: int):
+                 error_log: int, feedback_log: int, shard_id: int,
+                 shard_count: int):
         """
         Init the instance of HahaNoUR.
         :param prefix: the bot prefix.
@@ -28,7 +29,7 @@ class HahaNoUR(Bot):
         :param db: the MongoDB data controller.
         :param error_log: the channel id for error log.
         """
-        super().__init__(prefix, shard_id=shard_id)
+        super().__init__(prefix, shard_id=shard_id, shard_count=shard_count)
         self.prefix = prefix
         self.colour = colour
         self.start_time = start_time

@@ -18,8 +18,9 @@ from data_controller.card_updater import update_task
 
 def main():
     shard = 0
-    if len(sys.argv) > 1:
+    if len(sys.argv) > 2:
         shard = int(sys.argv[1])
+        shard_count = int(sys.argv[2])
         print(shard)
 
     start_time = int(time())
@@ -37,7 +38,7 @@ def main():
     bot = HahaNoUR(
         config['default_prefix'], start_time, int(config['colour'], base=16),
         logger, session_manager, db, auth['error_log'], auth['feedback_log'],
-        shard_id = shard
+        shard, shard_count
     )
 
     bot.remove_command('help')
