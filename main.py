@@ -17,7 +17,8 @@ from data_controller.card_updater import update_task
 
 
 def main():
-    shard = 0
+    shard = None
+    shard_count = None
     if len(sys.argv) > 2:
         shard = int(sys.argv[1])
         shard_count = int(sys.argv[2])
@@ -47,7 +48,6 @@ def main():
         Album(bot), 
         Info(bot), 
         Stats(bot), 
-        Trivia(bot), 
         Config(bot)
     ]
 
