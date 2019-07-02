@@ -6,7 +6,7 @@ Instructions for how to use the bot can be found here:
 There is also a Bang Dream: Girl's Band Party version of me:
 <https://github.com/DamourYouKnow/HAHA-NO-4STAR/blob/master/README.md>
 
-If you have any suggestions for new features or improvements contact D'Amour#0001 on discord or submit a request on our dev channel or on github:
+If you need help or have any suggestions for new features or improvements contact D'Amour#0001 on discord, email support@damour.xyz, or submit a request on our dev channel or on github:
 https://discord.gg/aEkzE59
 <https://github.com/DamourYouKnow/HAHA-NO-UR/issues>
 
