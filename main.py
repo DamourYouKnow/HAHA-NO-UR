@@ -16,6 +16,26 @@ from logs import log_path
 from data_controller.card_updater import update_task
 
 
+from discord import channel
+class Overwrites:
+    __slots__ = ('id', 'allow', 'deny', 'type')
+
+    def __init__(self, **kwargs):
+        self.id = kwargs.pop('id')
+        self.allow = kwargs.pop('allow', 0)
+        self.deny = kwargs.pop('deny', 0)
+        self.type = kwargs.pop('type')
+
+    def _asdict(self):
+        return {
+           'id': self.id,
+            'allow': self.allow,
+            'deny': self.deny,
+            'type': self.type,
+         }  
+channel.Overwrites = Overwrites
+
+
 def main():
     shard = None
     shard_count = None
