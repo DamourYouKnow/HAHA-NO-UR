@@ -6,7 +6,7 @@ websockets==3.4
 requests==2.20.0
 colorlog==2.10.0
 aiohttp==1.0.5
-Pillow==4.3.0
+Pillow==8.2.0
 discord==0.0.2
 typing==3.6.2
 PyYAML==4.2b1
